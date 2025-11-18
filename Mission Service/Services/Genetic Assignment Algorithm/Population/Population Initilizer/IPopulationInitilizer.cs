@@ -6,6 +6,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
     {
         IEnumerable<AssignmentChromosome> CreateInitialPopulation(
             IEnumerable<Mission> missions,
-            IEnumerable<UAV> uavs);
+            IEnumerable<UAV> uavs
+        );
     }
 }

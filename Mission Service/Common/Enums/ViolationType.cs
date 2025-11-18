@@ -5,6 +5,6 @@
         TIME_OVERLAP,
         TYPE_MISMATCH,
         FUEL_SHORTAGE,
-        WINDOW_VIOLATION
+        WINDOW_VIOLATION,
     }
 }

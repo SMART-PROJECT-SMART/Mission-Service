@@ -13,7 +13,8 @@ public class FitnessCalculator : IFitnessCalculator
 
     public FitnessCalculator(
         IOptions<TelemetryWeightsConfiguration> telemetryWeights,
-        IOptions<FitnessWeightsConfiguration> fitnessWeights)
+        IOptions<FitnessWeightsConfiguration> fitnessWeights
+    )
     {
         _telemetryWeights = telemetryWeights.Value;
         _fitnessWeights = fitnessWeights.Value;
@@ -40,8 +41,9 @@ public class FitnessCalculator : IFitnessCalculator
 
         foreach (AssignmentGene assignment in chromosome.Assignments)
         {
-            Dictionary<TelemetryFields, double> assignmentWeights =
-                _telemetryWeights.GetWeights(assignment.Mission.RequiredUAVType);
+            Dictionary<TelemetryFields, double> assignmentWeights = _telemetryWeights.GetWeights(
+                assignment.Mission.RequiredUAVType
+            );
 
             foreach (KeyValuePair<TelemetryFields, double> assignmentPair in assignmentWeights)
             {
@@ -71,15 +73,18 @@ public class FitnessCalculator : IFitnessCalculator
         int overlapCount = 0;
 
         IEnumerable<IGrouping<int, AssignmentGene>> assignmentsByUav =
-     chromosome.Assignments.GroupBy(a => a.UAV.TailId);
+            chromosome.Assignments.GroupBy(a => a.UAV.TailId);
 
         foreach (IGrouping<int, AssignmentGene> uavAssignments in assignmentsByUav)
         {
-            List<AssignmentGene> chronologicalAssignments = uavAssignments.OrderBy(a => a.StartTime).ToList();
+            List<AssignmentGene> chronologicalAssignments = uavAssignments
+                .OrderBy(a => a.StartTime)
+                .ToList();
 
             for (int i = 0; i < chronologicalAssignments.Count - 1; i++)
             {
-                DateTime currentAssignmentEnd = chronologicalAssignments[i].StartTime.Add(chronologicalAssignments[i].Duration);
+                DateTime currentAssignmentEnd = chronologicalAssignments[i]
+                    .StartTime.Add(chronologicalAssignments[i].Duration);
                 if (currentAssignmentEnd > chronologicalAssignments[i + 1].StartTime)
                 {
                     overlapCount++;
@@ -92,8 +97,9 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateMismatchPenalty(AssignmentChromosome chromosome)
     {
-        int mismatchCount = chromosome.Assignments
-            .Count(a => a.Mission.RequiredUAVType != a.UAV.UavType);
+        int mismatchCount = chromosome.Assignments.Count(a =>
+            a.Mission.RequiredUAVType != a.UAV.UavType
+        );
 
         return mismatchCount * _fitnessWeights.TypeMismatchPenalty;
     }

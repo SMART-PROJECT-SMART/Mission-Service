@@ -10,7 +10,15 @@
         public int TornumentSize { get; set; }
         public int StagnationLimit { get; set; }
 
-        public AssignmentAlgorithmConfiguration(int populationSize, int maxGenerations, double crossoverProbability, double mutationProbability, double elitePrecentage, int tornumentSize, int stagnationLimit)
+        public AssignmentAlgorithmConfiguration(
+            int populationSize,
+            int maxGenerations,
+            double crossoverProbability,
+            double mutationProbability,
+            double elitePrecentage,
+            int tornumentSize,
+            int stagnationLimit
+        )
         {
             PopulationSize = populationSize;
             MaxGenerations = maxGenerations;
@@ -21,8 +29,6 @@
             StagnationLimit = stagnationLimit;
         }
 
-        public AssignmentAlgorithmConfiguration()
-        {
-        }
+        public AssignmentAlgorithmConfiguration() { }
     }
 }

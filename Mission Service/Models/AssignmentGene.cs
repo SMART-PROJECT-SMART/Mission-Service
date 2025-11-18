@@ -15,9 +15,6 @@
             Duration = duration;
         }
 
-        public AssignmentGene()
-        {
-        }
-
+        public AssignmentGene() { }
     }
 }

@@ -16,37 +16,59 @@ namespace Mission_Service.Extensions
             return services;
         }
 
-        public static IServiceCollection AddAppConfiguration(this IServiceCollection services,
-            IConfiguration configuration)
+        public static IServiceCollection AddAppConfiguration(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             services.AddAlgorithmConfig(configuration);
             services.AddTelemetryWeightsConfig(configuration);
             services.AddFitnessWeightsConfig(configuration);
             return services;
         }
-        private static IServiceCollection AddAlgorithmConfig(this IServiceCollection services,
-            IConfiguration configuration)
+
+        private static IServiceCollection AddAlgorithmConfig(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             return services.Configure<AssignmentAlgorithmConfiguration>(
-                configuration.GetSection(MissionServiceConstants.Configuration.ALGORITHM_CONFIG_SECTION));
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.ALGORITHM_CONFIG_SECTION
+                )
+            );
         }
 
-        private static IServiceCollection AddTelemetryWeightsConfig(this IServiceCollection services,
-            IConfiguration configuration)
+        private static IServiceCollection AddTelemetryWeightsConfig(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             return services.Configure<TelemetryWeightsConfiguration>(
-                configuration.GetSection(MissionServiceConstants.Configuration.TELEMETRY_WEIGHTS_CONFIG_SECTION));
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.TELEMETRY_WEIGHTS_CONFIG_SECTION
+                )
+            );
         }
-        private static IServiceCollection AddFitnessWeightsConfig(this IServiceCollection services,
-            IConfiguration configuration)
+
+        private static IServiceCollection AddFitnessWeightsConfig(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             return services.Configure<FitnessWeightsConfiguration>(
-                configuration.GetSection(MissionServiceConstants.Configuration.FITNESS_WEIGHTS_CONFIG_SECTION));
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.FITNESS_WEIGHTS_CONFIG_SECTION
+                )
+            );
         }
-        public static IServiceCollection AddAssignmentAlgorithmServices(this IServiceCollection services)
+
+        public static IServiceCollection AddAssignmentAlgorithmServices(
+            this IServiceCollection services
+        )
         {
             services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
-            services.AddSingleton<IPopulationInitializer,PopulationInitializer>();
+            services.AddSingleton<IPopulationInitializer, PopulationInitializer>();
             services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
             return services;
         }
