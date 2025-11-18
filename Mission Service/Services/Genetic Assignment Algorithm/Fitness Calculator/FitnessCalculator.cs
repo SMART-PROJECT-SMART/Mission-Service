@@ -21,17 +21,17 @@ public class FitnessCalculator : IFitnessCalculator
 
     public double CalculateFitness(AssignmentChromosome chromosome)
     {
-        double total = 0.0;
+        double totalFitnessScore = 0.0;
 
-        total += CalculateTelemetryScore(chromosome);
-        total += CalculatePriorityScore(chromosome);
-        total += CalculateOverlapPenalty(chromosome);
-        total += CalculateMismatchPenalty(chromosome);
+        totalFitnessScore += CalculateTelemetryScore(chromosome);
+        totalFitnessScore += CalculatePriorityScore(chromosome);
+        totalFitnessScore += CalculateOverlapPenalty(chromosome);
+        totalFitnessScore += CalculateMismatchPenalty(chromosome);
 
-        chromosome.FitnessScore = total;
-        chromosome.IsValid = total >= 0.0;
+        chromosome.FitnessScore = totalFitnessScore;
+        chromosome.IsValid = totalFitnessScore >= 0.0;
 
-        return total;
+        return totalFitnessScore;
     }
 
     private double CalculateTelemetryScore(AssignmentChromosome chromosome)
