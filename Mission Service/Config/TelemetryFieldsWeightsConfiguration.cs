@@ -4,7 +4,7 @@ using Mission_Service.Common.Enums;
 
 namespace Mission_Service.Config
 {
-    public class TelemetryWeightsConfig
+    public class TelemetryWeightsConfiguration
     {
         public Dictionary<UAVType, Dictionary<TelemetryFields, double>> Weights { get; set; } = new();
 
