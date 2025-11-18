@@ -3,6 +3,7 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
 
 namespace Mission_Service.Extensions
 {
@@ -46,6 +47,7 @@ namespace Mission_Service.Extensions
         {
             services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
             services.AddSingleton<IPopulationInitializer,PopulationInitializer>();
+            services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
             return services;
         }
     }

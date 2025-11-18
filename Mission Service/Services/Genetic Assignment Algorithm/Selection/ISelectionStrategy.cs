@@ -4,6 +4,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection
 {
     public interface ISelectionStrategy
     {
-        AssignmentChromosome selectParentChromosome(List<AssignmentChromosome> population);
+        AssignmentChromosome selectParentChromosome(IEnumerable<AssignmentChromosome> population);
     }
 }
