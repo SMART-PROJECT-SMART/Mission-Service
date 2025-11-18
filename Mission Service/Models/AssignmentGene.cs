@@ -2,15 +2,15 @@
 {
     public class AssignmentGene
     {
-        public string MissionId { get; set; }
-        public string UAVTailId { get; set; }
+        public Mission Mission { get; set; }
+        public UAV UAV { get; set; }
         public DateTime StartTime { get; set; }
-        public DateTime Duration { get; set; }
+        public TimeSpan Duration { get; set; }
 
-        public AssignmentGene(string missionId, string uavTailId, DateTime startTime, DateTime duration)
+        public AssignmentGene(Mission mission, UAV uav, DateTime startTime, TimeSpan duration)
         {
-            MissionId = missionId;
-            UAVTailId = uavTailId;
+            Mission = mission;
+            UAV = uav;
             StartTime = startTime;
             Duration = duration;
         }

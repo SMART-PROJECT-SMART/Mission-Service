@@ -4,7 +4,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculat
 {
     public interface IFitnessCalculator
     {
-        public double CalculateFitness(AssignmentChromosome chromosome, IEnumerable<Mission> missions,
-            IEnumerable<UAV> uavs);
+        public double CalculateFitness(AssignmentChromosome chromosome);
     }
 }
