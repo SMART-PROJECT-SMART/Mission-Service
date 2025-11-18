@@ -3,7 +3,7 @@ using Mission_Service.Models.choromosomes;
 
 namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
 {
-    public class TwoPointCrossover : ICrossoverStrategy
+    public class TwoPointCrossoverStrategy : ICrossoverStrategy
     {
         public CrossoverResult CrossoverChromosomes(AssignmentChromosome firstChromosome, AssignmentChromosome secondChromosome)
         {
@@ -11,7 +11,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             int firstCrossoverPoint = Random.Shared.Next(1, minLength);
             int secondCrossoverPoint = Random.Shared.Next(firstCrossoverPoint + 1,minLength+1);
             AssignmentChromosome firstChild = CreateChildChromosome(firstChromosome, secondChromosome, firstCrossoverPoint, secondCrossoverPoint, minLength);
-            AssignmentChromosome secondChild = CreateChildChromosome(firstChromosome, secondChromosome, firstCrossoverPoint, secondCrossoverPoint, minLength);
+            AssignmentChromosome secondChild = CreateChildChromosome(secondChromosome, firstChromosome, firstCrossoverPoint, secondCrossoverPoint, minLength);
 
             return new CrossoverResult
             {
@@ -43,7 +43,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
                     StartTime = sourceGene.StartTime,
                     Duration = sourceGene.Duration
                 };
-                childChromosome.Assignments.Append(newGene);
+                childChromosome.Assignments = childChromosome.Assignments.Append(newGene);
             }
             return childChromosome;
         }
