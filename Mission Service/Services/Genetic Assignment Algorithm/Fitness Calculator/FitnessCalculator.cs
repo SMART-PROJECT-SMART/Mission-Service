@@ -43,12 +43,12 @@ public class FitnessCalculator : IFitnessCalculator
             Dictionary<TelemetryFields, double> weights =
                 _telemetryWeights.GetWeights(assignment.Mission.RequiredUAVType);
 
-            foreach (KeyValuePair<TelemetryFields, double> entry in weights)
+            foreach (KeyValuePair<TelemetryFields, double> assignmentPair in weights)
             {
-                if (assignment.UAV.TelemetryData.TryGetValue(entry.Key, out double value))
+                if (assignment.UAV.TelemetryData.TryGetValue(assignmentPair.Key, out double value))
                 {
-                    double normalized = entry.Key.NormalizeTelemetryValue(value);
-                    total += normalized * entry.Value;
+                    double normalized = assignmentPair.Key.NormalizeTelemetryValue(value);
+                    total += normalized * assignmentPair.Value;
                 }
             }
         }
@@ -70,17 +70,17 @@ public class FitnessCalculator : IFitnessCalculator
     {
         int overlapCount = 0;
 
-        IEnumerable<IGrouping<int, AssignmentGene>> grouped =
-            chromosome.Assignments.GroupBy(a => a.UAV.TailId);
+        IEnumerable<IGrouping<int, AssignmentGene>> assignmentsByUav =
+     chromosome.Assignments.GroupBy(a => a.UAV.TailId);
 
-        foreach (IGrouping<int, AssignmentGene> group in grouped)
+        foreach (IGrouping<int, AssignmentGene> uavAssignments in assignmentsByUav)
         {
-            List<AssignmentGene> sorted = group.OrderBy(a => a.StartTime).ToList();
+            List<AssignmentGene> chronologicalAssignments = uavAssignments.OrderBy(a => a.StartTime).ToList();
 
-            for (int i = 0; i < sorted.Count - 1; i++)
+            for (int i = 0; i < chronologicalAssignments.Count - 1; i++)
             {
-                DateTime currentEnd = sorted[i].StartTime.Add(sorted[i].Duration);
-                if (currentEnd > sorted[i + 1].StartTime)
+                DateTime currentAssignmentEnd = chronologicalAssignments[i].StartTime.Add(chronologicalAssignments[i].Duration);
+                if (currentAssignmentEnd > chronologicalAssignments[i + 1].StartTime)
                 {
                     overlapCount++;
                 }
