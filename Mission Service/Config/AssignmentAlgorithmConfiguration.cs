@@ -1,28 +1,12 @@
-﻿namespace Mission_Service.Config
+﻿// Services/Genetic_Assignment_Algorithm/IPopulationInitializer.cs
+using Mission_Service.Models;
+
+namespace Mission_Service.Services.Genetic_Assignment_Algorithm
 {
-    public class AssignmentAlgorithmConfiguration
+    public interface IPopulationInitializer
     {
-        public int PopulationSize { get; set; }
-        public int MaxGenerations { get; set; }
-        public double CrossoverProbability { get; set; }
-        public double MutationProbability { get; set; }
-        public double ElitePrecentage { get; set; }
-        public int TornumentSize { get; set; }
-        public int StagnationLimit { get; set; }
-
-        public AssignmentAlgorithmConfiguration(int populationSize, int maxGenerations, double crossoverProbability, double mutationProbability, double elitePrecentage, int tornumentSize, int stagnationLimit)
-        {
-            PopulationSize = populationSize;
-            MaxGenerations = maxGenerations;
-            CrossoverProbability = crossoverProbability;
-            MutationProbability = mutationProbability;
-            ElitePrecentage = elitePrecentage;
-            TornumentSize = tornumentSize;
-            StagnationLimit = stagnationLimit;
-        }
-
-        public AssignmentAlgorithmConfiguration()
-        {
-        }
+        List<AssignmentChromosome> CreateInitialPopulation(
+            List<Mission> missions,
+            List<UAV> uavs);
     }
 }

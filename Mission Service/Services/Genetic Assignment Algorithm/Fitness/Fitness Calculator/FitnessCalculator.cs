@@ -21,17 +21,17 @@ public class FitnessCalculator : IFitnessCalculator
 
     public double CalculateFitness(AssignmentChromosome chromosome)
     {
-        double totalFitnessScore = 0.0;
+        double total = 0.0;
 
-        totalFitnessScore += CalculateTelemetryScore(chromosome);
-        totalFitnessScore += CalculatePriorityScore(chromosome);
-        totalFitnessScore += CalculateOverlapPenalty(chromosome);
-        totalFitnessScore += CalculateMismatchPenalty(chromosome);
+        total += CalculateTelemetryScore(chromosome);
+        total += CalculatePriorityScore(chromosome);
+        total += CalculateOverlapPenalty(chromosome);
+        total += CalculateMismatchPenalty(chromosome);
 
-        chromosome.FitnessScore = totalFitnessScore;
-        chromosome.IsValid = totalFitnessScore >= 0.0;
+        chromosome.FitnessScore = total;
+        chromosome.IsValid = total >= 0.0;
 
-        return totalFitnessScore;
+        return total;
     }
 
     private double CalculateTelemetryScore(AssignmentChromosome chromosome)
@@ -40,10 +40,10 @@ public class FitnessCalculator : IFitnessCalculator
 
         foreach (AssignmentGene assignment in chromosome.Assignments)
         {
-            Dictionary<TelemetryFields, double> weights =
+            Dictionary<TelemetryFields, double> assignmentWeights =
                 _telemetryWeights.GetWeights(assignment.Mission.RequiredUAVType);
 
-            foreach (KeyValuePair<TelemetryFields, double> assignmentPair in weights)
+            foreach (KeyValuePair<TelemetryFields, double> assignmentPair in assignmentWeights)
             {
                 if (assignment.UAV.TelemetryData.TryGetValue(assignmentPair.Key, out double value))
                 {
