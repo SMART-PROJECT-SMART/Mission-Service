@@ -2,6 +2,7 @@
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
 
 namespace Mission_Service.Extensions
 {
@@ -44,6 +45,7 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddAssignmentAlgorithmServices(this IServiceCollection services)
         {
             services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
+            services.AddSingleton<IPopulationInitializer,PopulationInitializer>();
             return services;
         }
     }

@@ -30,10 +30,10 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             foreach (Mission mission in missions)
             {
                 List<UAV> compatibleUAVs = uavs
-                    .Where(uav => uav.Type == mission.RequiredUAVType)
+                    .Where(uav => uav.UavType == mission.RequiredUAVType)
                     .ToList();
 
-                if (compatibleUaVs.Count == 0)
+                if (compatibleUAVs.Count == 0)
                     continue;
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
@@ -42,7 +42,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
                     Mission = mission,
                     UAV = selectedUav,
                     StartTime = mission.TimeWindow.Start,
-                    EndTime = mission.TimeWindow.End
+                    Duration = mission.TimeWindow.End - mission.TimeWindow.Start
                 };
             }
             return randomAssignmentChromosome;
