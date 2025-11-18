@@ -1,6 +1,6 @@
 ﻿namespace Mission_Service.Config
 {
-    public class AlgorithmConfiguration
+    public class AssignmentAlgorithmConfiguration
     {
         public int PopulationSize { get; set; }
         public int MaxGenerations { get; set; }
@@ -10,7 +10,7 @@
         public int TornumentSize { get; set; }
         public int StagnationLimit { get; set; }
 
-        public AlgorithmConfiguration(int populationSize, int maxGenerations, double crossoverProbability, double mutationProbability, double elitePrecentage, int tornumentSize, int stagnationLimit)
+        public AssignmentAlgorithmConfiguration(int populationSize, int maxGenerations, double crossoverProbability, double mutationProbability, double elitePrecentage, int tornumentSize, int stagnationLimit)
         {
             PopulationSize = populationSize;
             MaxGenerations = maxGenerations;
@@ -21,7 +21,7 @@
             StagnationLimit = stagnationLimit;
         }
 
-        public AlgorithmConfiguration()
+        public AssignmentAlgorithmConfiguration()
         {
         }
     }
