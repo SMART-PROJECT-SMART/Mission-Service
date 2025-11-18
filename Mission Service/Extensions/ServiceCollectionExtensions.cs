@@ -1,6 +1,7 @@
 ﻿using System.Security.AccessControl;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 
 namespace Mission_Service.Extensions
 {
@@ -39,6 +40,11 @@ namespace Mission_Service.Extensions
         {
             return services.Configure<FitnessWeightsConfiguration>(
                 configuration.GetSection(MissionServiceConstants.Configuration.FITNESS_WEIGHTS_CONFIG_SECTION));
+        }
+        public static IServiceCollection AddAssignmentAlgorithmServices(this IServiceCollection services)
+        {
+            services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
+            return services;
         }
     }
 }
