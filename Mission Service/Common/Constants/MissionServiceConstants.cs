@@ -9,6 +9,11 @@
             public const string FITNESS_WEIGHTS_CONFIG_SECTION = "FitnessWeights";
         }
 
+        public static class MainAlgorithm
+        {
+            public const int AMOUNT_OF_MUTATION_OPTIONS = 2;
+        }
+
         public static class TelemetryNormalization
         {
             public const double MAX_PERCENTAGE = 100.0;
