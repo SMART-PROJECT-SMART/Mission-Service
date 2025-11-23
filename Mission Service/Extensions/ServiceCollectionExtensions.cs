@@ -5,6 +5,9 @@ using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategies;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
 
 namespace Mission_Service.Extensions
@@ -74,6 +77,22 @@ namespace Mission_Service.Extensions
             services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
             services.AddSingleton<ICrossoverStrategy, TwoPointCrossoverStrategy>();
             services.AddSingleton<IMutationStrategy, SwapMutationStrategy>();
+            services.AddRepairStrategies();
+            services.AddRepairPipeline();
+            return services;
+        }
+
+        private static IServiceCollection AddRepairPipeline(this IServiceCollection services)
+        {
+            services.AddSingleton<IRepairPipeline, RepairPipline>();
+            return services;
+        }
+
+        private static IServiceCollection AddRepairStrategies(this IServiceCollection services)
+        {
+            services.AddSingleton<IRepairStrategy, TypeMismatchRepairStrategy>();
+            services.AddSingleton<IRepairStrategy, TimeWindowRepairStrategy>();
+            services.AddSingleton<IRepairStrategy, OverlapRepairStrategy>();
             return services;
         }
     }

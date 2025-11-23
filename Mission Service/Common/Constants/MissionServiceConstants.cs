@@ -12,6 +12,7 @@
         public static class MainAlgorithm
         {
             public const int AMOUNT_OF_MUTATION_OPTIONS = 2;
+            public const int MAX_REPAIR_ATTEMPTS = 5;
         }
 
         public static class TelemetryNormalization
