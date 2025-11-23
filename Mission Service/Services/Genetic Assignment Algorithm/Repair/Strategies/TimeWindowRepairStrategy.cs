@@ -8,72 +8,62 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
         public void RepairChromosomeViolation(AssignmentChromosome assignmentChromosome, List<Mission> missions,
             List<UAV> uavs)
         {
-            for (int assignmentIndex = assignmentChromosome.Assignments.Count() - 1;
-                 assignmentIndex >= 0;
-                 assignmentIndex--)
+            if (assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any())
             {
-                AssignmentGene currentGene = assignmentChromosome.Assignments.ElementAt(assignmentIndex);
-
-                if (IsAssignmentTimeWindowValid(currentGene))
-                    continue;
-
-                DateTime validStartTime = CalculateValidStartTime(currentGene);
-                currentGene.StartTime = validStartTime;
-
-                TimeSpan validDuration = CalculateValidDuration(currentGene);
-
-                if (validDuration >= currentGene.Mission.MinAssignmentLength)
-                {
-                    currentGene.Duration = validDuration;
-                }
-                else
-                {
-                    assignmentChromosome.Assignments.RemoveAt(assignmentIndex);
-                }
+      return;
             }
+
+IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome.Assignments
+        .Select(gene => RepairGeneIfNeeded(gene))
+    .Where(gene => gene != null)
+      .Cast<AssignmentGene>();
+
+            assignmentChromosome.Assignments = repairedAssignments;
+        }
+
+        private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene)
+        {
+    if (IsAssignmentTimeWindowValid(gene))
+      {
+                return gene;
+            }
+
+       DateTime validStartTime = CalculateValidStartTime(gene);
+      gene.StartTime = validStartTime;
+
+     TimeSpan validDuration = CalculateValidDuration(gene);
+
+    if (validDuration <= TimeSpan.Zero)
+  {
+  return null;
+         }
+
+         gene.Duration = validDuration;
+        return gene;
         }
 
         private bool IsAssignmentTimeWindowValid(AssignmentGene gene)
-        {
-            DateTime missionStartTime = gene.Mission.EarliestStartTime;
-            DateTime missionEndTime = gene.Mission.LatestEndTime;
-            DateTime uavAvailableFrom = gene.UAV.AvailableFrom;
-            DateTime uavAvailableTo = gene.UAV.AvailableTo;
+{
+  DateTime missionStart = gene.Mission.TimeWindow.Start;
+       DateTime missionEnd = gene.Mission.TimeWindow.End;
 
-            bool assignmentStartValid = gene.StartTime >= missionStartTime && gene.StartTime >= uavAvailableFrom;
-            bool assignmentEndValid = gene.EndTime <= missionEndTime && gene.EndTime <= uavAvailableTo;
+    bool assignmentStartValid = gene.StartTime >= missionStart;
+   bool assignmentEndValid = gene.EndTime <= missionEnd;
 
-            return assignmentStartValid && assignmentEndValid;
+return assignmentStartValid && assignmentEndValid;
         }
 
         private DateTime CalculateValidStartTime(AssignmentGene gene)
-        {
-            DateTime missionEarliestStart = gene.Mission.EarliestStartTime;
-            DateTime uavAvailableFrom = gene.UAV.AvailableFrom;
-
-            DateTime validStartTime = missionEarliestStart > uavAvailableFrom
-                ? missionEarliestStart
-                : uavAvailableFrom;
-
-            return validStartTime;
+ {
+            DateTime missionStart = gene.Mission.TimeWindow.Start;
+   return gene.StartTime < missionStart ? missionStart : gene.StartTime;
         }
 
-        private TimeSpan CalculateValidDuration(AssignmentGene gene)
+     private TimeSpan CalculateValidDuration(AssignmentGene gene)
         {
-            DateTime missionLatestEnd = gene.Mission.LatestEndTime;
-            DateTime uavAvailableTo = gene.UAV.AvailableTo;
-
-            DateTime effectiveEndTime = missionLatestEnd < uavAvailableTo
-                ? missionLatestEnd
-                : uavAvailableTo;
-
-            TimeSpan maxPossibleDuration = effectiveEndTime - gene.StartTime;
-
-            TimeSpan validDuration = TimeSpan.FromMinutes(
-                Math.Min(gene.Mission.MaxAssignmentLength.TotalMinutes, maxPossibleDuration.TotalMinutes)
-            );
-
-            return validDuration;
-        }
+    DateTime missionEnd = gene.Mission.TimeWindow.End;
+            TimeSpan maxPossibleDuration = missionEnd - gene.StartTime;
+            return maxPossibleDuration;
+ }
     }
 }

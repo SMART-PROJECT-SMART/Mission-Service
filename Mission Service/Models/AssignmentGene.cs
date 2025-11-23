@@ -6,6 +6,7 @@
         public UAV UAV { get; set; }
         public DateTime StartTime { get; set; }
         public TimeSpan Duration { get; set; }
+        public DateTime EndTime => StartTime + Duration;
 
         public AssignmentGene(Mission mission, UAV uav, DateTime startTime, TimeSpan duration)
         {

@@ -6,44 +6,55 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
     public class TypeMismatchRepairStrategy : IRepairStrategy
     {
         public void RepairChromosomeViolation(
-            AssignmentChromosome assignmentChromosome,
-            List<Mission> missions,
-            List<UAV> uavs)
+          AssignmentChromosome assignmentChromosome,
+        List<Mission> missions,
+  List<UAV> uavs)
         {
-            for (int assignmentIndex = assignmentChromosome.Assignments.Count() - 1; assignmentIndex >= 0; assignmentIndex--)
-            {
-                AssignmentGene currentGene = assignmentChromosome.Assignments.ElementAt(assignmentIndex);
-
-                if (IsTypeMismatch(currentGene))
-                {
-                    List<UAV> compatibleUAVs = FindCompatibleUAVs(currentGene.Mission, uavs);
-
-                    if (compatibleUAVs.Count > 0)
-                    {
-                        currentGene.UAV = SelectRandomUAV(compatibleUAVs);
-                    }
-                    else
-                    {
-                        assignmentChromosome.Assignments.RemoveAt(assignmentIndex);
-                    }
-                }
-            }
+            if (assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any())
+          {
+     return;
         }
 
-        private bool IsTypeMismatch(AssignmentGene gene)
-        {
-            return gene.Mission.RequiredUAVType != gene.UAV.UavType;
+      IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome.Assignments
+     .Select(gene => RepairGeneIfNeeded(gene, uavs))
+     .Where(gene => gene != null)
+        .Cast<AssignmentGene>();
+
+            assignmentChromosome.Assignments = repairedAssignments;
         }
 
-        private List<UAV> FindCompatibleUAVs(Mission mission, List<UAV> uavs)
+        private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene, List<UAV> uavs)
         {
-            return uavs.Where(u => u.UavType == mission.RequiredUAVType).ToList();
+          if (!IsTypeMismatch(gene))
+     {
+      return gene;
+          }
+
+      IEnumerable<UAV> compatibleUAVs = FindCompatibleUAVs(gene.Mission, uavs);
+
+            if (compatibleUAVs.Any())
+   {
+    gene.UAV = SelectRandomUAV(compatibleUAVs);
+     return gene;
+    }
+
+  return null;
+  }
+
+      private bool IsTypeMismatch(AssignmentGene gene)
+     {
+        return gene.Mission.RequiredUAVType != gene.UAV.UavType;
         }
 
-        private UAV SelectRandomUAV(List<UAV> compatibleUAVs)
-        {
-            int randomIndex = Random.Shared.Next(compatibleUAVs.Count);
-            return compatibleUAVs[randomIndex];
+        private IEnumerable<UAV> FindCompatibleUAVs(Mission mission, IEnumerable<UAV> uavs)
+     {
+     return uavs.Where(u => u.UavType == mission.RequiredUAVType);
         }
+
+private UAV SelectRandomUAV(IEnumerable<UAV> compatibleUAVs)
+ {
+     List<UAV> uavList = compatibleUAVs.ToList();
+      return uavList[Random.Shared.Next(uavList.Count)];
+   }
     }
 }
