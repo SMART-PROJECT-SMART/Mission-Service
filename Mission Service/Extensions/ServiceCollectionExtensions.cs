@@ -3,6 +3,7 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
@@ -72,6 +73,7 @@ namespace Mission_Service.Extensions
             this IServiceCollection services
         )
         {
+            services.AddSingleton<IAssignmentAlgorithm, GeneticAssignmentAlgorithm>();
             services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
             services.AddSingleton<IPopulationInitializer, PopulationInitializer>();
             services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();

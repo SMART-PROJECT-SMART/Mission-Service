@@ -13,6 +13,10 @@
         {
             public const int AMOUNT_OF_MUTATION_OPTIONS = 2;
             public const int MAX_REPAIR_ATTEMPTS = 5;
+            public const int OFFSPRING_PAIR_SIZE = 2;
+            public const int FIRST_OFFSPRING_INDEX = 0;
+            public const int SECOND_OFFSPRING_INDEX = 1;
+            public const double NO_IMPROVEMENT_THRESHOLD = 0.0001;
         }
 
         public static class TelemetryNormalization
