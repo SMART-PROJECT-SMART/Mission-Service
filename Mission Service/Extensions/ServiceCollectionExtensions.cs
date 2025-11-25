@@ -95,6 +95,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IRepairStrategy, TypeMismatchRepairStrategy>();
             services.AddSingleton<IRepairStrategy, TimeWindowRepairStrategy>();
             services.AddSingleton<IRepairStrategy, OverlapRepairStrategy>();
+            services.AddSingleton<IRepairStrategy, DuplicateMissionRepairStrategy>();
             return services;
         }
     }
