@@ -7,7 +7,7 @@
         public double CrossoverProbability { get; set; }
         public double MutationProbability { get; set; }
         public double ElitePrecentage { get; set; }
-        public int TornumentSize { get; set; }
+        public int TournamentSize { get; set; }
         public int StagnationLimit { get; set; }
 
         public AssignmentAlgorithmConfiguration(
@@ -16,7 +16,7 @@
             double crossoverProbability,
             double mutationProbability,
             double elitePrecentage,
-            int tornumentSize,
+            int tournamentSize,
             int stagnationLimit
         )
         {
@@ -25,7 +25,7 @@
             CrossoverProbability = crossoverProbability;
             MutationProbability = mutationProbability;
             ElitePrecentage = elitePrecentage;
-            TornumentSize = tornumentSize;
+            TournamentSize = tournamentSize;
             StagnationLimit = stagnationLimit;
         }
 
