@@ -10,17 +10,17 @@ namespace Mission_Service.Controllers
     [ApiController]
     public class AssignmentController : ControllerBase
     {
-        private readonly IAssignmentSuggestionRequestQueue _requestQueue;
+        private readonly IAssignmentSuggestionQueue _queue;
 
-        public AssignmentController(IAssignmentSuggestionRequestQueue requestQueue)
+        public AssignmentController(IAssignmentSuggestionQueue queue)
         {
-            _requestQueue = requestQueue;
+            _queue = queue;
         }
 
         [HttpPost("create-assignment-suggestion")]
         public async Task<IActionResult> CreateAssignmentSuggestion(AssignmentSuggestionDto assignmentSuggestionDto)
         {
-            await _requestQueue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
+            await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
             return Ok(MissionServiceConstants.APIResponses.CREATE_ASSIGNMENT_RECIVED);
         }
     }

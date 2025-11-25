@@ -54,5 +54,9 @@
         {
             public const string CREATE_ASSIGNMENT_RECIVED = "Create Assignment request received and will be procecced.";
         }
+        public static class HttpClients
+        {
+            public const string CALLBACK_HTTP_CLIENT = "AssignmentCallback";
+        }
     }
 }

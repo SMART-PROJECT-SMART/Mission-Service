@@ -3,11 +3,11 @@ using Mission_Service.Models.Dto;
 
 namespace Mission_Service.Services.Assignment_Request_Queue
 {
-    public class AssignmentSuggestionRequestQueue : IAssignmentSuggestionRequestQueue
+    public class AssignmentSuggestionQueue : IAssignmentSuggestionQueue
     {
         private readonly Channel<AssignmentSuggestionDto> _assignmentSuggestionRequestQueue;
 
-        public AssignmentSuggestionRequestQueue()
+        public AssignmentSuggestionQueue()
         {
             _assignmentSuggestionRequestQueue = Channel.CreateUnbounded<AssignmentSuggestionDto>();
         }

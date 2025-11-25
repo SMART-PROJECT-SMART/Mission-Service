@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddWebApi();
 builder.Services.AddAppConfiguration(builder.Configuration);
 builder.Services.AddAssignmentAlgorithmServices();
-builder.Services.AddLongLastingRequestProcessing();
+builder.Services.AddBackgroundServices();
 
 var app = builder.Build();
 

@@ -1,7 +1,9 @@
 ﻿using System.Security.AccessControl;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
+using Mission_Service.Models;
 using Mission_Service.Services.Assignment_Request_Queue;
+using Mission_Service.Services.Assignment_Suggestion_Worker;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
@@ -20,6 +22,7 @@ namespace Mission_Service.Extensions
         {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
+            services.AddHttpClient(MissionServiceConstants.HttpClients.CALLBACK_HTTP_CLIENT);
             return services;
         }
 
@@ -99,11 +102,10 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IRepairStrategy, DuplicateMissionRepairStrategy>();
             return services;
         }
-        public static IServiceCollection AddLongLastingRequestProcessing(
-            this IServiceCollection services
-        )
+        public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
         {
-            services.AddSingleton<IAssignmentSuggestionRequestQueue, AssignmentSuggestionRequestQueue>();
+            services.AddSingleton<IAssignmentSuggestionQueue, AssignmentSuggestionQueue>();
+            services.AddHostedService<AssignmentSuggestionWorker>();
             return services;
         }
     }
