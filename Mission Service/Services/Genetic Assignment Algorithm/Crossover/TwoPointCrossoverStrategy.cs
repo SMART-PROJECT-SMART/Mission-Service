@@ -11,8 +11,14 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             AssignmentChromosome secondChromosome
         )
         {
-            AssignmentChromosome firstChild = CreateMissionBasedChild(firstChromosome, secondChromosome);
-            AssignmentChromosome secondChild = CreateMissionBasedChild(secondChromosome, firstChromosome);
+            AssignmentChromosome firstChild = CreateMissionBasedChild(
+                firstChromosome,
+                secondChromosome
+            );
+            AssignmentChromosome secondChild = CreateMissionBasedChild(
+                secondChromosome,
+                firstChromosome
+            );
 
             return new CrossoverResult
             {
@@ -26,11 +32,11 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             AssignmentChromosome secondary
         )
         {
-            Dictionary<string, AssignmentGene> primaryAssignments = primary.Assignments
-                .ToDictionary(a => a.Mission.Id, a => a);
+            Dictionary<string, AssignmentGene> primaryAssignments =
+                primary.Assignments.ToDictionary(a => a.Mission.Id, a => a);
 
-            Dictionary<string, AssignmentGene> secondaryAssignments = secondary.Assignments
-                .ToDictionary(a => a.Mission.Id, a => a);
+            Dictionary<string, AssignmentGene> secondaryAssignments =
+                secondary.Assignments.ToDictionary(a => a.Mission.Id, a => a);
 
             List<AssignmentGene> childGenes = new List<AssignmentGene>();
 

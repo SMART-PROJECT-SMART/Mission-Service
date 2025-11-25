@@ -42,8 +42,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline
                 }
             }
 
-            HashSet<string> assignedMissionIds = assignmentChromosome.Assignments
-                .Select(a => a.Mission.Id)
+            HashSet<string> assignedMissionIds = assignmentChromosome
+                .Assignments.Select(a => a.Mission.Id)
                 .ToHashSet();
 
             bool allMissionsAssigned = missions.All(m => assignedMissionIds.Contains(m.Id));

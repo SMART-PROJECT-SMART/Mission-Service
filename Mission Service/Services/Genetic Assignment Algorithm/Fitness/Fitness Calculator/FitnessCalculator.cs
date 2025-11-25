@@ -64,8 +64,8 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculatePriorityScore(AssignmentChromosome chromosome)
     {
-        double totalPriority = chromosome.Assignments
-            .GroupBy(a => a.Mission.Id)
+        double totalPriority = chromosome
+            .Assignments.GroupBy(a => a.Mission.Id)
             .Select(g => g.First())
             .Sum(a => (int)a.Mission.Priority);
 
@@ -74,10 +74,7 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateMissionCoverageBonus(AssignmentChromosome chromosome)
     {
-        int uniqueMissions = chromosome.Assignments
-            .Select(a => a.Mission.Id)
-            .Distinct()
-            .Count();
+        int uniqueMissions = chromosome.Assignments.Select(a => a.Mission.Id).Distinct().Count();
 
         return uniqueMissions * uniqueMissions * _fitnessWeights.MissionCoverageWeight;
     }

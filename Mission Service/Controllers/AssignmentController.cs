@@ -99,10 +99,7 @@ namespace Mission_Service.Controllers
                 )
             );
             results.Add(
-                ExecuteTestCaseInternal(
-                    "Test 15: Maximum Coverage",
-                    CreateMaximumCoverageData()
-                )
+                ExecuteTestCaseInternal("Test 15: Maximum Coverage", CreateMaximumCoverageData())
             );
 
             _logger.LogInformation("========================================");

@@ -9,8 +9,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
     {
         private readonly AssignmentAlgorithmConfiguration _algorithmConfig;
 
-        public PopulationInitializer(
-            IOptions<AssignmentAlgorithmConfiguration> algorithmConfig)
+        public PopulationInitializer(IOptions<AssignmentAlgorithmConfiguration> algorithmConfig)
         {
             _algorithmConfig = algorithmConfig.Value;
         }
@@ -67,7 +66,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             AssignmentChromosome randomAssignmentChromosome = new AssignmentChromosome
             {
                 Assignments = assignments,
-                IsValid = true 
+                IsValid = true,
             };
 
             return randomAssignmentChromosome;

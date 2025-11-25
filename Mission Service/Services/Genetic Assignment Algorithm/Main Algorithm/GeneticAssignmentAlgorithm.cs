@@ -145,8 +145,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
             List<AssignmentChromosome> invalidOffspring = offspringPopulation
                 .Where(c => !c.IsValid)
-                .OrderByDescending(c => c.Assignments.Count()) 
-                .ThenByDescending(c => c.FitnessScore) 
+                .OrderByDescending(c => c.Assignments.Count())
+                .ThenByDescending(c => c.FitnessScore)
                 .ToList();
 
             List<AssignmentChromosome> allOffspring = new List<AssignmentChromosome>();
