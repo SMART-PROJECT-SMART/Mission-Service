@@ -12,7 +12,9 @@ namespace Mission_Service.Services.Assignment_Request_Queue
             _assignmentSuggestionRequestQueue = Channel.CreateUnbounded<AssignmentSuggestionDto>();
         }
 
-        public async Task QueueAssignmentSuggestionRequest(AssignmentSuggestionDto assignmentSuggestionDto)
+        public async Task QueueAssignmentSuggestionRequest(
+            AssignmentSuggestionDto assignmentSuggestionDto
+        )
         {
             await _assignmentSuggestionRequestQueue.Writer.WriteAsync(assignmentSuggestionDto);
         }

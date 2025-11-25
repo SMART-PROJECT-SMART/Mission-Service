@@ -18,7 +18,9 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost("create-assignment-suggestion")]
-        public async Task<IActionResult> CreateAssignmentSuggestion(AssignmentSuggestionDto assignmentSuggestionDto)
+        public async Task<IActionResult> CreateAssignmentSuggestion(
+            AssignmentSuggestionDto assignmentSuggestionDto
+        )
         {
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
             return Ok(MissionServiceConstants.APIResponses.CREATE_ASSIGNMENT_RECIVED);

@@ -20,23 +20,28 @@ namespace Mission_Service.Services.Assignment_Suggestion_Worker
         {
             _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentAlgorithm = assignmentAlgorithm;
-            _httpClient = httpClientFactory.CreateClient(MissionServiceConstants.HttpClients.CALLBACK_HTTP_CLIENT);
+            _httpClient = httpClientFactory.CreateClient(
+                MissionServiceConstants.HttpClients.CALLBACK_HTTP_CLIENT
+            );
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await foreach (AssignmentSuggestionDto request in _assignmentSuggestionQueue
-                               .AssignmentSuggestionRequestReader.ReadAllAsync(stoppingToken))
+            await foreach (
+                AssignmentSuggestionDto request in _assignmentSuggestionQueue.AssignmentSuggestionRequestReader.ReadAllAsync(
+                    stoppingToken
+                )
+            )
             {
-                    AssignmentResult result = _assignmentAlgorithm.PreformAssignmentAlgorithm(
-                        request.Missions,
-                        request.UAVs
-                    );
-                    HttpResponseMessage response = await _httpClient.PostAsJsonAsync(
-                        request.CallbackURL,
-                        result,
-                        cancellationToken: stoppingToken
-                    );
+                AssignmentResult assignmentResult = _assignmentAlgorithm.PreformAssignmentAlgorithm(
+                    request.Missions,
+                    request.UAVs
+                );
+                _ = _httpClient.PostAsJsonAsync(
+                    request.CallbackURL,
+                    assignmentResult,
+                    cancellationToken: stoppingToken
+                );
             }
         }
     }

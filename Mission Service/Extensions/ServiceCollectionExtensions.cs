@@ -102,6 +102,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IRepairStrategy, DuplicateMissionRepairStrategy>();
             return services;
         }
+
         public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
         {
             services.AddSingleton<IAssignmentSuggestionQueue, AssignmentSuggestionQueue>();
