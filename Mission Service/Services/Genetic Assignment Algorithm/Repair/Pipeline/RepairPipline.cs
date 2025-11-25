@@ -42,7 +42,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline
                 }
             }
 
-            // Check if all missions are assigned
             HashSet<string> assignedMissionIds = assignmentChromosome.Assignments
                 .Select(a => a.Mission.Id)
                 .ToHashSet();

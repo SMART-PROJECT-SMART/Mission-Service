@@ -9,7 +9,6 @@ using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
-using Microsoft.Extensions.Logging;
 
 namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 {
@@ -22,7 +21,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
         private readonly IMutationStrategy _mutationStrategy;
         private readonly IRepairPipeline _repairPipeline;
         private readonly AssignmentAlgorithmConfiguration _algorithmConfiguration;
-        private readonly ILogger<GeneticAssignmentAlgorithm> _logger;
 
         public GeneticAssignmentAlgorithm(
             IFitnessCalculator fitnessCalculator,
@@ -31,8 +29,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             ICrossoverStrategy crossoverStrategy,
             IMutationStrategy mutationStrategy,
             IRepairPipeline repairPipeline,
-            IOptions<AssignmentAlgorithmConfiguration> algorithmConfiguration,
-            ILogger<GeneticAssignmentAlgorithm> logger
+            IOptions<AssignmentAlgorithmConfiguration> algorithmConfiguration
         )
         {
             _fitnessCalculator = fitnessCalculator;
@@ -42,7 +39,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             _mutationStrategy = mutationStrategy;
             _repairPipeline = repairPipeline;
             _algorithmConfiguration = algorithmConfiguration.Value;
-            _logger = logger;
         }
 
         public AssignmentResult PreformAssignmentAlgorithm(
@@ -53,28 +49,14 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             List<Mission> missionList = missions.ToList();
             List<UAV> uavList = uavs.ToList();
 
-            _logger.LogInformation("========================================");
-            _logger.LogInformation("Starting Genetic Assignment Algorithm");
-            _logger.LogInformation($"Missions: {missionList.Count}, UAVs: {uavList.Count}");
-            _logger.LogInformation($"Population Size: {_algorithmConfiguration.PopulationSize}");
-            _logger.LogInformation($"Max Generations: {_algorithmConfiguration.MaxGenerations}");
-            _logger.LogInformation("========================================");
-
             List<AssignmentChromosome> population = _populationInitializer
                 .CreateInitialPopulation(missionList, uavList)
                 .ToList();
-
-            _logger.LogInformation($"Initial population created with {population.Count} chromosomes");
 
             EvaluateFitnessParallel(population);
 
             AssignmentChromosome bestChromosome = GetChromosomeWithBestFitnessScore(population);
             int stagnationCounter = 0;
-
-            _logger.LogInformation(
-                $"Initial best fitness: {bestChromosome.FitnessScore:F2}, Assignments: {bestChromosome.Assignments.Count()}"
-            );
-            _logger.LogInformation("========================================");
 
             for (
                 int generation = 0;
@@ -92,45 +74,19 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
                 if (IsAssignmentBetter(currentBestChromosome, bestChromosome))
                 {
-                    _logger.LogInformation(
-                        $"Generation {generation}: NEW BEST - Fitness: {currentBestChromosome.FitnessScore:F2}, " +
-                        $"Assignments: {currentBestChromosome.Assignments.Count()}, " +
-                        $"Unique Missions: {currentBestChromosome.Assignments.Select(a => a.Mission.Id).Distinct().Count()}, " +
-                        $"Valid: {currentBestChromosome.IsValid}"
-                    );
                     bestChromosome = currentBestChromosome;
                     stagnationCounter = 0;
                 }
                 else
                 {
                     stagnationCounter++;
-                    if (generation % 10 == 0) // Log every 10 generations
-                    {
-                        _logger.LogInformation(
-                            $"Generation {generation}: Stagnation {stagnationCounter}/{_algorithmConfiguration.StagnationLimit}, " +
-                            $"Best Fitness: {bestChromosome.FitnessScore:F2}"
-                        );
-                    }
                 }
 
                 if (ShouldTerminateAlgorithm(stagnationCounter))
                 {
-                    _logger.LogInformation(
-                        $"Algorithm terminated at generation {generation} due to stagnation"
-                    );
                     break;
                 }
             }
-
-            _logger.LogInformation("========================================");
-            _logger.LogInformation("Algorithm Complete");
-            _logger.LogInformation($"Final Best Fitness: {bestChromosome.FitnessScore:F2}");
-            _logger.LogInformation($"Total Assignments: {bestChromosome.Assignments.Count()}");
-            _logger.LogInformation(
-                $"Unique Missions Assigned: {bestChromosome.Assignments.Select(a => a.Mission.Id).Distinct().Count()}/{missionList.Count}"
-            );
-            _logger.LogInformation($"Valid Solution: {bestChromosome.IsValid}");
-            _logger.LogInformation("========================================");
 
             return new AssignmentResult(new[] { bestChromosome });
         }

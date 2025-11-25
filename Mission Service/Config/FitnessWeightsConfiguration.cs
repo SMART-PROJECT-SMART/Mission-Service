@@ -6,5 +6,6 @@
         public double PriorityCoverage { get; set; }
         public double TimeOverlapPenalty { get; set; }
         public double TypeMismatchPenalty { get; set; }
+        public double MissionCoverageWeight { get; set; }
     }
 }

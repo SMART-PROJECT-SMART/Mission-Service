@@ -64,7 +64,6 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculatePriorityScore(AssignmentChromosome chromosome)
     {
-        // Only count priority for unique missions (no duplicates)
         double totalPriority = chromosome.Assignments
             .GroupBy(a => a.Mission.Id)
             .Select(g => g.First())
@@ -75,15 +74,12 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateMissionCoverageBonus(AssignmentChromosome chromosome)
     {
-        // Give bonus for covering more unique missions
         int uniqueMissions = chromosome.Assignments
             .Select(a => a.Mission.Id)
-         .Distinct()
+            .Distinct()
             .Count();
 
-        // Much stronger bonus - mission coverage is critical!
-        // Use exponential scaling to heavily reward covering more missions
-     return uniqueMissions * uniqueMissions * 1000.0;
+        return uniqueMissions * uniqueMissions * _fitnessWeights.MissionCoverageWeight;
     }
 
     private double CalculateOverlapPenalty(AssignmentChromosome chromosome)
