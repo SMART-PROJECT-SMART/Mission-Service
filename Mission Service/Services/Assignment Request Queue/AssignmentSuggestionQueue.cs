@@ -19,7 +19,7 @@ namespace Mission_Service.Services.Assignment_Request_Queue
             await _assignmentSuggestionRequestQueue.Writer.WriteAsync(assignmentSuggestionDto);
         }
 
-        public ChannelReader<AssignmentSuggestionDto> AssignmentSuggestionRequestReader =>
+        public ChannelReader<AssignmentSuggestionDto> AssignmentSuggestionReader =>
             _assignmentSuggestionRequestQueue.Reader;
     }
 }
