@@ -45,11 +45,11 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
 
             foreach (Mission mission in missions)
             {
-                List<UAV> compatibleUAVs = uavs
-                    .Where(uav => uav.UavType == mission.RequiredUAVType)
+                List<UAV> compatibleUAVs = uavs.Where(uav => uav.UavType == mission.RequiredUAVType)
                     .ToList();
 
-                if (compatibleUAVs.Count == 0) continue;
+                if (compatibleUAVs.Count == 0)
+                    continue;
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
                 AssignmentGene assignmentGene = new AssignmentGene

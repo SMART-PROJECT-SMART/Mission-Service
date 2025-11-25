@@ -5,7 +5,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 {
     public interface IAssignmentAlgorithm
     {
-        public AssignmentResult PreformAssignmentAlgorithm(IEnumerable<Mission> missions,
-            IEnumerable<UAV> uavs);
+        public AssignmentResult PreformAssignmentAlgorithm(
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> uavs
+        );
     }
 }

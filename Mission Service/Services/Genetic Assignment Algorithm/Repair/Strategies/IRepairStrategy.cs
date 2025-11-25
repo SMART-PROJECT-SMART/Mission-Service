@@ -5,7 +5,10 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
 {
     public interface IRepairStrategy
     {
-        void RepairChromosomeViolation(AssignmentChromosome assignmentChromosome, List<Mission> missions,
-            List<UAV> uavs);
+        void RepairChromosomeViolation(
+            AssignmentChromosome assignmentChromosome,
+            List<Mission> missions,
+            List<UAV> uavs
+        );
     }
 }

@@ -8,15 +8,21 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
         public void RepairChromosomeViolation(
             AssignmentChromosome assignmentChromosome,
             List<Mission> missions,
-            List<UAV> uavs)
+            List<UAV> uavs
+        )
         {
-            if (assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any())
+            if (
+                assignmentChromosome?.Assignments == null
+                || !assignmentChromosome.Assignments.Any()
+            )
             {
                 return;
             }
 
             List<AssignmentGene> assignmentList = assignmentChromosome.Assignments.ToList();
-            IEnumerable<IGrouping<int, AssignmentGene>> groupedByUAV = assignmentList.GroupBy(a => a.UAV.TailId);
+            IEnumerable<IGrouping<int, AssignmentGene>> groupedByUAV = assignmentList.GroupBy(a =>
+                a.UAV.TailId
+            );
 
             HashSet<AssignmentGene> assignmentsToRemove = new HashSet<AssignmentGene>();
 
@@ -30,7 +36,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
 
         private void CollectOverlappingAssignments(
             IEnumerable<AssignmentGene> assignments,
-            HashSet<AssignmentGene> assignmentsToRemove)
+            HashSet<AssignmentGene> assignmentsToRemove
+        )
         {
             List<AssignmentGene> sortedAssignments = assignments.OrderBy(a => a.StartTime).ToList();
 
@@ -57,7 +64,10 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
 
                 if (HasOverlap(currentAssignment, nextAssignment))
                 {
-                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(currentAssignment, nextAssignment);
+                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
+                        currentAssignment,
+                        nextAssignment
+                    );
                     assignmentsToRemove.Add(assignmentToRemove);
                 }
             }
@@ -68,7 +78,10 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
             return current.EndTime > next.StartTime;
         }
 
-        private AssignmentGene SelectAssignmentToRemove(AssignmentGene assignment1, AssignmentGene assignment2)
+        private AssignmentGene SelectAssignmentToRemove(
+            AssignmentGene assignment1,
+            AssignmentGene assignment2
+        )
         {
             int priority1 = (int)assignment1.Mission.Priority;
             int priority2 = (int)assignment2.Mission.Priority;

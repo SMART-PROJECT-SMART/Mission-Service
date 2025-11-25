@@ -5,65 +5,71 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
 {
     public class TimeWindowRepairStrategy : IRepairStrategy
     {
-        public void RepairChromosomeViolation(AssignmentChromosome assignmentChromosome, List<Mission> missions,
-            List<UAV> uavs)
+        public void RepairChromosomeViolation(
+            AssignmentChromosome assignmentChromosome,
+            List<Mission> missions,
+            List<UAV> uavs
+        )
         {
-            if (assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any())
+            if (
+                assignmentChromosome?.Assignments == null
+                || !assignmentChromosome.Assignments.Any()
+            )
             {
-      return;
+                return;
             }
 
-IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome.Assignments
-        .Select(gene => RepairGeneIfNeeded(gene))
-    .Where(gene => gene != null)
-      .Cast<AssignmentGene>();
+            IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome
+                .Assignments.Select(gene => RepairGeneIfNeeded(gene))
+                .Where(gene => gene != null)
+                .Cast<AssignmentGene>();
 
             assignmentChromosome.Assignments = repairedAssignments;
         }
 
         private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene)
         {
-    if (IsAssignmentTimeWindowValid(gene))
-      {
+            if (IsAssignmentTimeWindowValid(gene))
+            {
                 return gene;
             }
 
-       DateTime validStartTime = CalculateValidStartTime(gene);
-      gene.StartTime = validStartTime;
+            DateTime validStartTime = CalculateValidStartTime(gene);
+            gene.StartTime = validStartTime;
 
-     TimeSpan validDuration = CalculateValidDuration(gene);
+            TimeSpan validDuration = CalculateValidDuration(gene);
 
-    if (validDuration <= TimeSpan.Zero)
-  {
-  return null;
-         }
+            if (validDuration <= TimeSpan.Zero)
+            {
+                return null;
+            }
 
-         gene.Duration = validDuration;
-        return gene;
+            gene.Duration = validDuration;
+            return gene;
         }
 
         private bool IsAssignmentTimeWindowValid(AssignmentGene gene)
-{
-  DateTime missionStart = gene.Mission.TimeWindow.Start;
-       DateTime missionEnd = gene.Mission.TimeWindow.End;
+        {
+            DateTime missionStart = gene.Mission.TimeWindow.Start;
+            DateTime missionEnd = gene.Mission.TimeWindow.End;
 
-    bool assignmentStartValid = gene.StartTime >= missionStart;
-   bool assignmentEndValid = gene.EndTime <= missionEnd;
+            bool assignmentStartValid = gene.StartTime >= missionStart;
+            bool assignmentEndValid = gene.EndTime <= missionEnd;
 
-return assignmentStartValid && assignmentEndValid;
+            return assignmentStartValid && assignmentEndValid;
         }
 
         private DateTime CalculateValidStartTime(AssignmentGene gene)
- {
+        {
             DateTime missionStart = gene.Mission.TimeWindow.Start;
-   return gene.StartTime < missionStart ? missionStart : gene.StartTime;
+            return gene.StartTime < missionStart ? missionStart : gene.StartTime;
         }
 
-     private TimeSpan CalculateValidDuration(AssignmentGene gene)
+        private TimeSpan CalculateValidDuration(AssignmentGene gene)
         {
-    DateTime missionEnd = gene.Mission.TimeWindow.End;
+            DateTime missionEnd = gene.Mission.TimeWindow.End;
             TimeSpan maxPossibleDuration = missionEnd - gene.StartTime;
             return maxPossibleDuration;
- }
+        }
     }
 }

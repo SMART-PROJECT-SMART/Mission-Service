@@ -8,14 +8,22 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation
 {
     public class SwapMutationStrategy : IMutationStrategy
     {
-        public void MutateChromosome(AssignmentChromosome assignmentChromosome, IEnumerable<UAV> uavs)
+        public void MutateChromosome(
+            AssignmentChromosome assignmentChromosome,
+            IEnumerable<UAV> uavs
+        )
         {
-            if (assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any())
+            if (
+                assignmentChromosome?.Assignments == null
+                || !assignmentChromosome.Assignments.Any()
+            )
             {
                 return;
             }
 
-            bool mutateUAV = Random.Shared.Next(MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS) == 0;
+            bool mutateUAV =
+                Random.Shared.Next(MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS)
+                == 0;
 
             if (mutateUAV)
             {
@@ -33,8 +41,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation
             int randomIndex = Random.Shared.Next(assignments.Count);
             AssignmentGene geneToMutate = assignments[randomIndex];
 
-            List<UAV> compatibleUAVs = uavs
-                .Where(uav => IsValidUAVForSwap(uav, geneToMutate))
+            List<UAV> compatibleUAVs = uavs.Where(uav => IsValidUAVForSwap(uav, geneToMutate))
                 .ToList();
 
             if (compatibleUAVs.Count > 0)
