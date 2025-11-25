@@ -49,5 +49,10 @@
             public const double DEFAULT_NORMALIZED_VALUE = 0.5;
             public const double MIN_NORMALIZED_VALUE = 1.0;
         }
+
+        public static class APIResponses
+        {
+            public const string CREATE_ASSIGNMENT_RECIVED = "Create Assignment request received and will be procecced.";
+        }
     }
 }
