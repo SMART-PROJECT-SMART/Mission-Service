@@ -41,17 +41,15 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             IEnumerable<UAV> uavs
         )
         {
-            AssignmentChromosome randomAssignmentChromosome = new AssignmentChromosome
-            {
-                Assignments = new List<AssignmentGene>(),
-            };
+            List<AssignmentGene> assignments = new List<AssignmentGene>();
+
             foreach (Mission mission in missions)
             {
-                List<UAV> compatibleUAVs = uavs.Where(uav => uav.UavType == mission.RequiredUAVType)
+                List<UAV> compatibleUAVs = uavs
+                    .Where(uav => uav.UavType == mission.RequiredUAVType)
                     .ToList();
 
-                if (compatibleUAVs.Count == 0)
-                    continue;
+                if (compatibleUAVs.Count == 0) continue;
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
                 AssignmentGene assignmentGene = new AssignmentGene
@@ -61,7 +59,15 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
                     StartTime = mission.TimeWindow.Start,
                     Duration = mission.TimeWindow.End - mission.TimeWindow.Start,
                 };
+
+                assignments.Add(assignmentGene);
             }
+
+            AssignmentChromosome randomAssignmentChromosome = new AssignmentChromosome
+            {
+                Assignments = assignments,
+            };
+
             return randomAssignmentChromosome;
         }
     }

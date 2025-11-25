@@ -19,6 +19,12 @@
             public const double NO_IMPROVEMENT_THRESHOLD = 0.0001;
         }
 
+        public static class Crossover
+        {
+            public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;
+            public const int MIN_CROSSOVER_POINT = 1;
+        }
+
         public static class TelemetryNormalization
         {
             public const double MAX_PERCENTAGE = 100.0;
