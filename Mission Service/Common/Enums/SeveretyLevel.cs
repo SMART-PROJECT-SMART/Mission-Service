@@ -3,6 +3,6 @@
     public enum SeveretyLevel
     {
         HARD,
-        SOFT
+        SOFT,
     }
 }

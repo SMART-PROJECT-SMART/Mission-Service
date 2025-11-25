@@ -9,6 +9,22 @@
             public const string FITNESS_WEIGHTS_CONFIG_SECTION = "FitnessWeights";
         }
 
+        public static class MainAlgorithm
+        {
+            public const int AMOUNT_OF_MUTATION_OPTIONS = 2;
+            public const int MAX_REPAIR_ATTEMPTS = 5;
+            public const int OFFSPRING_PAIR_SIZE = 2;
+            public const int FIRST_OFFSPRING_INDEX = 0;
+            public const int SECOND_OFFSPRING_INDEX = 1;
+            public const double NO_IMPROVEMENT_THRESHOLD = 0.0001;
+        }
+
+        public static class Crossover
+        {
+            public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;
+            public const int MIN_CROSSOVER_POINT = 1;
+        }
+
         public static class TelemetryNormalization
         {
             public const double MAX_PERCENTAGE = 100.0;

@@ -1,4 +1,4 @@
-﻿namespace Mission_Service.Models
+﻿namespace Mission_Service.Models.choromosomes
 {
     public class AssignmentChromosome
     {

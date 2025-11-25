@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Extensions;
 using Mission_Service.Models;
+using Mission_Service.Models.choromosomes;
 
 namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 
@@ -13,7 +14,8 @@ public class FitnessCalculator : IFitnessCalculator
 
     public FitnessCalculator(
         IOptions<TelemetryWeightsConfiguration> telemetryWeights,
-        IOptions<FitnessWeightsConfiguration> fitnessWeights)
+        IOptions<FitnessWeightsConfiguration> fitnessWeights
+    )
     {
         _telemetryWeights = telemetryWeights.Value;
         _fitnessWeights = fitnessWeights.Value;
@@ -27,9 +29,9 @@ public class FitnessCalculator : IFitnessCalculator
         total += CalculatePriorityScore(chromosome);
         total += CalculateOverlapPenalty(chromosome);
         total += CalculateMismatchPenalty(chromosome);
+        total += CalculateMissionCoverageBonus(chromosome);
 
         chromosome.FitnessScore = total;
-        chromosome.IsValid = total >= 0.0;
 
         return total;
     }
@@ -40,10 +42,11 @@ public class FitnessCalculator : IFitnessCalculator
 
         foreach (AssignmentGene assignment in chromosome.Assignments)
         {
-            Dictionary<TelemetryFields, double> weights =
-                _telemetryWeights.GetWeights(assignment.Mission.RequiredUAVType);
+            Dictionary<TelemetryFields, double> assignmentWeights = _telemetryWeights.GetWeights(
+                assignment.Mission.RequiredUAVType
+            );
 
-            foreach (KeyValuePair<TelemetryFields, double> assignmentPair in weights)
+            foreach (KeyValuePair<TelemetryFields, double> assignmentPair in assignmentWeights)
             {
                 if (assignment.UAV.TelemetryData.TryGetValue(assignmentPair.Key, out double value))
                 {
@@ -61,9 +64,19 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculatePriorityScore(AssignmentChromosome chromosome)
     {
-        double totalPriority = chromosome.Assignments.Sum(a => (int)a.Mission.Priority);
+        double totalPriority = chromosome
+            .Assignments.GroupBy(a => a.Mission.Id)
+            .Select(g => g.First())
+            .Sum(a => (int)a.Mission.Priority);
 
         return totalPriority * _fitnessWeights.PriorityCoverage;
+    }
+
+    private double CalculateMissionCoverageBonus(AssignmentChromosome chromosome)
+    {
+        int uniqueMissions = chromosome.Assignments.Select(a => a.Mission.Id).Distinct().Count();
+
+        return uniqueMissions * uniqueMissions * _fitnessWeights.MissionCoverageWeight;
     }
 
     private double CalculateOverlapPenalty(AssignmentChromosome chromosome)
@@ -71,15 +84,18 @@ public class FitnessCalculator : IFitnessCalculator
         int overlapCount = 0;
 
         IEnumerable<IGrouping<int, AssignmentGene>> assignmentsByUav =
-     chromosome.Assignments.GroupBy(a => a.UAV.TailId);
+            chromosome.Assignments.GroupBy(a => a.UAV.TailId);
 
         foreach (IGrouping<int, AssignmentGene> uavAssignments in assignmentsByUav)
         {
-            List<AssignmentGene> chronologicalAssignments = uavAssignments.OrderBy(a => a.StartTime).ToList();
+            List<AssignmentGene> chronologicalAssignments = uavAssignments
+                .OrderBy(a => a.StartTime)
+                .ToList();
 
             for (int i = 0; i < chronologicalAssignments.Count - 1; i++)
             {
-                DateTime currentAssignmentEnd = chronologicalAssignments[i].StartTime.Add(chronologicalAssignments[i].Duration);
+                DateTime currentAssignmentEnd = chronologicalAssignments[i]
+                    .StartTime.Add(chronologicalAssignments[i].Duration);
                 if (currentAssignmentEnd > chronologicalAssignments[i + 1].StartTime)
                 {
                     overlapCount++;
@@ -92,8 +108,9 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateMismatchPenalty(AssignmentChromosome chromosome)
     {
-        int mismatchCount = chromosome.Assignments
-            .Count(a => a.Mission.RequiredUAVType != a.UAV.UavType);
+        int mismatchCount = chromosome.Assignments.Count(a =>
+            a.Mission.RequiredUAVType != a.UAV.UavType
+        );
 
         return mismatchCount * _fitnessWeights.TypeMismatchPenalty;
     }
