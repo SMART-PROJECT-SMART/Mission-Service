@@ -74,6 +74,36 @@ namespace Mission_Service.Controllers
             );
             results.Add(ExecuteTestCaseInternal("Test 9: Stress Test", CreateStressTestData()));
             results.Add(ExecuteTestCaseInternal("Test 10: Edge Cases", CreateEdgeCasesData()));
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 11: UAV Quality Selection",
+                    CreateUAVQualitySelectionData()
+                )
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 12: Priority vs Telemetry",
+                    CreatePriorityVsTelemetryData()
+                )
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 13: Parallel Missions Optimization",
+                    CreateParallelMissionsOptimizationData()
+                )
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 14: Best UAV Per Mission Type",
+                    CreateBestUAVPerMissionTypeData()
+                )
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 15: Maximum Coverage",
+                    CreateMaximumCoverageData()
+                )
+            );
 
             _logger.LogInformation("========================================");
             _logger.LogInformation("ALL TEST CASES COMPLETED");
@@ -150,6 +180,41 @@ namespace Mission_Service.Controllers
         {
             var (missions, uavs) = CreateEdgeCasesData();
             return ExecuteTestCase("Edge Cases", missions, uavs);
+        }
+
+        [HttpGet("test/uav-quality-selection")]
+        public IActionResult TestUAVQualitySelection()
+        {
+            var (missions, uavs) = CreateUAVQualitySelectionData();
+            return ExecuteTestCase("UAV Quality Selection", missions, uavs);
+        }
+
+        [HttpGet("test/priority-vs-telemetry")]
+        public IActionResult TestPriorityVsTelemetry()
+        {
+            var (missions, uavs) = CreatePriorityVsTelemetryData();
+            return ExecuteTestCase("Priority vs Telemetry", missions, uavs);
+        }
+
+        [HttpGet("test/parallel-missions-optimization")]
+        public IActionResult TestParallelMissionsOptimization()
+        {
+            var (missions, uavs) = CreateParallelMissionsOptimizationData();
+            return ExecuteTestCase("Parallel Missions Optimization", missions, uavs);
+        }
+
+        [HttpGet("test/best-uav-per-mission-type")]
+        public IActionResult TestBestUAVPerMissionType()
+        {
+            var (missions, uavs) = CreateBestUAVPerMissionTypeData();
+            return ExecuteTestCase("Best UAV Per Mission Type", missions, uavs);
+        }
+
+        [HttpGet("test/maximum-coverage")]
+        public IActionResult TestMaximumCoverage()
+        {
+            var (missions, uavs) = CreateMaximumCoverageData();
+            return ExecuteTestCase("Maximum Coverage", missions, uavs);
         }
 
         private IActionResult ExecuteTestCase(
@@ -619,6 +684,222 @@ namespace Mission_Service.Controllers
         private (List<Mission>, List<UAV>) CreateEdgeCasesData()
         {
             return (new List<Mission>(), new List<UAV>());
+        }
+
+        private (List<Mission>, List<UAV>) CreateUAVQualitySelectionData()
+        {
+            var missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "M1",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "M2",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(DateTime.Now.AddHours(4), DateTime.Now.AddHours(6)),
+                    Location = new Location(31.7683, 35.2137, 150),
+                },
+            };
+
+            var uavs = new List<UAV>
+            {
+                new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(102, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+                new UAV(103, UAVType.Surveillance, CreatePoorTelemetry()),
+                new UAV(104, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(105, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreatePriorityVsTelemetryData()
+        {
+            var missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "M1",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.Low,
+                    TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "M2",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
+                    Location = new Location(31.7683, 35.2137, 150),
+                },
+            };
+
+            var uavs = new List<UAV>
+            {
+                new UAV(201, UAVType.Armed, CreateOptimalTelemetry()),
+                new UAV(202, UAVType.Armed, CreatePoorTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreateParallelMissionsOptimizationData()
+        {
+            var baseTime = DateTime.Now.AddHours(1);
+            var missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "M1",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "M2",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(31.7683, 35.2137, 150),
+                },
+                new Mission
+                {
+                    Id = "M3",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(32.4427, 34.9235, 200),
+                },
+            };
+
+            var uavs = new List<UAV>
+            {
+                new UAV(301, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(302, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(303, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+                new UAV(304, UAVType.Surveillance, CreatePoorTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreateBestUAVPerMissionTypeData()
+        {
+            var baseTime = DateTime.Now.AddHours(1);
+            var missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "M1",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "M2",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(31.7683, 35.2137, 150),
+                },
+                new Mission
+                {
+                    Id = "M3",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
+                    Location = new Location(32.4427, 34.9235, 200),
+                },
+                new Mission
+                {
+                    Id = "M4",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
+                    Location = new Location(31.2530, 34.7915, 120),
+                },
+            };
+
+            var uavs = new List<UAV>
+            {
+                new UAV(401, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(402, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+                new UAV(403, UAVType.Surveillance, CreatePoorTelemetry()),
+                new UAV(404, UAVType.Armed, CreateOptimalTelemetry()),
+                new UAV(405, UAVType.Armed, CreateSubOptimalTelemetry()),
+                new UAV(406, UAVType.Armed, CreatePoorTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreateMaximumCoverageData()
+        {
+            var baseTime = DateTime.Now.AddHours(1);
+            var missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "M1",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "M2",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.Medium,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(1), baseTime.AddHours(3)),
+                    Location = new Location(31.7683, 35.2137, 150),
+                },
+                new Mission
+                {
+                    Id = "M3",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.Low,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(2), baseTime.AddHours(4)),
+                    Location = new Location(32.4427, 34.9235, 200),
+                },
+                new Mission
+                {
+                    Id = "M4",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.Medium,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
+                    Location = new Location(31.2530, 34.7915, 120),
+                },
+                new Mission
+                {
+                    Id = "M5",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime.AddHours(4), baseTime.AddHours(6)),
+                    Location = new Location(32.1500, 34.8500, 130),
+                },
+            };
+
+            var uavs = new List<UAV>
+            {
+                new UAV(501, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(502, UAVType.Surveillance, CreateOptimalTelemetry()),
+                new UAV(503, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+            };
+
+            return (missions, uavs);
         }
 
         private Dictionary<TelemetryFields, double> CreateOptimalTelemetry()

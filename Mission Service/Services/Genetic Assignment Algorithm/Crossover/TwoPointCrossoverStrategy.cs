@@ -11,40 +11,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             AssignmentChromosome secondChromosome
         )
         {
-            int minLength = Math.Min(
-                firstChromosome.Assignments.Count(),
-                secondChromosome.Assignments.Count()
-            );
-
-            if (minLength < MissionServiceConstants.Crossover.MIN_CHROMOSOMES_FOR_CROSSOVER)
-            {
-                return new CrossoverResult
-                {
-                    FirstChromosome = firstChromosome,
-                    SecondChromosome = secondChromosome,
-                };
-            }
-
-            int firstCrossoverPoint = Random.Shared.Next(
-                MissionServiceConstants.Crossover.MIN_CROSSOVER_POINT,
-                minLength - 1
-            );
-            int secondCrossoverPoint = Random.Shared.Next(firstCrossoverPoint + 1, minLength);
-
-            AssignmentChromosome firstChild = CreateChildChromosome(
-                firstChromosome,
-                secondChromosome,
-                firstCrossoverPoint,
-                secondCrossoverPoint,
-                minLength
-            );
-            AssignmentChromosome secondChild = CreateChildChromosome(
-                secondChromosome,
-                firstChromosome,
-                firstCrossoverPoint,
-                secondCrossoverPoint,
-                minLength
-            );
+            // Create children using mission-based crossover to preserve all missions
+            AssignmentChromosome firstChild = CreateMissionBasedChild(firstChromosome, secondChromosome);
+            AssignmentChromosome secondChild = CreateMissionBasedChild(secondChromosome, firstChromosome);
 
             return new CrossoverResult
             {
@@ -53,32 +22,36 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             };
         }
 
-        private AssignmentChromosome CreateChildChromosome(
-            AssignmentChromosome firstChromosome,
-            AssignmentChromosome secondChromosome,
-            int firstCrossoverPoint,
-            int secondCrossoverPoint,
-            int length
+        private AssignmentChromosome CreateMissionBasedChild(
+            AssignmentChromosome primary,
+            AssignmentChromosome secondary
         )
         {
-            AssignmentChromosome childChromosome = new AssignmentChromosome();
-            List<AssignmentGene> childGenes = new List<AssignmentGene>(length);
+            // Get all unique missions from both parents
+            Dictionary<string, AssignmentGene> primaryAssignments = primary.Assignments
+                .ToDictionary(a => a.Mission.Id, a => a);
 
-            for (int assignmentIndex = 0; assignmentIndex < length; assignmentIndex++)
+            Dictionary<string, AssignmentGene> secondaryAssignments = secondary.Assignments
+                .ToDictionary(a => a.Mission.Id, a => a);
+
+            List<AssignmentGene> childGenes = new List<AssignmentGene>();
+
+            // For each mission in primary, randomly choose UAV assignment from primary or secondary
+            foreach (var missionId in primaryAssignments.Keys)
             {
                 AssignmentGene sourceGene;
-                if (
-                    assignmentIndex >= firstCrossoverPoint
-                    && assignmentIndex < secondCrossoverPoint
-                )
+
+                // If both parents have this mission, randomly choose which parent's UAV assignment to use
+                if (secondaryAssignments.ContainsKey(missionId) && Random.Shared.NextDouble() < 0.5)
                 {
-                    sourceGene = secondChromosome.Assignments.ElementAt(assignmentIndex);
+                    sourceGene = secondaryAssignments[missionId];
                 }
                 else
                 {
-                    sourceGene = firstChromosome.Assignments.ElementAt(assignmentIndex);
+                    sourceGene = primaryAssignments[missionId];
                 }
 
+                // Create a copy of the gene
                 AssignmentGene newGene = new AssignmentGene
                 {
                     Mission = sourceGene.Mission,
@@ -89,7 +62,29 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
                 childGenes.Add(newGene);
             }
 
-            childChromosome.Assignments = childGenes;
+            // Add any missions from secondary that aren't in primary
+            foreach (var missionId in secondaryAssignments.Keys)
+            {
+                if (!primaryAssignments.ContainsKey(missionId))
+                {
+                    var sourceGene = secondaryAssignments[missionId];
+                    AssignmentGene newGene = new AssignmentGene
+                    {
+                        Mission = sourceGene.Mission,
+                        UAV = sourceGene.UAV,
+                        StartTime = sourceGene.StartTime,
+                        Duration = sourceGene.Duration,
+                    };
+                    childGenes.Add(newGene);
+                }
+            }
+
+            AssignmentChromosome childChromosome = new AssignmentChromosome
+            {
+                Assignments = childGenes,
+                IsValid = true, // Will be validated by repair pipeline
+            };
+
             return childChromosome;
         }
     }

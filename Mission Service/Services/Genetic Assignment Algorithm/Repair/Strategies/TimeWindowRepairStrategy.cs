@@ -1,10 +1,18 @@
 ﻿using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Microsoft.Extensions.Logging;
 
 namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
 {
     public class TimeWindowRepairStrategy : IRepairStrategy
     {
+        private readonly ILogger<TimeWindowRepairStrategy> _logger;
+
+        public TimeWindowRepairStrategy(ILogger<TimeWindowRepairStrategy> logger)
+        {
+            _logger = logger;
+        }
+
         public void RepairChromosomeViolation(
             AssignmentChromosome assignmentChromosome,
             List<Mission> missions,
@@ -19,12 +27,22 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
                 return;
             }
 
+            int beforeCount = assignmentChromosome.Assignments.Count();
+
             IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome
                 .Assignments.Select(gene => RepairGeneIfNeeded(gene))
                 .Where(gene => gene != null)
                 .Cast<AssignmentGene>();
 
             assignmentChromosome.Assignments = repairedAssignments;
+
+            int afterCount = assignmentChromosome.Assignments.Count();
+            if (beforeCount != afterCount)
+            {
+                _logger.LogWarning(
+                    $"[TIME WINDOW REPAIR] Removed {beforeCount - afterCount} assignments with invalid time windows. Before: {beforeCount}, After: {afterCount}"
+                );
+            }
         }
 
         private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene)
