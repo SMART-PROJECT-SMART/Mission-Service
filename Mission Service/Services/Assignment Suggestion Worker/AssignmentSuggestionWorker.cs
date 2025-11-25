@@ -28,7 +28,7 @@ namespace Mission_Service.Services.Assignment_Suggestion_Worker
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await foreach (
-                AssignmentSuggestionDto request in _assignmentSuggestionQueue.AssignmentSuggestionRequestReader.ReadAllAsync(
+                AssignmentSuggestionDto request in _assignmentSuggestionQueue.AssignmentSuggestionReader.ReadAllAsync(
                     stoppingToken
                 )
             )
