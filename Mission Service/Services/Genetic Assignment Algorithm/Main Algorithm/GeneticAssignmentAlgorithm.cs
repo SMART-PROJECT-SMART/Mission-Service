@@ -93,20 +93,34 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
         private void EvaluateFitnessParallel(List<AssignmentChromosome> population)
         {
-            Parallel.ForEach(
-                population,
-                chromosome =>
-                {
-                    _fitnessCalculator.CalculateFitness(chromosome);
-                }
-            );
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount
+            };
+
+            Parallel.ForEach(population, options, chromosome =>
+            {
+                _fitnessCalculator.CalculateFitness(chromosome);
+            });
         }
 
         private AssignmentChromosome GetChromosomeWithBestFitnessScore(
             List<AssignmentChromosome> population
         )
         {
-            return population.OrderByDescending(chromosome => chromosome.FitnessScore).First();
+            AssignmentChromosome best = population[0];
+            double bestScore = best.FitnessScore;
+
+            for (int i = 1; i < population.Count; i++)
+            {
+                if (population[i].FitnessScore > bestScore)
+                {
+                    best = population[i];
+                    bestScore = population[i].FitnessScore;
+                }
+            }
+
+            return best;
         }
 
         private bool IsAssignmentBetter(
@@ -145,7 +159,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
             List<AssignmentChromosome> invalidOffspring = offspringPopulation
                 .Where(c => !c.IsValid)
-                .OrderByDescending(c => c.Assignments.Count())
+                .OrderByDescending(c => c.AssignmentCount)
                 .ThenByDescending(c => c.FitnessScore)
                 .ToList();
 
@@ -174,6 +188,11 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             int eliteCount = (int)(
                 _algorithmConfiguration.PopulationSize * _algorithmConfiguration.ElitePrecentage
             );
+
+            if (eliteCount == 0)
+                return new List<AssignmentChromosome>();
+            if (eliteCount == 1)
+                return new List<AssignmentChromosome> { GetChromosomeWithBestFitnessScore(population) };
 
             return population
                 .OrderByDescending(chromosome => chromosome.FitnessScore)
@@ -255,13 +274,15 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             List<UAV> uavs
         )
         {
-            Parallel.ForEach(
-                population,
-                chromosome =>
-                {
-                    _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, uavs);
-                }
-            );
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount
+            };
+
+            Parallel.ForEach(population, options, chromosome =>
+            {
+                _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, uavs);
+            });
         }
     }
 }
