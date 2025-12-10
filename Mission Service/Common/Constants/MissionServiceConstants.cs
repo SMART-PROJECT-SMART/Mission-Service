@@ -23,6 +23,7 @@
         {
             public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;
             public const int MIN_CROSSOVER_POINT = 1;
+            public const double GENE_SELECTION_PROBABILITY = 0.5;
         }
 
         public static class TelemetryNormalization

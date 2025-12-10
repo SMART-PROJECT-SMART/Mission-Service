@@ -210,10 +210,10 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 pairCount,
                 pairIndex =>
                 {
-                    AssignmentChromosome parent1 = _selectionStrategy.selectParentChromosome(
+                    AssignmentChromosome parent1 = _selectionStrategy.SelectParentChromosome(
                         population
                     );
-                    AssignmentChromosome parent2 = _selectionStrategy.selectParentChromosome(
+                    AssignmentChromosome parent2 = _selectionStrategy.SelectParentChromosome(
                         population
                     );
 

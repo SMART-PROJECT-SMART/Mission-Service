@@ -15,7 +15,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection
             _algorithmConfiguration = algorithmConfiguration.Value;
         }
 
-        public AssignmentChromosome selectParentChromosome(
+        public AssignmentChromosome SelectParentChromosome(
             IEnumerable<AssignmentChromosome> population
         )
         {

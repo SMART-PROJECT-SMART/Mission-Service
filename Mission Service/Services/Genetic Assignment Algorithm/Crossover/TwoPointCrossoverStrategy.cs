@@ -44,7 +44,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             {
                 AssignmentGene sourceGene;
 
-                if (secondaryAssignments.ContainsKey(missionId) && Random.Shared.NextDouble() < 0.5)
+                if (secondaryAssignments.ContainsKey(missionId) && Random.Shared.NextDouble() < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY)
                 {
                     sourceGene = secondaryAssignments[missionId];
                 }
@@ -63,7 +63,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
                 childGenes.Add(newGene);
             }
 
-            foreach (var missionId in secondaryAssignments.Keys)
+            foreach (string missionId in secondaryAssignments.Keys)
             {
                 if (!primaryAssignments.ContainsKey(missionId))
                 {
