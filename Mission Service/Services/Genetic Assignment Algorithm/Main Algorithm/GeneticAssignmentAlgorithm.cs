@@ -60,7 +60,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
             for (
                 int generation = 0;
-                generation < _algorithmConfiguration.MaxGenerations;
+                ShouldStopAlgorithmEarly(stagnationCounter,generation);
                 generation++
             )
             {
@@ -80,11 +80,6 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 else
                 {
                     stagnationCounter++;
-                }
-
-                if (ShouldTerminateAlgorithm(stagnationCounter))
-                {
-                    break;
                 }
             }
 
@@ -132,9 +127,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 > MissionServiceConstants.MainAlgorithm.NO_IMPROVEMENT_THRESHOLD;
         }
 
-        private bool ShouldTerminateAlgorithm(int stagnationCounter)
+        private bool ShouldStopAlgorithmEarly(int stagnationCounter,int generationIndex)
         {
-            return stagnationCounter >= _algorithmConfiguration.StagnationLimit;
+            return stagnationCounter >= _algorithmConfiguration.StagnationLimit && generationIndex < _algorithmConfiguration.MaxGenerations;
         }
 
         private List<AssignmentChromosome> CreateNextGeneration(
