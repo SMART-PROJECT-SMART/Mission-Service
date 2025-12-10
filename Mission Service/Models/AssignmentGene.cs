@@ -17,5 +17,16 @@
         }
 
         public AssignmentGene() { }
+
+        public AssignmentGene Clone()
+        {
+            return new AssignmentGene
+            {
+                Mission = Mission,
+                UAV = UAV,
+                StartTime = StartTime,
+                Duration = Duration,
+            };
+        }
     }
 }

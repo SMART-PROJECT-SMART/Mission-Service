@@ -32,7 +32,7 @@ public class GeneticAssignmentAlgorithmTests
             MutationProbability = 0.3,
             ElitePrecentage = 0.1,
             TournamentSize = 3,
-            StagnationLimit = 10
+            StagnationLimit = 10,
         };
 
         var telemetryWeights = new TelemetryWeightsConfiguration
@@ -45,7 +45,7 @@ public class GeneticAssignmentAlgorithmTests
                     {
                         { TelemetryFields.FuelAmount, 35.0 },
                         { TelemetryFields.SignalStrength, 45.0 },
-                        { TelemetryFields.FlightTimeSec, 40.0 }
+                        { TelemetryFields.FlightTimeSec, 40.0 },
                     }
                 },
                 {
@@ -54,10 +54,10 @@ public class GeneticAssignmentAlgorithmTests
                     {
                         { TelemetryFields.FuelAmount, 35.0 },
                         { TelemetryFields.ThrustAfterInfluence, 45.0 },
-                        { TelemetryFields.CurrentSpeedKmph, 40.0 }
+                        { TelemetryFields.CurrentSpeedKmph, 40.0 },
                     }
-                }
-            }
+                },
+            },
         };
 
         var fitnessWeights = new FitnessWeightsConfiguration
@@ -66,7 +66,7 @@ public class GeneticAssignmentAlgorithmTests
             PriorityCoverage = 100.0,
             TimeOverlapPenalty = -10000.0,
             TypeMismatchPenalty = -10000.0,
-            MissionCoverageWeight = 1000.0
+            MissionCoverageWeight = 1000.0,
         };
 
         // Setup all dependencies
@@ -77,7 +77,7 @@ public class GeneticAssignmentAlgorithmTests
 
         var populationInitializer = new PopulationInitializer(Options.Create(_config));
         var selectionStrategy = new TournamentSelectionStrategy(Options.Create(_config));
-        var crossoverStrategy = new TwoPointCrossoverStrategy();
+        var crossoverStrategy = new UniformCrossoverStrategy();
         var mutationStrategy = new SwapMutationStrategy();
 
         // Setup repair pipeline
@@ -86,7 +86,7 @@ public class GeneticAssignmentAlgorithmTests
             new TypeMismatchRepairStrategy(),
             new TimeWindowRepairStrategy(),
             new OverlapRepairStrategy(),
-            new DuplicateMissionRepairStrategy()
+            new DuplicateMissionRepairStrategy(),
         };
         var repairPipeline = new RepairPipline(repairStrategies);
 
@@ -158,7 +158,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
+                Location = new Core.Models.Location(32.0, 34.0, 100),
             },
             new Mission
             {
@@ -166,14 +166,11 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Low,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
-            }
+                Location = new Core.Models.Location(32.0, 34.0, 100),
+            },
         };
 
-        var uavs = new List<UAV>
-        {
-            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry())
-        };
+        var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
@@ -196,14 +193,11 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
-            }
+                Location = new Core.Models.Location(32.0, 34.0, 100),
+            },
         };
 
-        var uavs = new List<UAV>
-        {
-            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry())
-        };
+        var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
@@ -226,7 +220,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
+                Location = new Core.Models.Location(32.0, 34.0, 100),
             },
             new Mission
             {
@@ -234,28 +228,25 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(1), baseTime.AddHours(3)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
-            }
+                Location = new Core.Models.Location(32.0, 34.0, 100),
+            },
         };
 
-        var uavs = new List<UAV>
-        {
-            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry())
-        };
+        var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
         var bestChromosome = result.Assignments.First();
 
         // Assert - Check no time overlaps for same UAV
-        var uavAssignments = bestChromosome.Assignments
-            .OrderBy(a => a.StartTime)
-            .ToList();
+        var uavAssignments = bestChromosome.Assignments.OrderBy(a => a.StartTime).ToList();
 
         for (int i = 0; i < uavAssignments.Count - 1; i++)
         {
-            Assert.True(uavAssignments[i].EndTime <= uavAssignments[i + 1].StartTime,
-                "Assignments should not overlap");
+            Assert.True(
+                uavAssignments[i].EndTime <= uavAssignments[i + 1].StartTime,
+                "Assignments should not overlap"
+            );
         }
     }
 
@@ -271,27 +262,26 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
-            }
+                Location = new Core.Models.Location(32.0, 34.0, 100),
+            },
         };
 
         var optimalUavs = new List<UAV>
         {
-            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry())
+            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()),
         };
 
-        var poorUavs = new List<UAV>
-        {
-            new UAV(102, UAVType.Surveillance, CreatePoorTelemetry())
-        };
+        var poorUavs = new List<UAV> { new UAV(102, UAVType.Surveillance, CreatePoorTelemetry()) };
 
         // Act
         var optimalResult = _algorithm.PreformAssignmentAlgorithm(missions, optimalUavs);
         var poorResult = _algorithm.PreformAssignmentAlgorithm(missions, poorUavs);
 
         // Assert
-        Assert.True(optimalResult.Assignments.First().FitnessScore >
-                   poorResult.Assignments.First().FitnessScore);
+        Assert.True(
+            optimalResult.Assignments.First().FitnessScore
+                > poorResult.Assignments.First().FitnessScore
+        );
     }
 
     [Fact]
@@ -299,10 +289,7 @@ public class GeneticAssignmentAlgorithmTests
     {
         // Arrange
         var missions = new List<Mission>();
-        var uavs = new List<UAV>
-        {
-            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry())
-        };
+        var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
@@ -324,8 +311,8 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
-            }
+                Location = new Core.Models.Location(32.0, 34.0, 100),
+            },
         };
         var uavs = new List<UAV>();
 
@@ -349,7 +336,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
+                Location = new Core.Models.Location(32.0, 34.0, 100),
             },
             new Mission
             {
@@ -357,7 +344,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
-                Location = new Core.Models.Location(31.0, 35.0, 150)
+                Location = new Core.Models.Location(31.0, 35.0, 150),
             },
             new Mission
             {
@@ -365,15 +352,15 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(baseTime.AddHours(6), baseTime.AddHours(8)),
-                Location = new Core.Models.Location(32.5, 34.5, 200)
-            }
+                Location = new Core.Models.Location(32.5, 34.5, 200),
+            },
         };
 
         var uavs = new List<UAV>
         {
             new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()),
             new UAV(102, UAVType.Armed, CreateOptimalTelemetry()),
-            new UAV(103, UAVType.Surveillance, CreateSubOptimalTelemetry())
+            new UAV(103, UAVType.Surveillance, CreateSubOptimalTelemetry()),
         };
 
         // Act
@@ -397,7 +384,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100)
+                Location = new Core.Models.Location(32.0, 34.0, 100),
             },
             new Mission
             {
@@ -405,14 +392,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now.AddHours(3), DateTime.Now.AddHours(5)),
-                Location = new Core.Models.Location(31.0, 35.0, 150)
-            }
+                Location = new Core.Models.Location(31.0, 35.0, 150),
+            },
         };
 
         var uavs = new List<UAV>
         {
             new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()),
-            new UAV(102, UAVType.Armed, CreateOptimalTelemetry())
+            new UAV(102, UAVType.Armed, CreateOptimalTelemetry()),
         };
 
         return (missions, uavs);
@@ -426,7 +413,7 @@ public class GeneticAssignmentAlgorithmTests
             { TelemetryFields.SignalStrength, 90.0 },
             { TelemetryFields.FlightTimeSec, 50000.0 },
             { TelemetryFields.CurrentSpeedKmph, 150.0 },
-            { TelemetryFields.ThrustAfterInfluence, 80000.0 }
+            { TelemetryFields.ThrustAfterInfluence, 80000.0 },
         };
     }
 
@@ -438,7 +425,7 @@ public class GeneticAssignmentAlgorithmTests
             { TelemetryFields.SignalStrength, 70.0 },
             { TelemetryFields.FlightTimeSec, 30000.0 },
             { TelemetryFields.CurrentSpeedKmph, 120.0 },
-            { TelemetryFields.ThrustAfterInfluence, 60000.0 }
+            { TelemetryFields.ThrustAfterInfluence, 60000.0 },
         };
     }
 
@@ -450,7 +437,7 @@ public class GeneticAssignmentAlgorithmTests
             { TelemetryFields.SignalStrength, 40.0 },
             { TelemetryFields.FlightTimeSec, 10000.0 },
             { TelemetryFields.CurrentSpeedKmph, 80.0 },
-            { TelemetryFields.ThrustAfterInfluence, 40000.0 }
+            { TelemetryFields.ThrustAfterInfluence, 40000.0 },
         };
     }
 }

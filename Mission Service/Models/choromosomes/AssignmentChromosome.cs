@@ -12,9 +12,13 @@
         {
             get
             {
-                if (_cachedAssignmentsList == null || !ReferenceEquals(_cachedAssignmentsList, Assignments))
+                if (
+                    _cachedAssignmentsList == null
+                    || !ReferenceEquals(_cachedAssignmentsList, Assignments)
+                )
                 {
-                    _cachedAssignmentsList = Assignments as List<AssignmentGene> ?? Assignments.ToList();
+                    _cachedAssignmentsList =
+                        Assignments as List<AssignmentGene> ?? Assignments.ToList();
                 }
                 return _cachedAssignmentsList;
             }

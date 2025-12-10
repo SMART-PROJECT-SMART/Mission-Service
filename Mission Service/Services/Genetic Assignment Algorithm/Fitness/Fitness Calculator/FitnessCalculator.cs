@@ -46,7 +46,9 @@ public class FitnessCalculator : IFitnessCalculator
 
         foreach (AssignmentGene assignment in assignments)
         {
-            Dictionary<TelemetryFields, double> assignmentWeights = _telemetryWeights.GetWeights(assignment.Mission.RequiredUAVType);
+            Dictionary<TelemetryFields, double> assignmentWeights = _telemetryWeights.GetWeights(
+                assignment.Mission.RequiredUAVType
+            );
             Dictionary<TelemetryFields, double> telemetryData = assignment.UAV.TelemetryData;
 
             foreach (KeyValuePair<TelemetryFields, double> weightEntry in assignmentWeights)
@@ -100,7 +102,8 @@ public class FitnessCalculator : IFitnessCalculator
         if (assignments.Count <= 1)
             return 0.0;
 
-        Dictionary<int, List<AssignmentGene>> uavGroups = new Dictionary<int, List<AssignmentGene>>();
+        Dictionary<int, List<AssignmentGene>> uavGroups =
+            new Dictionary<int, List<AssignmentGene>>();
         foreach (AssignmentGene assignment in assignments)
         {
             if (!uavGroups.TryGetValue(assignment.UAV.TailId, out List<AssignmentGene>? list))

@@ -81,7 +81,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
             services.AddSingleton<IPopulationInitializer, PopulationInitializer>();
             services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
-            services.AddSingleton<ICrossoverStrategy, TwoPointCrossoverStrategy>();
+            services.AddSingleton<ICrossoverStrategy, UniformCrossoverStrategy>();
             services.AddSingleton<IMutationStrategy, SwapMutationStrategy>();
             services.AddRepairStrategies();
             services.AddRepairPipeline();
