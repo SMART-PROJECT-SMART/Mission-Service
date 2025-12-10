@@ -2,6 +2,7 @@
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
 using Mission_Service.Config;
+using Mission_Service.Extensions;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
@@ -56,9 +57,12 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 .CreateInitialPopulation(missionsWithCompatibleUAVs, allAvailableUAVs)
                 .ToList();
 
-            _parallelExecutor.EvaluatePopulationFitnessInParallel(currentPopulation, chromosome => _fitnessCalculator.CalculateFitness(chromosome));
+            _parallelExecutor.EvaluatePopulationFitnessInParallel(
+                currentPopulation,
+                chromosome => _fitnessCalculator.CalculateFitness(chromosome)
+            );
 
-            AssignmentChromosome bestChromosomeFound = FindChromosomeWithHighestFitness(currentPopulation);
+            AssignmentChromosome bestChromosomeFound = currentPopulation.FindChromosomeWithHighestFitness();
             int generationsWithoutImprovement = 0;
 
             for (
@@ -69,9 +73,12 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             {
                 currentPopulation = CreateNextGenerationPopulation(currentPopulation, missionsWithCompatibleUAVs, allAvailableUAVs);
 
-                _parallelExecutor.EvaluatePopulationFitnessInParallel(currentPopulation, chromosome => _fitnessCalculator.CalculateFitness(chromosome));
+                _parallelExecutor.EvaluatePopulationFitnessInParallel(
+                    currentPopulation,
+                    chromosome => _fitnessCalculator.CalculateFitness(chromosome)
+                );
 
-                AssignmentChromosome bestChromosomeInGeneration = FindChromosomeWithHighestFitness(currentPopulation);
+                AssignmentChromosome bestChromosomeInGeneration = currentPopulation.FindChromosomeWithHighestFitness();
 
                 if (IsNewChromosomeBetterThanCurrent(bestChromosomeInGeneration, bestChromosomeFound))
                 {
@@ -111,20 +118,19 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 chromosome => _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, availableUAVs)
             );
 
-            List<AssignmentChromosome> validOffspringChromosomes = generatedOffspring.Where(c => c.IsValid).ToList();
-            List<AssignmentChromosome> invalidOffspringChromosomes = generatedOffspring
-                .Where(c => !c.IsValid)
-                .OrderByDescending(c => c.AssignmentCount)
-                .ThenByDescending(c => c.FitnessScore)
-                .ToList();
+            List<AssignmentChromosome> validOffspringChromosomes = generatedOffspring.FilterValidChromosomes();
+            List<AssignmentChromosome> invalidOffspringChromosomesSortedByQuality = generatedOffspring
+                .FilterAndOrderInvalidChromosomesByQuality();
 
             List<AssignmentChromosome> combinedOffspring = new List<AssignmentChromosome>();
             combinedOffspring.AddRange(validOffspringChromosomes);
 
             int remainingPopulationSlots = numberOfOffspringNeeded - validOffspringChromosomes.Count;
-            if (remainingPopulationSlots > 0 && invalidOffspringChromosomes.Any())
+            if (remainingPopulationSlots > 0 && invalidOffspringChromosomesSortedByQuality.Any())
             {
-                combinedOffspring.AddRange(invalidOffspringChromosomes.Take(remainingPopulationSlots));
+                combinedOffspring.AddRange(
+                    invalidOffspringChromosomesSortedByQuality.Take(remainingPopulationSlots)
+                );
             }
 
             List<AssignmentChromosome> nextGenerationPopulation = new List<AssignmentChromosome>(
@@ -136,32 +142,19 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             return nextGenerationPopulation;
         }
 
-        #region Helper Methods
 
-        private static List<Mission> FilterMissionsWithCompatibleUAVs(List<Mission> allMissions, List<UAV> availableUAVs)
+        private static List<Mission> FilterMissionsWithCompatibleUAVs(
+            List<Mission> allMissions,
+            List<UAV> availableUAVs
+        )
         {
-            HashSet<UAVType> availableUAVTypes = availableUAVs.Select(uav => uav.UavType).ToHashSet();
-            return allMissions.Where(mission => availableUAVTypes.Contains(mission.RequiredUAVType)).ToList();
-        }
+            HashSet<UAVType> availableUAVTypes = availableUAVs
+                .Select(uav => uav.UavType)
+                .ToHashSet();
 
-        private static AssignmentChromosome FindChromosomeWithHighestFitness(List<AssignmentChromosome> population)
-        {
-            AssignmentChromosome chromosomeWithBestFitness = population[0];
-            double highestFitnessScore = chromosomeWithBestFitness.FitnessScore;
-
-            for (int i = 1; i < population.Count; i++)
-            {
-                AssignmentChromosome currentChromosome = population[i];
-                double currentFitnessScore = currentChromosome.FitnessScore;
-
-                if (currentFitnessScore > highestFitnessScore)
-                {
-                    chromosomeWithBestFitness = currentChromosome;
-                    highestFitnessScore = currentFitnessScore;
-                }
-            }
-
-            return chromosomeWithBestFitness;
+            return allMissions
+                .Where(mission => availableUAVTypes.Contains(mission.RequiredUAVType))
+                .ToList();
         }
 
         private bool IsNewChromosomeBetterThanCurrent(
@@ -180,7 +173,5 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
 
             return hasNotStagnated && hasNotReachedMaxGenerations;
         }
-
-        #endregion
     }
 }
