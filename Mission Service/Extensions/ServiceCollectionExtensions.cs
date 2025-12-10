@@ -5,6 +5,7 @@ using Mission_Service.Models;
 using Mission_Service.Services.Assignment_Request_Queue;
 using Mission_Service.Services.Assignment_Suggestion_Worker;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
@@ -13,7 +14,9 @@ using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Populatio
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategies;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Reproduction;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
 
 namespace Mission_Service.Extensions
 {
@@ -84,6 +87,9 @@ namespace Mission_Service.Extensions
             services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
             services.AddSingleton<ICrossoverStrategy, UniformCrossoverStrategy>();
             services.AddSingleton<IMutationStrategy, SwapMutationStrategy>();
+            services.AddSingleton<IEliteSelector, EliteSelector>();
+            services.AddSingleton<IOffspringGenerator, OffspringGenerator>();
+            services.AddSingleton<IParallelExecutor, ParallelExecutor>();
             services.AddRepairStrategies();
             services.AddRepairPipeline();
             return services;

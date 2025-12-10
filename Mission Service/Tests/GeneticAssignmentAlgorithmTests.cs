@@ -4,6 +4,7 @@ using Mission_Service.Common.Enums;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
@@ -12,93 +13,100 @@ using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Populatio
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategies;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Reproduction;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
 using Xunit;
 
 namespace Mission_Service.Tests;
 
 public class GeneticAssignmentAlgorithmTests
 {
-    private readonly GeneticAssignmentAlgorithm _algorithm;
+  private readonly GeneticAssignmentAlgorithm _algorithm;
     private readonly AssignmentAlgorithmConfiguration _config;
 
-    public GeneticAssignmentAlgorithmTests()
+  public GeneticAssignmentAlgorithmTests()
+  {
+   _config = new AssignmentAlgorithmConfiguration
+{
+    PopulationSize = 20,
+    MaxGenerations = 50,
+  CrossoverProbability = 0.7,
+      MutationProbability = 0.3,
+ ElitePrecentage = 0.1,
+    TournamentSize = 3,
+    StagnationLimit = 10,
+ };
+
+  var telemetryWeights = new TelemetryWeightsConfiguration
+     {
+       Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
     {
-        // Setup configuration
-        _config = new AssignmentAlgorithmConfiguration
+    {
+      UAVType.Surveillance,
+  new Dictionary<TelemetryFields, double>
+   {
+   { TelemetryFields.FuelAmount, 35.0 },
+   { TelemetryFields.SignalStrength, 45.0 },
+ { TelemetryFields.FlightTimeSec, 40.0 },
+      }
+     },
+      {
+ UAVType.Armed,
+    new Dictionary<TelemetryFields, double>
         {
-            PopulationSize = 20,
-            MaxGenerations = 50,
-            CrossoverProbability = 0.7,
-            MutationProbability = 0.3,
-            ElitePrecentage = 0.1,
-            TournamentSize = 3,
-            StagnationLimit = 10,
-        };
+     { TelemetryFields.FuelAmount, 35.0 },
+  { TelemetryFields.ThrustAfterInfluence, 45.0 },
+  { TelemetryFields.CurrentSpeedKmph, 40.0 },
+   }
+   },
+},
+ };
 
-        var telemetryWeights = new TelemetryWeightsConfiguration
-        {
-            Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
-            {
-                {
-                    UAVType.Surveillance,
-                    new Dictionary<TelemetryFields, double>
-                    {
-                        { TelemetryFields.FuelAmount, 35.0 },
-                        { TelemetryFields.SignalStrength, 45.0 },
-                        { TelemetryFields.FlightTimeSec, 40.0 },
-                    }
-                },
-                {
-                    UAVType.Armed,
-                    new Dictionary<TelemetryFields, double>
-                    {
-                        { TelemetryFields.FuelAmount, 35.0 },
-                        { TelemetryFields.ThrustAfterInfluence, 45.0 },
-                        { TelemetryFields.CurrentSpeedKmph, 40.0 },
-                    }
-                },
-            },
-        };
+     var fitnessWeights = new FitnessWeightsConfiguration
+{
+TelemetryOptimization = 150.0,
+PriorityCoverage = 100.0,
+      TimeOverlapPenalty = -10000.0,
+ TypeMismatchPenalty = -10000.0,
+         MissionCoverageWeight = 1000.0,
+      };
 
-        var fitnessWeights = new FitnessWeightsConfiguration
-        {
-            TelemetryOptimization = 150.0,
-            PriorityCoverage = 100.0,
-            TimeOverlapPenalty = -10000.0,
-            TypeMismatchPenalty = -10000.0,
-            MissionCoverageWeight = 1000.0,
-        };
-
-        // Setup all dependencies
-        var fitnessCalculator = new FitnessCalculator(
-            Options.Create(telemetryWeights),
-            Options.Create(fitnessWeights)
-        );
+  var fitnessCalculator = new FitnessCalculator(
+       Options.Create(telemetryWeights),
+  Options.Create(fitnessWeights)
+ );
 
         var populationInitializer = new PopulationInitializer(Options.Create(_config));
-        var selectionStrategy = new TournamentSelectionStrategy(Options.Create(_config));
-        var crossoverStrategy = new UniformCrossoverStrategy();
+  var selectionStrategy = new TournamentSelectionStrategy(Options.Create(_config));
+  var crossoverStrategy = new UniformCrossoverStrategy();
         var mutationStrategy = new SwapMutationStrategy();
+      var eliteSelector = new EliteSelector();
+   var offspringGenerator = new OffspringGenerator(
+ selectionStrategy,
+crossoverStrategy,
+     mutationStrategy,
+    Options.Create(_config)
+ );
+        var parallelExecutor = new ParallelExecutor();
 
-        // Setup repair pipeline
-        var repairStrategies = new List<IRepairStrategy>
-        {
-            new TypeMismatchRepairStrategy(),
-            new TimeWindowRepairStrategy(),
-            new OverlapRepairStrategy(),
-            new DuplicateMissionRepairStrategy(),
-        };
+     var repairStrategies = new List<IRepairStrategy>
+  {
+    new TypeMismatchRepairStrategy(),
+    new TimeWindowRepairStrategy(),
+  new OverlapRepairStrategy(),
+   new DuplicateMissionRepairStrategy(),
+ };
         var repairPipeline = new RepairPipline(repairStrategies);
 
-        _algorithm = new GeneticAssignmentAlgorithm(
-            fitnessCalculator,
-            populationInitializer,
-            selectionStrategy,
-            crossoverStrategy,
-            mutationStrategy,
-            repairPipeline,
-            Options.Create(_config)
+      _algorithm = new GeneticAssignmentAlgorithm(
+    fitnessCalculator,
+     populationInitializer,
+      eliteSelector,
+  offspringGenerator,
+          parallelExecutor,
+       repairPipeline,
+    Options.Create(_config)
         );
     }
 
