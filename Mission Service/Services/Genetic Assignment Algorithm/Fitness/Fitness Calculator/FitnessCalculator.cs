@@ -42,27 +42,28 @@ public class FitnessCalculator : IFitnessCalculator
         if (assignments.Count == 0)
             return 0.0;
 
-        double total = 0.0;
+        double totalWeightedTelemetryScore = 0.0;
 
         foreach (AssignmentGene assignment in assignments)
         {
-            Dictionary<TelemetryFields, double> assignmentWeights = _telemetryWeights.GetWeights(
+            Dictionary<TelemetryFields, double> telemetryWeightsForUAVType = _telemetryWeights.GetWeights(
                 assignment.Mission.RequiredUAVType
             );
-            Dictionary<TelemetryFields, double> telemetryData = assignment.UAV.TelemetryData;
+            Dictionary<TelemetryFields, double> uavTelemetryData = assignment.UAV.TelemetryData;
 
-            foreach (KeyValuePair<TelemetryFields, double> weightEntry in assignmentWeights)
+            foreach (KeyValuePair<TelemetryFields, double> telemetryWeight in telemetryWeightsForUAVType)
             {
-                if (telemetryData.TryGetValue(weightEntry.Key, out double value))
+                if (uavTelemetryData.TryGetValue(telemetryWeight.Key, out double rawTelemetryValue))
                 {
-                    double normalized = weightEntry.Key.NormalizeTelemetryValue(value);
-                    total += normalized * weightEntry.Value;
+                    double normalizedValue = telemetryWeight.Key.NormalizeTelemetryValue(rawTelemetryValue);
+                    double weightedScore = normalizedValue * telemetryWeight.Value;
+                    totalWeightedTelemetryScore += weightedScore;
                 }
             }
         }
 
-        double average = total / assignments.Count;
-        return average * _fitnessWeights.TelemetryOptimization;
+        double averageTelemetryScore = totalWeightedTelemetryScore / assignments.Count;
+        return averageTelemetryScore * _fitnessWeights.TelemetryOptimization;
     }
 
     private double CalculatePriorityScore(AssignmentChromosome chromosome)
