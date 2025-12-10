@@ -25,14 +25,15 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline
                 attempts++
             )
             {
-                int assignmentCountBeforeRepair = assignmentChromosome.Assignments.Count();
+                int assignmentCountBeforeRepair = assignmentChromosome.AssignmentCount;
 
                 foreach (IRepairStrategy repairStrategy in _repairStrategies)
                 {
                     repairStrategy.RepairChromosomeViolation(assignmentChromosome, missions, uavs);
                 }
 
-                int assignmentCountAfterRepair = assignmentChromosome.Assignments.Count();
+                int assignmentCountAfterRepair = assignmentChromosome.AssignmentCount;
+
                 if (
                     assignmentCountBeforeRepair == assignmentCountAfterRepair
                     && assignmentChromosome.IsValid
@@ -42,9 +43,13 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline
                 }
             }
 
-            HashSet<string> assignedMissionIds = assignmentChromosome
-                .Assignments.Select(a => a.Mission.Id)
-                .ToHashSet();
+            List<AssignmentGene> finalAssignments = assignmentChromosome.AssignmentsList;
+            HashSet<string> assignedMissionIds = new HashSet<string>(finalAssignments.Count);
+
+            foreach (AssignmentGene assignment in finalAssignments)
+            {
+                assignedMissionIds.Add(assignment.Mission.Id);
+            }
 
             bool allMissionsAssigned = missions.All(m => assignedMissionIds.Contains(m.Id));
             assignmentChromosome.IsValid = allMissionsAssigned && assignmentChromosome.IsValid;

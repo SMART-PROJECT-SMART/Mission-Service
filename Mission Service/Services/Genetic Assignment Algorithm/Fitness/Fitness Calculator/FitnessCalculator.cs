@@ -23,22 +23,21 @@ public class FitnessCalculator : IFitnessCalculator
 
     public double CalculateFitness(AssignmentChromosome chromosome)
     {
-        double total = 0.0;
+        List<AssignmentGene> assignments = chromosome.AssignmentsList;
 
-        total += CalculateTelemetryScore(chromosome);
-        total += CalculatePriorityScore(chromosome);
-        total += CalculateOverlapPenalty(chromosome);
-        total += CalculateMismatchPenalty(chromosome);
-        total += CalculateMissionCoverageBonus(chromosome);
+        double totalFitness = 0.0;
+        totalFitness += CalculateTelemetryScore(assignments);
+        totalFitness += CalculatePriorityScore(assignments);
+        totalFitness += CalculateOverlapPenalty(assignments);
+        totalFitness += CalculateMismatchPenalty(assignments);
+        totalFitness += CalculateMissionCoverageBonus(assignments);
 
-        chromosome.FitnessScore = total;
-
-        return total;
+        chromosome.FitnessScore = totalFitness;
+        return totalFitness;
     }
 
-    private double CalculateTelemetryScore(AssignmentChromosome chromosome)
+    private double CalculateTelemetryScore(List<AssignmentGene> assignments)
     {
-        List<AssignmentGene> assignments = chromosome.AssignmentsList;
         if (assignments.Count == 0)
             return 0.0;
 
@@ -66,15 +65,14 @@ public class FitnessCalculator : IFitnessCalculator
         return averageTelemetryScore * _fitnessWeights.TelemetryOptimization;
     }
 
-    private double CalculatePriorityScore(AssignmentChromosome chromosome)
+    private double CalculatePriorityScore(List<AssignmentGene> assignments)
     {
-        List<AssignmentGene> assignments = chromosome.AssignmentsList;
-        HashSet<string> seenMissions = new HashSet<string>(assignments.Count);
+        HashSet<string> seenMissionIds = new HashSet<string>(assignments.Count);
         double totalPriority = 0.0;
 
         foreach (AssignmentGene assignment in assignments)
         {
-            if (seenMissions.Add(assignment.Mission.Id))
+            if (seenMissionIds.Add(assignment.Mission.Id))
             {
                 totalPriority += (int)assignment.Mission.Priority;
             }
@@ -83,41 +81,52 @@ public class FitnessCalculator : IFitnessCalculator
         return totalPriority * _fitnessWeights.PriorityCoverage;
     }
 
-    private double CalculateMissionCoverageBonus(AssignmentChromosome chromosome)
+    private double CalculateMissionCoverageBonus(List<AssignmentGene> assignments)
     {
-        List<AssignmentGene> assignments = chromosome.AssignmentsList;
-        HashSet<string> uniqueMissions = new HashSet<string>(assignments.Count);
+        HashSet<string> uniqueMissionIds = new HashSet<string>(assignments.Count);
 
         foreach (AssignmentGene assignment in assignments)
         {
-            uniqueMissions.Add(assignment.Mission.Id);
+            uniqueMissionIds.Add(assignment.Mission.Id);
         }
 
-        int count = uniqueMissions.Count;
-        return count * count * _fitnessWeights.MissionCoverageWeight;
+        int uniqueCount = uniqueMissionIds.Count;
+        return uniqueCount * uniqueCount * _fitnessWeights.MissionCoverageWeight;
     }
 
-    private double CalculateOverlapPenalty(AssignmentChromosome chromosome)
+    private double CalculateOverlapPenalty(List<AssignmentGene> assignments)
     {
-        List<AssignmentGene> assignments = chromosome.AssignmentsList;
         if (assignments.Count <= 1)
             return 0.0;
 
-        Dictionary<int, List<AssignmentGene>> uavGroups =
-            new Dictionary<int, List<AssignmentGene>>();
+        Dictionary<int, List<AssignmentGene>> assignmentsByUAVTailId = GroupAssignmentsByUAVTailId(assignments);
+        int totalOverlapCount = CountTimeOverlaps(assignmentsByUAVTailId);
+
+        return totalOverlapCount * _fitnessWeights.TimeOverlapPenalty;
+    }
+
+    private Dictionary<int, List<AssignmentGene>> GroupAssignmentsByUAVTailId(List<AssignmentGene> assignments)
+    {
+        Dictionary<int, List<AssignmentGene>> uavGroups = new Dictionary<int, List<AssignmentGene>>();
+
         foreach (AssignmentGene assignment in assignments)
         {
-            if (!uavGroups.TryGetValue(assignment.UAV.TailId, out List<AssignmentGene>? list))
+            if (!uavGroups.TryGetValue(assignment.UAV.TailId, out List<AssignmentGene>? assignmentList))
             {
-                list = new List<AssignmentGene>();
-                uavGroups[assignment.UAV.TailId] = list;
+                assignmentList = new List<AssignmentGene>();
+                uavGroups[assignment.UAV.TailId] = assignmentList;
             }
-            list.Add(assignment);
+            assignmentList.Add(assignment);
         }
 
+        return uavGroups;
+    }
+
+    private int CountTimeOverlaps(Dictionary<int, List<AssignmentGene>> assignmentsByUAVTailId)
+    {
         int overlapCount = 0;
 
-        foreach (List<AssignmentGene> uavAssignments in uavGroups.Values)
+        foreach (List<AssignmentGene> uavAssignments in assignmentsByUAVTailId.Values)
         {
             if (uavAssignments.Count <= 1)
                 continue;
@@ -133,12 +142,11 @@ public class FitnessCalculator : IFitnessCalculator
             }
         }
 
-        return overlapCount * _fitnessWeights.TimeOverlapPenalty;
+        return overlapCount;
     }
 
-    private double CalculateMismatchPenalty(AssignmentChromosome chromosome)
+    private double CalculateMismatchPenalty(List<AssignmentGene> assignments)
     {
-        List<AssignmentGene> assignments = chromosome.AssignmentsList;
         int mismatchCount = 0;
 
         foreach (AssignmentGene assignment in assignments)

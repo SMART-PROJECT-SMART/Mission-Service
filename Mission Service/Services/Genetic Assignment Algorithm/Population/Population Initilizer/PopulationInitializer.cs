@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Mission_Service.Common.Enums;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -19,57 +20,70 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             IEnumerable<UAV> uavs
         )
         {
-            List<AssignmentChromosome> population = new List<AssignmentChromosome>();
-            for (
-                int chromosomeIndex = 0;
-                chromosomeIndex < _algorithmConfig.PopulationSize;
-                chromosomeIndex++
-            )
+            List<Mission> missionList = missions as List<Mission> ?? missions.ToList();
+            List<UAV> uavList = uavs as List<UAV> ?? uavs.ToList();
+
+            Dictionary<UAVType, List<UAV>> uavsByType = GroupUAVsByType(uavList);
+
+            List<AssignmentChromosome> population = new List<AssignmentChromosome>(_algorithmConfig.PopulationSize);
+
+            for (int chromosomeIndex = 0; chromosomeIndex < _algorithmConfig.PopulationSize; chromosomeIndex++)
             {
-                AssignmentChromosome randomAssignmentChromosome = CreateRandomAssignmentChromosome(
-                    missions,
-                    uavs
-                );
-                population.Add(randomAssignmentChromosome);
+                AssignmentChromosome randomChromosome = CreateRandomAssignmentChromosome(missionList, uavsByType);
+                population.Add(randomChromosome);
             }
 
             return population;
         }
 
-        public AssignmentChromosome CreateRandomAssignmentChromosome(
-            IEnumerable<Mission> missions,
-            IEnumerable<UAV> uavs
+        private Dictionary<UAVType, List<UAV>> GroupUAVsByType(List<UAV> uavs)
+        {
+            Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
+
+            foreach (UAV uav in uavs)
+            {
+                if (!uavsByType.TryGetValue(uav.UavType, out List<UAV>? uavList))
+                {
+                    uavList = new List<UAV>();
+                    uavsByType[uav.UavType] = uavList;
+                }
+                uavList.Add(uav);
+            }
+
+            return uavsByType;
+        }
+
+        private AssignmentChromosome CreateRandomAssignmentChromosome(
+            List<Mission> missions,
+            Dictionary<UAVType, List<UAV>> uavsByType
         )
         {
-            List<AssignmentGene> assignments = new List<AssignmentGene>();
+            List<AssignmentGene> assignments = new List<AssignmentGene>(missions.Count);
 
             foreach (Mission mission in missions)
             {
-                List<UAV> compatibleUAVs = uavs.Where(uav => uav.UavType == mission.RequiredUAVType)
-                    .ToList();
+                if (!uavsByType.TryGetValue(mission.RequiredUAVType, out List<UAV>? compatibleUAVs))
+                    continue;
 
                 if (compatibleUAVs.Count == 0)
                     continue;
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
-                AssignmentGene assignmentGene = new AssignmentGene
+
+                assignments.Add(new AssignmentGene
                 {
                     Mission = mission,
                     UAV = selectedUav,
                     StartTime = mission.TimeWindow.Start,
                     Duration = mission.TimeWindow.End - mission.TimeWindow.Start,
-                };
-
-                assignments.Add(assignmentGene);
+                });
             }
 
-            AssignmentChromosome randomAssignmentChromosome = new AssignmentChromosome
+            return new AssignmentChromosome
             {
                 Assignments = assignments,
                 IsValid = true,
             };
-
-            return randomAssignmentChromosome;
         }
     }
 }
