@@ -5,6 +5,7 @@ using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;

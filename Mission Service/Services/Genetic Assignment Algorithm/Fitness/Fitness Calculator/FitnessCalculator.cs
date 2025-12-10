@@ -3,9 +3,10 @@ using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Helpers;
 
-namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
+namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
 
 public class FitnessCalculator : IFitnessCalculator
 {
