@@ -83,5 +83,20 @@ namespace Mission_Service.Extensions
                 _ => MissionServiceConstants.TelemetryNormalization.DEFAULT_NORMALIZED_VALUE,
             };
         }
+
+        public static double CalculateWeightedTelemetryScore(
+            this KeyValuePair<TelemetryFields, double> telemetryWeight,
+            Dictionary<TelemetryFields, double> uavTelemetryData
+        )
+        {
+            if (!uavTelemetryData.TryGetValue(telemetryWeight.Key, out double rawTelemetryValue))
+            {
+                return 0.0;
+            }
+
+            double normalizedValue = telemetryWeight.Key.NormalizeTelemetryValue(rawTelemetryValue);
+            double weightedScore = normalizedValue * telemetryWeight.Value;
+            return weightedScore;
+        }
     }
 }

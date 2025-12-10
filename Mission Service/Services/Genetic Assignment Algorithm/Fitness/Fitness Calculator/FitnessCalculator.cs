@@ -52,12 +52,7 @@ public class FitnessCalculator : IFitnessCalculator
 
             foreach (KeyValuePair<TelemetryFields, double> telemetryWeight in telemetryWeightsForUAVType)
             {
-                if (uavTelemetryData.TryGetValue(telemetryWeight.Key, out double rawTelemetryValue))
-                {
-                    double normalizedValue = telemetryWeight.Key.NormalizeTelemetryValue(rawTelemetryValue);
-                    double weightedScore = normalizedValue * telemetryWeight.Value;
-                    totalWeightedTelemetryScore += weightedScore;
-                }
+                totalWeightedTelemetryScore += telemetryWeight.CalculateWeightedTelemetryScore(uavTelemetryData);
             }
         }
 
