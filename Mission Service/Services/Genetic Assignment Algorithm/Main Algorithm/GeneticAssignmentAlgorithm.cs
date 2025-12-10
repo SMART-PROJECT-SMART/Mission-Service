@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
+using Mission_Service.Common.Enums;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -49,8 +50,13 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             List<Mission> missionList = missions.ToList();
             List<UAV> uavList = uavs.ToList();
 
+            HashSet<UAVType> availableUAVTypes = uavList.Select(u => u.UavType).ToHashSet();
+            List<Mission> assignableMissions = missionList
+                .Where(m => availableUAVTypes.Contains(m.RequiredUAVType))
+                .ToList();
+
             List<AssignmentChromosome> population = _populationInitializer
-                .CreateInitialPopulation(missionList, uavList)
+                .CreateInitialPopulation(assignableMissions, uavList)
                 .ToList();
 
             EvaluateFitnessParallel(population);
@@ -64,7 +70,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 generation++
             )
             {
-                population = CreateNextGeneration(population, missionList, uavList);
+                population = CreateNextGeneration(population, assignableMissions, uavList);
 
                 EvaluateFitnessParallel(population);
 
