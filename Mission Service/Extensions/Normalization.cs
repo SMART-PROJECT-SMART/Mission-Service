@@ -74,12 +74,6 @@ namespace Mission_Service.Extensions
                     MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
                 ),
                 TelemetryFields.LandingGearStatus => value,
-                TelemetryFields.Latitude => (
-                    value + MissionServiceConstants.TelemetryNormalization.LATITUDE_OFFSET
-                ) / MissionServiceConstants.TelemetryNormalization.LATITUDE_RANGE,
-                TelemetryFields.Longitude => (
-                    value + MissionServiceConstants.TelemetryNormalization.LONGITUDE_OFFSET
-                ) / MissionServiceConstants.TelemetryNormalization.LONGITUDE_RANGE,
                 _ => MissionServiceConstants.TelemetryNormalization.DEFAULT_NORMALIZED_VALUE,
             };
         }

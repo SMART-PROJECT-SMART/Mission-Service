@@ -25,11 +25,20 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
 
             Dictionary<UAVType, List<UAV>> uavsByType = GroupUAVsByType(uavList);
 
-            List<AssignmentChromosome> population = new List<AssignmentChromosome>(_algorithmConfig.PopulationSize);
+            List<AssignmentChromosome> population = new List<AssignmentChromosome>(
+                _algorithmConfig.PopulationSize
+            );
 
-            for (int chromosomeIndex = 0; chromosomeIndex < _algorithmConfig.PopulationSize; chromosomeIndex++)
+            for (
+                int chromosomeIndex = 0;
+                chromosomeIndex < _algorithmConfig.PopulationSize;
+                chromosomeIndex++
+            )
             {
-                AssignmentChromosome randomChromosome = CreateRandomAssignmentChromosome(missionList, uavsByType);
+                AssignmentChromosome randomChromosome = CreateRandomAssignmentChromosome(
+                    missionList,
+                    uavsByType
+                );
                 population.Add(randomChromosome);
             }
 
@@ -70,20 +79,18 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
 
-                assignments.Add(new AssignmentGene
-                {
-                    Mission = mission,
-                    UAV = selectedUav,
-                    StartTime = mission.TimeWindow.Start,
-                    Duration = mission.TimeWindow.End - mission.TimeWindow.Start,
-                });
+                assignments.Add(
+                    new AssignmentGene
+                    {
+                        Mission = mission,
+                        UAV = selectedUav,
+                        StartTime = mission.TimeWindow.Start,
+                        Duration = mission.TimeWindow.End - mission.TimeWindow.Start,
+                    }
+                );
             }
 
-            return new AssignmentChromosome
-            {
-                Assignments = assignments,
-                IsValid = true,
-            };
+            return new AssignmentChromosome { Assignments = assignments, IsValid = true };
         }
     }
 }
