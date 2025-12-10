@@ -67,7 +67,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover
             {
                 if (!primaryAssignments.ContainsKey(missionId))
                 {
-                    var sourceGene = secondaryAssignments[missionId];
+                    AssignmentGene sourceGene = secondaryAssignments[missionId];
                     AssignmentGene newGene = new AssignmentGene
                     {
                         Mission = sourceGene.Mission,
