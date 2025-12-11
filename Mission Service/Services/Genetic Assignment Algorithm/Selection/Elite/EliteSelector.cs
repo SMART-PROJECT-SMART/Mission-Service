@@ -23,7 +23,8 @@ public class EliteSelector : IEliteSelector
 
         if (numberOfEliteChromosomesToSelect == 1)
         {
-            AssignmentChromosome singleBestChromosome = chromosomePopulation.FindChromosomeWithHighestFitness();
+            AssignmentChromosome singleBestChromosome =
+                chromosomePopulation.FindChromosomeWithHighestFitness();
             return new List<AssignmentChromosome> { singleBestChromosome };
         }
 

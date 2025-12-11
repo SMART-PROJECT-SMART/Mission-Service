@@ -5,7 +5,7 @@ namespace Mission_Service.Extensions;
 public static class ChromosomeCollectionExtensions
 {
     public static List<AssignmentChromosome> FilterValidChromosomes(
-this IEnumerable<AssignmentChromosome> chromosomes
+        this IEnumerable<AssignmentChromosome> chromosomes
     )
     {
         return chromosomes.Where(chromosome => chromosome.IsValid).ToList();
@@ -13,18 +13,18 @@ this IEnumerable<AssignmentChromosome> chromosomes
 
     public static List<AssignmentChromosome> FilterInvalidChromosomes(
         this IEnumerable<AssignmentChromosome> chromosomes
-)
+    )
     {
-    return chromosomes.Where(chromosome => !chromosome.IsValid).ToList();
+        return chromosomes.Where(chromosome => !chromosome.IsValid).ToList();
     }
 
     public static List<AssignmentChromosome> OrderByBestQuality(
-this IEnumerable<AssignmentChromosome> chromosomes
+        this IEnumerable<AssignmentChromosome> chromosomes
     )
     {
         return chromosomes
-   .OrderByDescending(chromosome => chromosome.AssignmentCount)
-     .ThenByDescending(chromosome => chromosome.FitnessScore)
+            .OrderByDescending(chromosome => chromosome.AssignmentCount)
+            .ThenByDescending(chromosome => chromosome.FitnessScore)
             .ToList();
     }
 
@@ -32,32 +32,33 @@ this IEnumerable<AssignmentChromosome> chromosomes
         this IEnumerable<AssignmentChromosome> chromosomes
     )
     {
-  return chromosomes
-          .FilterInvalidChromosomes()
-            .OrderByBestQuality();
+        return chromosomes.FilterInvalidChromosomes().OrderByBestQuality();
     }
 
     public static AssignmentChromosome FindChromosomeWithHighestFitness(
         this List<AssignmentChromosome> chromosomePopulation
     )
     {
-     if (chromosomePopulation == null || chromosomePopulation.Count == 0)
+        if (chromosomePopulation == null || chromosomePopulation.Count == 0)
         {
-     throw new ArgumentException("Population cannot be null or empty", nameof(chromosomePopulation));
+            throw new ArgumentException(
+                "Population cannot be null or empty",
+                nameof(chromosomePopulation)
+            );
         }
 
         AssignmentChromosome chromosomeWithBestFitness = chromosomePopulation[0];
         double highestFitnessScore = chromosomeWithBestFitness.FitnessScore;
 
         for (int i = 1; i < chromosomePopulation.Count; i++)
-    {
+        {
             AssignmentChromosome currentChromosome = chromosomePopulation[i];
             double currentFitnessScore = currentChromosome.FitnessScore;
 
             if (currentFitnessScore > highestFitnessScore)
             {
-   chromosomeWithBestFitness = currentChromosome;
-    highestFitnessScore = currentFitnessScore;
+                chromosomeWithBestFitness = currentChromosome;
+                highestFitnessScore = currentFitnessScore;
             }
         }
 

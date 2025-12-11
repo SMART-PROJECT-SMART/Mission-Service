@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
+using Mission_Service.Common.Enums;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -8,6 +9,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation
 {
     public class SwapMutationStrategy : IMutationStrategy
     {
+        private Dictionary<UAVType, List<UAV>>? _uavsByType;
+
         public void MutateChromosome(
             AssignmentChromosome assignmentChromosome,
             IEnumerable<UAV> uavs
@@ -21,13 +24,11 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation
                 return;
             }
 
-            bool mutateUAV =
-                Random.Shared.Next(MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS)
-                == 0;
+            InitializeUAVCacheIfNeeded(uavs);
 
-            if (mutateUAV)
+            if (ShouldPerformUAVSwap())
             {
-                MutateUAVSwap(assignmentChromosome, uavs);
+                MutateUAVSwap(assignmentChromosome);
             }
             else
             {
@@ -35,47 +36,112 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation
             }
         }
 
-        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome, IEnumerable<UAV> uavs)
+        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome)
         {
-            List<AssignmentGene> assignments = assignmentChromosome.Assignments.ToList();
-            int randomIndex = Random.Shared.Next(assignments.Count);
-            AssignmentGene geneToMutate = assignments[randomIndex];
+            List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
+            AssignmentGene geneToMutate = SelectRandomGene(assignments);
 
-            List<UAV> compatibleUAVs = uavs.Where(uav => IsValidUAVForSwap(uav, geneToMutate))
-                .ToList();
+            List<UAV> compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
+                geneToMutate.Mission.RequiredUAVType,
+                geneToMutate.UAV.TailId
+            );
 
             if (compatibleUAVs.Count > 0)
             {
-                geneToMutate.UAV = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
+                geneToMutate.UAV = SelectRandomUAV(compatibleUAVs);
             }
         }
 
         private void MutateAssignmentSwap(AssignmentChromosome assignmentChromosome)
         {
-            List<AssignmentGene> assignments = assignmentChromosome.Assignments.ToList();
+            List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
 
             if (assignments.Count < 2)
             {
                 return;
             }
 
-            int firstIndex = Random.Shared.Next(assignments.Count);
-            int secondIndex = Random.Shared.Next(assignments.Count);
+            (int firstIndex, int secondIndex) = SelectTwoDifferentRandomIndices(assignments.Count);
 
-            while (secondIndex == firstIndex && assignments.Count > 1)
+            SwapUAVsBetweenAssignments(assignments[firstIndex], assignments[secondIndex]);
+        }
+
+        private void InitializeUAVCacheIfNeeded(IEnumerable<UAV> uavs)
+        {
+            _uavsByType ??= GroupUAVsByType(uavs);
+        }
+
+        private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IEnumerable<UAV> uavs)
+        {
+            Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
+
+            foreach (UAV uav in uavs)
             {
-                secondIndex = Random.Shared.Next(assignments.Count);
+                if (!uavsByType.TryGetValue(uav.UavType, out List<UAV>? uavList))
+                {
+                    uavList = new List<UAV>();
+                    uavsByType[uav.UavType] = uavList;
+                }
+                uavList.Add(uav);
             }
 
-            (assignments[firstIndex].UAV, assignments[secondIndex].UAV) = (
-                assignments[secondIndex].UAV,
-                assignments[firstIndex].UAV
+            return uavsByType;
+        }
+
+        private List<UAV> GetCompatibleUAVsExcludingCurrent(
+            UAVType requiredType,
+            int currentUAVTailId
+        )
+        {
+            if (!_uavsByType!.TryGetValue(requiredType, out List<UAV>? uavsOfType))
+            {
+                return new List<UAV>();
+            }
+
+            return uavsOfType.Where(uav => uav.TailId != currentUAVTailId).ToList();
+        }
+
+        private AssignmentGene SelectRandomGene(List<AssignmentGene> assignments)
+        {
+            int randomIndex = Random.Shared.Next(assignments.Count);
+            return assignments[randomIndex];
+        }
+
+        private UAV SelectRandomUAV(List<UAV> uavs)
+        {
+            int randomIndex = Random.Shared.Next(uavs.Count);
+            return uavs[randomIndex];
+        }
+
+        private (int firstIndex, int secondIndex) SelectTwoDifferentRandomIndices(int count)
+        {
+            int firstIndex = Random.Shared.Next(count);
+            int secondIndex = Random.Shared.Next(count);
+
+            while (secondIndex == firstIndex)
+            {
+                secondIndex = Random.Shared.Next(count);
+            }
+
+            return (firstIndex, secondIndex);
+        }
+
+        private void SwapUAVsBetweenAssignments(
+            AssignmentGene firstAssignment,
+            AssignmentGene secondAssignment
+        )
+        {
+            (firstAssignment.UAV, secondAssignment.UAV) = (
+                secondAssignment.UAV,
+                firstAssignment.UAV
             );
         }
 
-        private bool IsValidUAVForSwap(UAV uav, AssignmentGene gene)
+        private bool ShouldPerformUAVSwap()
         {
-            return uav.UavType == gene.Mission.RequiredUAVType && uav.TailId != gene.UAV.TailId;
+            return Random.Shared.Next(
+                    MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS
+                ) == 0;
         }
     }
 }

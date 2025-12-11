@@ -35,39 +35,71 @@ public class OffspringGenerator : IOffspringGenerator
         List<UAV> availableUAVsForAssignment
     )
     {
-        int numberOfParentPairsToCreate = CalculateNumberOfParentPairsNeeded(numberOfOffspringChromosomesToGenerate);
-        AssignmentChromosome[] generatedOffspringArray = new AssignmentChromosome[numberOfOffspringChromosomesToGenerate];
+        int numberOfParentPairsToCreate = CalculateNumberOfParentPairsNeeded(
+            numberOfOffspringChromosomesToGenerate
+        );
+        AssignmentChromosome[] generatedOffspringArray = new AssignmentChromosome[
+            numberOfOffspringChromosomesToGenerate
+        ];
 
-        Parallel.For(0, numberOfParentPairsToCreate, currentPairIndexBeingProcessed =>
-        {
-            AssignmentChromosome firstSelectedParent = SelectParentChromosomeFromPopulation(parentChromosomePopulation);
-            AssignmentChromosome secondSelectedParent = SelectParentChromosomeFromPopulation(parentChromosomePopulation);
-
-            CrossoverResult offspringFromCrossover = PerformCrossoverOnParentPair(firstSelectedParent, secondSelectedParent);
-
-            ApplyMutationToChromosome(offspringFromCrossover.FirstChromosome, availableUAVsForAssignment);
-            ApplyMutationToChromosome(offspringFromCrossover.SecondChromosome, availableUAVsForAssignment);
-
-            int firstOffspringPositionInArray = CalculateOffspringArrayPosition(currentPairIndexBeingProcessed, isFirstOffspring: true);
-            int secondOffspringPositionInArray = CalculateOffspringArrayPosition(currentPairIndexBeingProcessed, isFirstOffspring: false);
-
-            generatedOffspringArray[firstOffspringPositionInArray] = offspringFromCrossover.FirstChromosome;
-
-            if (secondOffspringPositionInArray < numberOfOffspringChromosomesToGenerate)
+        Parallel.For(
+            0,
+            numberOfParentPairsToCreate,
+            currentPairIndexBeingProcessed =>
             {
-                generatedOffspringArray[secondOffspringPositionInArray] = offspringFromCrossover.SecondChromosome;
+                AssignmentChromosome firstSelectedParent = SelectParentChromosomeFromPopulation(
+                    parentChromosomePopulation
+                );
+                AssignmentChromosome secondSelectedParent = SelectParentChromosomeFromPopulation(
+                    parentChromosomePopulation
+                );
+
+                CrossoverResult offspringFromCrossover = PerformCrossoverOnParentPair(
+                    firstSelectedParent,
+                    secondSelectedParent
+                );
+
+                ApplyMutationToChromosome(
+                    offspringFromCrossover.FirstChromosome,
+                    availableUAVsForAssignment
+                );
+                ApplyMutationToChromosome(
+                    offspringFromCrossover.SecondChromosome,
+                    availableUAVsForAssignment
+                );
+
+                int firstOffspringPositionInArray = CalculateOffspringArrayPosition(
+                    currentPairIndexBeingProcessed,
+                    isFirstOffspring: true
+                );
+                int secondOffspringPositionInArray = CalculateOffspringArrayPosition(
+                    currentPairIndexBeingProcessed,
+                    isFirstOffspring: false
+                );
+
+                generatedOffspringArray[firstOffspringPositionInArray] =
+                    offspringFromCrossover.FirstChromosome;
+
+                if (secondOffspringPositionInArray < numberOfOffspringChromosomesToGenerate)
+                {
+                    generatedOffspringArray[secondOffspringPositionInArray] =
+                        offspringFromCrossover.SecondChromosome;
+                }
             }
-        });
+        );
 
         return FilterOutNullChromosomesFromArray(generatedOffspringArray);
     }
 
     private int CalculateNumberOfParentPairsNeeded(int numberOfOffspringNeeded)
     {
-        return (numberOfOffspringNeeded + 1) / MissionServiceConstants.MainAlgorithm.OFFSPRING_PAIR_SIZE;
+        return (numberOfOffspringNeeded + 1)
+            / MissionServiceConstants.MainAlgorithm.OFFSPRING_PAIR_SIZE;
     }
 
-    private AssignmentChromosome SelectParentChromosomeFromPopulation(List<AssignmentChromosome> parentPopulation)
+    private AssignmentChromosome SelectParentChromosomeFromPopulation(
+        List<AssignmentChromosome> parentPopulation
+    )
     {
         return _parentSelectionStrategy.SelectParentChromosome(parentPopulation);
     }
@@ -77,19 +109,31 @@ public class OffspringGenerator : IOffspringGenerator
         AssignmentChromosome secondParentChromosome
     )
     {
-        bool shouldPerformCrossover = Random.Shared.NextDouble() < _algorithmConfig.CrossoverProbability;
+        bool shouldPerformCrossover =
+            Random.Shared.NextDouble() < _algorithmConfig.CrossoverProbability;
 
         if (shouldPerformCrossover)
         {
-            return _crossoverStrategy.CrossoverChromosomes(firstParentChromosome, secondParentChromosome);
+            return _crossoverStrategy.CrossoverChromosomes(
+                firstParentChromosome,
+                secondParentChromosome
+            );
         }
 
-        return new CrossoverResult { FirstChromosome = firstParentChromosome, SecondChromosome = secondParentChromosome };
+        return new CrossoverResult
+        {
+            FirstChromosome = firstParentChromosome,
+            SecondChromosome = secondParentChromosome,
+        };
     }
 
-    private void ApplyMutationToChromosome(AssignmentChromosome chromosomeToMutate, List<UAV> availableUAVs)
+    private void ApplyMutationToChromosome(
+        AssignmentChromosome chromosomeToMutate,
+        List<UAV> availableUAVs
+    )
     {
-        bool shouldApplyMutation = Random.Shared.NextDouble() < _algorithmConfig.MutationProbability;
+        bool shouldApplyMutation =
+            Random.Shared.NextDouble() < _algorithmConfig.MutationProbability;
 
         if (shouldApplyMutation)
         {
@@ -99,7 +143,8 @@ public class OffspringGenerator : IOffspringGenerator
 
     private int CalculateOffspringArrayPosition(int parentPairIndex, bool isFirstOffspring)
     {
-        int basePositionInArray = parentPairIndex * MissionServiceConstants.MainAlgorithm.OFFSPRING_PAIR_SIZE;
+        int basePositionInArray =
+            parentPairIndex * MissionServiceConstants.MainAlgorithm.OFFSPRING_PAIR_SIZE;
         int offsetFromBasePosition = isFirstOffspring
             ? MissionServiceConstants.MainAlgorithm.FIRST_OFFSPRING_INDEX
             : MissionServiceConstants.MainAlgorithm.SECOND_OFFSPRING_INDEX;
@@ -107,7 +152,9 @@ public class OffspringGenerator : IOffspringGenerator
         return basePositionInArray + offsetFromBasePosition;
     }
 
-    private List<AssignmentChromosome> FilterOutNullChromosomesFromArray(AssignmentChromosome[] chromosomeArray)
+    private List<AssignmentChromosome> FilterOutNullChromosomesFromArray(
+        AssignmentChromosome[] chromosomeArray
+    )
     {
         return chromosomeArray.Where(chromosome => chromosome != null).ToList();
     }

@@ -10,10 +10,10 @@ public class ParallelExecutor : IParallelExecutor
     )
     {
         ParallelOptions parallelExecutionOptions = CreateParallelExecutionOptions();
-  
+
         Parallel.ForEach(
-            chromosomePopulationToEvaluate, 
-            parallelExecutionOptions, 
+            chromosomePopulationToEvaluate,
+            parallelExecutionOptions,
             evaluateSingleChromosomeFitness
         );
     }
@@ -24,19 +24,16 @@ public class ParallelExecutor : IParallelExecutor
     )
     {
         ParallelOptions parallelExecutionOptions = CreateParallelExecutionOptions();
-        
+
         Parallel.ForEach(
-            chromosomePopulationToRepair, 
-            parallelExecutionOptions, 
+            chromosomePopulationToRepair,
+            parallelExecutionOptions,
             repairSingleChromosome
         );
     }
 
     private ParallelOptions CreateParallelExecutionOptions()
     {
-        return new ParallelOptions
-        {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        };
+        return new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
     }
 }
