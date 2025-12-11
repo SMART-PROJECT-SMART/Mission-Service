@@ -4,6 +4,7 @@ using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Services.Assignment_Request_Queue;
 using Mission_Service.Services.Assignment_Suggestion_Worker;
+using Mission_Service.Services.AssignmentResultManager;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
@@ -26,7 +27,6 @@ namespace Mission_Service.Extensions
         {
             services.AddControllers();
             services.AddEndpointsApiExplorer();
-            services.AddHttpClient(MissionServiceConstants.HttpClients.CALLBACK_HTTP_CLIENT);
             return services;
         }
 
@@ -113,6 +113,7 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
         {
             services.AddSingleton<IAssignmentSuggestionQueue, AssignmentSuggestionQueue>();
+            services.AddSingleton<IAssignmentResultManager, AssignmentResultManager>();
             services.AddHostedService<AssignmentSuggestionWorker>();
             return services;
         }

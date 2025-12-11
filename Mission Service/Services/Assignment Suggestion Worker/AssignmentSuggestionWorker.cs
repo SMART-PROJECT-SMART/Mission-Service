@@ -1,7 +1,9 @@
 ﻿using Mission_Service.Common.Constants;
 using Mission_Service.Models;
+using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.Dto;
 using Mission_Service.Services.Assignment_Request_Queue;
+using Mission_Service.Services.AssignmentResultManager;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
 
 namespace Mission_Service.Services.Assignment_Suggestion_Worker
@@ -10,19 +12,17 @@ namespace Mission_Service.Services.Assignment_Suggestion_Worker
     {
         private readonly IAssignmentSuggestionQueue _assignmentSuggestionQueue;
         private readonly IAssignmentAlgorithm _assignmentAlgorithm;
-        private readonly HttpClient _httpClient;
+        private readonly IAssignmentResultManager _assignmentResultManager;
 
         public AssignmentSuggestionWorker(
             IAssignmentSuggestionQueue assignmentSuggestionQueue,
             IAssignmentAlgorithm assignmentAlgorithm,
-            IHttpClientFactory httpClientFactory
+            IAssignmentResultManager assignmentResultManager
         )
         {
             _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentAlgorithm = assignmentAlgorithm;
-            _httpClient = httpClientFactory.CreateClient(
-                MissionServiceConstants.HttpClients.CALLBACK_HTTP_CLIENT
-            );
+            _assignmentResultManager = assignmentResultManager;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -37,11 +37,13 @@ namespace Mission_Service.Services.Assignment_Suggestion_Worker
                     request.Missions,
                     request.UAVs
                 );
-                _ = _httpClient.PostAsJsonAsync(
-                    request.CallbackURL,
-                    assignmentResult,
-                    cancellationToken: stoppingToken
-                );
+
+                AssignmentChromosome bestResult = assignmentResult.Assignments.FirstOrDefault();
+
+                if (bestResult != null)
+                {
+                    _assignmentResultManager.StoreResult(request.RequestId, bestResult);
+                }
             }
         }
     }
