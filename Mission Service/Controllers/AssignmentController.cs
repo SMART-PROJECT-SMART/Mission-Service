@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Models.Dto;
+using Mission_Service.Models.RO;
 using Mission_Service.Services.Assignment_Request_Queue;
 
 namespace Mission_Service.Controllers
@@ -17,13 +18,30 @@ namespace Mission_Service.Controllers
             _queue = queue;
         }
 
-        [HttpPost("create-assignment-suggestion")]
+        [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
         public async Task<IActionResult> CreateAssignmentSuggestion(
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
+            // Ensure RequestId is set (generate if not provided by client)
+            assignmentSuggestionDto.EnsureRequestId();
+
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
-            return Ok(MissionServiceConstants.APIResponses.CREATE_ASSIGNMENT_RECIVED);
+
+            string statusUrl = Url.Action(
+                nameof(AssignmentResultController.CheckAssignmentStatus),
+                MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
+                new { requestId = assignmentSuggestionDto.RequestId },
+                Request.Scheme
+            );
+
+            var response = new AssignmentRequestAcceptedResponse(
+                MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
+                assignmentSuggestionDto.RequestId!,
+                statusUrl!
+            );
+
+            return Accepted(response);
         }
     }
 }
