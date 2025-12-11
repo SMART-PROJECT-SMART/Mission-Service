@@ -10,7 +10,12 @@ namespace Mission_Service.Models
         public Mission? ActiveMission { get; set; }
         public Dictionary<TelemetryFields, double> TelemetryData { get; set; }
 
-        public UAV(int tailId, UAVType uavType, Dictionary<TelemetryFields, double> telemetryData, Mission? activeMission = null)
+        public UAV(
+            int tailId,
+            UAVType uavType,
+            Dictionary<TelemetryFields, double> telemetryData,
+            Mission? activeMission = null
+        )
         {
             TailId = tailId;
             UavType = uavType;
