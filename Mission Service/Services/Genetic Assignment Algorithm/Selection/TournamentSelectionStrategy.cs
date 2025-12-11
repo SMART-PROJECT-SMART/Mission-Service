@@ -19,8 +19,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection
             IEnumerable<AssignmentChromosome> population
         )
         {
-            List<AssignmentChromosome> tournamentContestants = new List<AssignmentChromosome>();
-            List<AssignmentChromosome> populationList = population.ToList();
+            List<AssignmentChromosome> populationList = population as List<AssignmentChromosome> ?? population.ToList();
+            List<AssignmentChromosome> tournamentContestants = new List<AssignmentChromosome>(_algorithmConfiguration.TournamentSize);
+            
             for (
                 int contestantIndex = 0;
                 contestantIndex < _algorithmConfiguration.TournamentSize;
@@ -30,6 +31,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection
                 int randomIndex = Random.Shared.Next(populationList.Count);
                 tournamentContestants.Add(populationList[randomIndex]);
             }
+            
             AssignmentChromosome bestChromosome = tournamentContestants
                 .OrderByDescending(chromosome => chromosome.FitnessScore)
                 .First();

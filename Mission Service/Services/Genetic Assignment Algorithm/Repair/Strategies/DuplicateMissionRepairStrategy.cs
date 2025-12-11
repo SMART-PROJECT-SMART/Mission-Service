@@ -19,7 +19,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
                 return;
             }
 
-            List<AssignmentGene> assignmentList = assignmentChromosome.Assignments.ToList();
+            List<AssignmentGene> assignmentList = assignmentChromosome.AssignmentsList;
             HashSet<string> seenMissions = new HashSet<string>();
             List<AssignmentGene> uniqueAssignments = new List<AssignmentGene>();
 

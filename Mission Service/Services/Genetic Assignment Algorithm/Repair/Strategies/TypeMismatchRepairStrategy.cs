@@ -57,8 +57,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
 
         private UAV SelectRandomUAV(IEnumerable<UAV> compatibleUAVs)
         {
-            List<UAV> uavList = compatibleUAVs.ToList();
-            return uavList[Random.Shared.Next(uavList.Count)];
+            int count = compatibleUAVs.Count();
+            int randomIndex = Random.Shared.Next(count);
+            return compatibleUAVs.ElementAt(randomIndex);
         }
     }
 }

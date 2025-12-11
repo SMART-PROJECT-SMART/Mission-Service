@@ -19,7 +19,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
                 return;
             }
 
-            List<AssignmentGene> assignmentList = assignmentChromosome.Assignments.ToList();
+            List<AssignmentGene> assignmentList = assignmentChromosome.AssignmentsList;
             IEnumerable<IGrouping<int, AssignmentGene>> groupedByUAV = assignmentList.GroupBy(a =>
                 a.UAV.TailId
             );
