@@ -1,4 +1,6 @@
 ﻿using System.Threading.Channels;
+using Microsoft.Extensions.Options;
+using Mission_Service.Config;
 using Mission_Service.Models.Dto;
 
 namespace Mission_Service.Services.Assignment_Request_Queue
@@ -7,9 +9,14 @@ namespace Mission_Service.Services.Assignment_Request_Queue
     {
         private readonly Channel<AssignmentSuggestionDto> _assignmentSuggestionRequestQueue;
 
-        public AssignmentSuggestionQueue()
+        public AssignmentSuggestionQueue(IOptions<AssignmentRequestQueueConfiguration> queueConfig)
         {
-            _assignmentSuggestionRequestQueue = Channel.CreateUnbounded<AssignmentSuggestionDto>();
+            var options = new BoundedChannelOptions(queueConfig.Value.ChannelSize)
+            {
+                FullMode = BoundedChannelFullMode.Wait
+            };
+
+            _assignmentSuggestionRequestQueue = Channel.CreateBounded<AssignmentSuggestionDto>(options);
         }
 
         public async Task QueueAssignmentSuggestionRequest(

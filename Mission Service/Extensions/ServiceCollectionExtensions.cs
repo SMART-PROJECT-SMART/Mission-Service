@@ -38,6 +38,7 @@ namespace Mission_Service.Extensions
             services.AddAlgorithmConfig(configuration);
             services.AddTelemetryWeightsConfig(configuration);
             services.AddFitnessWeightsConfig(configuration);
+            services.AddAssignmentQueueConfig(configuration);
             return services;
         }
 
@@ -73,6 +74,18 @@ namespace Mission_Service.Extensions
             return services.Configure<FitnessWeightsConfiguration>(
                 configuration.GetSection(
                     MissionServiceConstants.Configuration.FITNESS_WEIGHTS_CONFIG_SECTION
+                )
+            );
+        }
+
+        private static IServiceCollection AddAssignmentQueueConfig(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            return services.Configure<AssignmentRequestQueueConfiguration>(
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.ASSIGNMENT_QUEUE_CONFIG_SECTION
                 )
             );
         }
