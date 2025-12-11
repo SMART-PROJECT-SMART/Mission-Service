@@ -32,6 +32,7 @@ public class FitnessCalculator : IFitnessCalculator
         totalFitness += CalculateOverlapPenalty(assignments);
         totalFitness += CalculateMismatchPenalty(assignments);
         totalFitness += CalculateMissionCoverageBonus(assignments);
+        totalFitness += CalculateActiveMissionPenalty(assignments);
 
         chromosome.FitnessScore = totalFitness;
         return totalFitness;
@@ -93,5 +94,20 @@ public class FitnessCalculator : IFitnessCalculator
     {
         int mismatchCount = MissionAnalyzer.CountTypeMismatches(assignments);
         return mismatchCount * _fitnessWeights.TypeMismatchPenalty;
+    }
+
+    private double CalculateActiveMissionPenalty(List<AssignmentGene> assignments)
+    {
+        int activeMissionCount = 0;
+
+        foreach (AssignmentGene assignment in assignments)
+        {
+            if (assignment.UAV.ActiveMission != null)
+            {
+                activeMissionCount++;
+            }
+        }
+
+        return activeMissionCount * _fitnessWeights.ActiveMissionPenalty;
     }
 }
