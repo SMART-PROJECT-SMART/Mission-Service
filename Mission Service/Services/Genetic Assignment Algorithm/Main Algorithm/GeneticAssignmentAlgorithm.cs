@@ -48,16 +48,13 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             IEnumerable<UAV> uavs
         )
         {
-            List<Mission> allMissions = missions.ToList();
-            List<UAV> allAvailableUAVs = uavs.ToList();
-
-            List<Mission> missionsWithCompatibleUAVs = FilterMissionsWithCompatibleUAVs(
-                allMissions,
-                allAvailableUAVs
+            IEnumerable<Mission> missionsWithCompatibleUAVs = FilterMissionsWithCompatibleUAVs(
+                missions,
+                uavs
             );
 
-            List<AssignmentChromosome> currentPopulation = _populationInitializer
-                .CreateInitialPopulation(missionsWithCompatibleUAVs, allAvailableUAVs)
+            IReadOnlyList<AssignmentChromosome> currentPopulation = _populationInitializer
+                .CreateInitialPopulation(missionsWithCompatibleUAVs, uavs)
                 .ToList();
 
             _parallelExecutor.EvaluatePopulationFitnessInParallel(
@@ -78,7 +75,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 currentPopulation = CreateNextGenerationPopulation(
                     currentPopulation,
                     missionsWithCompatibleUAVs,
-                    allAvailableUAVs
+                    uavs
                 );
 
                 _parallelExecutor.EvaluatePopulationFitnessInParallel(
@@ -108,23 +105,23 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             return new AssignmentResult(new[] { bestChromosomeFound });
         }
 
-        private List<AssignmentChromosome> CreateNextGenerationPopulation(
-            List<AssignmentChromosome> currentPopulation,
-            List<Mission> missions,
-            List<UAV> availableUAVs
+        private IReadOnlyList<AssignmentChromosome> CreateNextGenerationPopulation(
+            IReadOnlyList<AssignmentChromosome> currentPopulation,
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> availableUAVs
         )
         {
-            List<AssignmentChromosome> eliteChromosomes = _eliteSelector.SelectElite(
+            IEnumerable<AssignmentChromosome> eliteChromosomes = _eliteSelector.SelectElite(
                 currentPopulation,
                 _algorithmConfig.ElitePrecentage,
                 _algorithmConfig.PopulationSize
             );
 
-            int numberOfOffspringNeeded = _algorithmConfig.PopulationSize - eliteChromosomes.Count;
-            List<AssignmentChromosome> generatedOffspring = _offspringGenerator.CreateOffspring(
+            int numberOfOffspringNeeded = _algorithmConfig.PopulationSize - eliteChromosomes.Count();
+            IEnumerable<AssignmentChromosome> generatedOffspring = _offspringGenerator.CreateOffspring(
                 currentPopulation,
                 numberOfOffspringNeeded,
-                availableUAVs
+                availableUAVs as IReadOnlyList<UAV> ?? availableUAVs.ToList()
             );
 
             _parallelExecutor.RepairPopulationInParallel(
@@ -133,16 +130,16 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                     _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, availableUAVs)
             );
 
-            List<AssignmentChromosome> validOffspringChromosomes =
+            IEnumerable<AssignmentChromosome> validOffspringChromosomes =
                 generatedOffspring.FilterValidChromosomes();
-            List<AssignmentChromosome> invalidOffspringChromosomesSortedByQuality =
+            IEnumerable<AssignmentChromosome> invalidOffspringChromosomesSortedByQuality =
                 generatedOffspring.FilterAndOrderInvalidChromosomesByQuality();
 
             List<AssignmentChromosome> combinedOffspring = new List<AssignmentChromosome>();
             combinedOffspring.AddRange(validOffspringChromosomes);
 
             int remainingPopulationSlots =
-                numberOfOffspringNeeded - validOffspringChromosomes.Count;
+                numberOfOffspringNeeded - combinedOffspring.Count;
             if (remainingPopulationSlots > 0 && invalidOffspringChromosomesSortedByQuality.Any())
             {
                 combinedOffspring.AddRange(
@@ -159,9 +156,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
             return nextGenerationPopulation;
         }
 
-        private static List<Mission> FilterMissionsWithCompatibleUAVs(
-            List<Mission> allMissions,
-            List<UAV> availableUAVs
+        private static IEnumerable<Mission> FilterMissionsWithCompatibleUAVs(
+            IEnumerable<Mission> allMissions,
+            IEnumerable<UAV> availableUAVs
         )
         {
             HashSet<UAVType> availableUAVTypes = availableUAVs
@@ -169,8 +166,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm
                 .ToHashSet();
 
             return allMissions
-                .Where(mission => availableUAVTypes.Contains(mission.RequiredUAVType))
-                .ToList();
+                .Where(mission => availableUAVTypes.Contains(mission.RequiredUAVType));
         }
 
         private bool IsNewChromosomeBetterThanCurrent(

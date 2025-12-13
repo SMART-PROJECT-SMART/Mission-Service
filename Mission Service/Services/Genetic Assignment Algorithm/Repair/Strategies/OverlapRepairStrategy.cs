@@ -7,8 +7,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
     {
         public void RepairChromosomeViolation(
             AssignmentChromosome assignmentChromosome,
-            List<Mission> missions,
-            List<UAV> uavs
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> uavs
         )
         {
             if (
@@ -39,37 +39,43 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
             HashSet<AssignmentGene> assignmentsToRemove
         )
         {
-            List<AssignmentGene> sortedAssignments = assignments.OrderBy(a => a.StartTime).ToList();
+            // Order by start time but don't materialize until necessary
+            IOrderedEnumerable<AssignmentGene> sortedAssignments = assignments.OrderBy(a => a.StartTime);
+            int count = assignments.Count();
 
-            if (sortedAssignments.Count < 2)
+            if (count < 2)
             {
                 return;
             }
 
-            for (int i = 0; i < sortedAssignments.Count - 1; i++)
-            {
-                AssignmentGene currentAssignment = sortedAssignments[i];
+            AssignmentGene? previousAssignment = null;
 
+            foreach (AssignmentGene currentAssignment in sortedAssignments)
+            {
                 if (assignmentsToRemove.Contains(currentAssignment))
                 {
                     continue;
                 }
 
-                AssignmentGene nextAssignment = sortedAssignments[i + 1];
-
-                if (assignmentsToRemove.Contains(nextAssignment))
+                if (previousAssignment != null)
                 {
-                    continue;
+                    if (assignmentsToRemove.Contains(previousAssignment))
+                    {
+                        previousAssignment = currentAssignment;
+                        continue;
+                    }
+
+                    if (HasOverlap(previousAssignment, currentAssignment))
+                    {
+                        AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
+                            previousAssignment,
+                            currentAssignment
+                        );
+                        assignmentsToRemove.Add(assignmentToRemove);
+                    }
                 }
 
-                if (HasOverlap(currentAssignment, nextAssignment))
-                {
-                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
-                        currentAssignment,
-                        nextAssignment
-                    );
-                    assignmentsToRemove.Add(assignmentToRemove);
-                }
+                previousAssignment = currentAssignment;
             }
         }
 

@@ -5,8 +5,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
 
 public class EliteSelector : IEliteSelector
 {
-    public List<AssignmentChromosome> SelectElite(
-        List<AssignmentChromosome> chromosomePopulation,
+    public IEnumerable<AssignmentChromosome> SelectElite(
+        IEnumerable<AssignmentChromosome> chromosomePopulation,
         double elitePercentageOfPopulation,
         int totalPopulationSize
     )
@@ -18,14 +18,14 @@ public class EliteSelector : IEliteSelector
 
         if (numberOfEliteChromosomesToSelect == 0)
         {
-            return new List<AssignmentChromosome>();
+            return Enumerable.Empty<AssignmentChromosome>();
         }
 
         if (numberOfEliteChromosomesToSelect == 1)
         {
             AssignmentChromosome singleBestChromosome =
-                chromosomePopulation.FindChromosomeWithHighestFitness();
-            return new List<AssignmentChromosome> { singleBestChromosome };
+                chromosomePopulation.MaxBy(c => c.FitnessScore)!;
+            return new[] { singleBestChromosome };
         }
 
         return SelectTopChromosomesByFitnessScore(
@@ -39,14 +39,13 @@ public class EliteSelector : IEliteSelector
         return (int)(totalPopulationSize * elitePercentage);
     }
 
-    private List<AssignmentChromosome> SelectTopChromosomesByFitnessScore(
-        List<AssignmentChromosome> chromosomePopulation,
+    private IEnumerable<AssignmentChromosome> SelectTopChromosomesByFitnessScore(
+        IEnumerable<AssignmentChromosome> chromosomePopulation,
         int numberOfChromosomesToSelect
     )
     {
         return chromosomePopulation
             .OrderByDescending(chromosome => chromosome.FitnessScore)
-            .Take(numberOfChromosomesToSelect)
-            .ToList();
+            .Take(numberOfChromosomesToSelect);
     }
 }

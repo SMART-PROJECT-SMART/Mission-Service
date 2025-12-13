@@ -29,10 +29,10 @@ public class OffspringGenerator : IOffspringGenerator
         _algorithmConfig = algorithmConfig.Value;
     }
 
-    public List<AssignmentChromosome> CreateOffspring(
-        List<AssignmentChromosome> parentChromosomePopulation,
+    public IEnumerable<AssignmentChromosome> CreateOffspring(
+        IReadOnlyList<AssignmentChromosome> parentChromosomePopulation,
         int numberOfOffspringChromosomesToGenerate,
-        List<UAV> availableUAVsForAssignment
+        IReadOnlyList<UAV> availableUAVsForAssignment
     )
     {
         int numberOfParentPairsToCreate = CalculateNumberOfParentPairsNeeded(
@@ -98,7 +98,7 @@ public class OffspringGenerator : IOffspringGenerator
     }
 
     private AssignmentChromosome SelectParentChromosomeFromPopulation(
-        List<AssignmentChromosome> parentPopulation
+        IReadOnlyList<AssignmentChromosome> parentPopulation
     )
     {
         return _parentSelectionStrategy.SelectParentChromosome(parentPopulation);
@@ -129,7 +129,7 @@ public class OffspringGenerator : IOffspringGenerator
 
     private void ApplyMutationToChromosome(
         AssignmentChromosome chromosomeToMutate,
-        List<UAV> availableUAVs
+        IReadOnlyList<UAV> availableUAVs
     )
     {
         bool shouldApplyMutation =
@@ -152,10 +152,10 @@ public class OffspringGenerator : IOffspringGenerator
         return basePositionInArray + offsetFromBasePosition;
     }
 
-    private List<AssignmentChromosome> FilterOutNullChromosomesFromArray(
+    private IEnumerable<AssignmentChromosome> FilterOutNullChromosomesFromArray(
         AssignmentChromosome[] chromosomeArray
     )
     {
-        return chromosomeArray.Where(chromosome => chromosome != null).ToList();
+        return chromosomeArray.Where(chromosome => chromosome != null);
     }
 }

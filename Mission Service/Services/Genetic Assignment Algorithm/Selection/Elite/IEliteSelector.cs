@@ -4,8 +4,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
 
 public interface IEliteSelector
 {
-    List<AssignmentChromosome> SelectElite(
-        List<AssignmentChromosome> chromosomePopulation,
+    IEnumerable<AssignmentChromosome> SelectElite(
+        IEnumerable<AssignmentChromosome> chromosomePopulation,
         double elitePercentageOfPopulation,
         int totalPopulationSize
     );

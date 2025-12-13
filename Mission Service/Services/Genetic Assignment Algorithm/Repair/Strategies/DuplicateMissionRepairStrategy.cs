@@ -7,8 +7,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategie
     {
         public void RepairChromosomeViolation(
             AssignmentChromosome assignmentChromosome,
-            List<Mission> missions,
-            List<UAV> uavs
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> uavs
         )
         {
             if (

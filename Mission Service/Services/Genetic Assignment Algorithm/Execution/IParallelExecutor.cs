@@ -6,12 +6,12 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
 public interface IParallelExecutor
 {
     void EvaluatePopulationFitnessInParallel(
-        List<AssignmentChromosome> chromosomePopulationToEvaluate,
+        IReadOnlyList<AssignmentChromosome> chromosomePopulationToEvaluate,
         Action<AssignmentChromosome> evaluateSingleChromosomeFitness
     );
 
     void RepairPopulationInParallel(
-        List<AssignmentChromosome> chromosomePopulationToRepair,
+        IEnumerable<AssignmentChromosome> chromosomePopulationToRepair,
         Action<AssignmentChromosome> repairSingleChromosome
     );
 }

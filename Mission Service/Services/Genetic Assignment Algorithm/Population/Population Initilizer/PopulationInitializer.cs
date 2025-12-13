@@ -20,8 +20,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             IEnumerable<UAV> uavs
         )
         {
-            List<Mission> missionList = missions as List<Mission> ?? missions.ToList();
-            List<UAV> uavList = uavs as List<UAV> ?? uavs.ToList();
+            // Materialize collections once for reuse across all chromosomes
+            IReadOnlyList<Mission> missionList = missions as IReadOnlyList<Mission> ?? missions.ToList();
+            IReadOnlyList<UAV> uavList = uavs as IReadOnlyList<UAV> ?? uavs.ToList();
 
             Dictionary<UAVType, List<UAV>> uavsByType = GroupUAVsByType(uavList);
 
@@ -45,7 +46,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
             return population;
         }
 
-        private Dictionary<UAVType, List<UAV>> GroupUAVsByType(List<UAV> uavs)
+        private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IReadOnlyList<UAV> uavs)
         {
             Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
 
@@ -63,7 +64,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Popul
         }
 
         private AssignmentChromosome CreateRandomAssignmentChromosome(
-            List<Mission> missions,
+            IReadOnlyList<Mission> missions,
             Dictionary<UAVType, List<UAV>> uavsByType
         )
         {

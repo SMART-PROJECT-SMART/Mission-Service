@@ -22,17 +22,14 @@ namespace Mission_Service.Controllers
         {
             AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(requestId);
 
-            if (result == null)
-            {
-                var notFoundResponse = new AssignmentResultNotFoundResponse(
-                    MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
-                    requestId
-                );
+            if (result != null) return Ok(result);
+            var notFoundResponse = new AssignmentResultNotFoundResponse(
+                MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
+                requestId
+            );
 
-                return NotFound(notFoundResponse);
-            }
+            return NotFound(notFoundResponse);
 
-            return Ok(result);
         }
 
         [HttpGet("{requestId}/" + MissionServiceConstants.Actions.STATUS)]

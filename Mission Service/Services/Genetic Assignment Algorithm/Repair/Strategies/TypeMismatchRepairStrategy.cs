@@ -7,8 +7,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
     {
         public void RepairChromosomeViolation(
             AssignmentChromosome assignmentChromosome,
-            List<Mission> missions,
-            List<UAV> uavs
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> uavs
         )
         {
             if (
@@ -27,7 +27,7 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair
             assignmentChromosome.Assignments = repairedAssignments;
         }
 
-        private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene, List<UAV> uavs)
+        private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene, IEnumerable<UAV> uavs)
         {
             if (!IsTypeMismatch(gene))
             {

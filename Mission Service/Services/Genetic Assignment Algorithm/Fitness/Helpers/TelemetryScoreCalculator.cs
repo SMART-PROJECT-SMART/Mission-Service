@@ -1,4 +1,5 @@
 using Core.Common.Enums;
+using Core.Models;
 using Mission_Service.Extensions;
 
 namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Helpers;
@@ -28,7 +29,7 @@ public static class TelemetryScoreCalculator
 
         if (totalLocationWeight > 0.0)
         {
-            Core.Models.Location uavLocation = LocationProximityCalculator.ExtractUAVLocation(
+            Location uavLocation = LocationProximityCalculator.ExtractUAVLocation(
                 uavTelemetryData
             );
             double proximityScore = LocationProximityCalculator.CalculateProximityScore(

@@ -7,8 +7,8 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline
     {
         public void RepairChromosomeViolaitions(
             AssignmentChromosome assignmentChromosome,
-            List<Mission> missions,
-            List<UAV> uavs
+            IEnumerable<Mission> missions,
+            IEnumerable<UAV> uavs
         );
     }
 }

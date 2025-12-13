@@ -5,9 +5,9 @@ namespace Mission_Service.Services.Genetic_Assignment_Algorithm.Reproduction;
 
 public interface IOffspringGenerator
 {
-    List<AssignmentChromosome> CreateOffspring(
-        List<AssignmentChromosome> parentChromosomePopulation,
+    IEnumerable<AssignmentChromosome> CreateOffspring(
+        IReadOnlyList<AssignmentChromosome> parentChromosomePopulation,
         int numberOfOffspringChromosomesToGenerate,
-        List<UAV> availableUAVsForAssignment
+        IReadOnlyList<UAV> availableUAVsForAssignment
     );
 }
