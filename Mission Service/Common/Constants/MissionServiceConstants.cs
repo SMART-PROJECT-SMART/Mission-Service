@@ -8,6 +8,7 @@
             public const string TELEMETRY_WEIGHTS_CONFIG_SECTION = "TelemetryWeights";
             public const string FITNESS_WEIGHTS_CONFIG_SECTION = "FitnessWeights";
             public const string ASSIGNMENT_QUEUE_CONFIG_SECTION = "AssignmentQueueConfig";
+            public const string LTS_CONFIG_SECTION = "LTS";
         }
 
         public static class MainAlgorithm
@@ -80,6 +81,12 @@
         public static class HttpClients
         {
             public const string CALLBACK_HTTP_CLIENT = "AssignmentCallback";
+            public const string LTS_HTTP_CLIENT = "LTS";
+        }
+
+        public static class LTSEndpoints
+        {
+            public const string ALL_UAV_TELEMETRY = "all-uav-telemetry-data";
         }
     }
 }
