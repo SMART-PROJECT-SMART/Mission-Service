@@ -2,22 +2,20 @@
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Models;
-using Mission_Service.Services.Assignment_Request_Queue;
-using Mission_Service.Services.Assignment_Suggestion_Worker;
 using Mission_Service.Services.AssignmentResultManager;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategies;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Reproduction;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
+using Mission_Service.Services.AssignmentSuggestionWorker;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
+using Mission_Service.Services.AssignmentRequestQueue;
 
 namespace Mission_Service.Extensions
 {

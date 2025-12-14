@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
 
 namespace Mission_Service.Controllers
 {

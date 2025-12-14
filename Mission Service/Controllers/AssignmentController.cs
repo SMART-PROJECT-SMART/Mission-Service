@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
-using Mission_Service.Services.Assignment_Request_Queue;
+using Mission_Service.Services.AssignmentRequestQueue;
 
 namespace Mission_Service.Controllers
 {

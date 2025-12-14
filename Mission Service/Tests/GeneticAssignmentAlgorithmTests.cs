@@ -7,16 +7,16 @@ using Mission_Service.Services.Genetic_Assignment_Algorithm.Crossover;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Execution;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness_Calculator;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Fitness.Fitness_Calculator;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Main_Algorithm;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Mutation;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Population.Population_Initilizer;
-using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Pipeline;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Repair.Strategies;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Reproduction;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection;
 using Mission_Service.Services.Genetic_Assignment_Algorithm.Selection.Elite;
 using Xunit;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 
 namespace Mission_Service.Tests;
 
