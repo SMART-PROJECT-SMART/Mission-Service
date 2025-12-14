@@ -2,28 +2,22 @@
 {
     public class AssignmentSuggestionDto
     {
-        public string? AssignmentId { get; set; }
+        public string AssignmentId { get; set; }
         public IReadOnlyCollection<Mission> Missions { get; set; }
         public IReadOnlyCollection<UAV> UAVs { get; set; }
 
-        public AssignmentSuggestionDto() { }
-
-        public AssignmentSuggestionDto(IReadOnlyCollection<Mission> missions, IReadOnlyCollection<UAV> uavs)
-            : this(null, missions, uavs) { }
-
-        public AssignmentSuggestionDto(string? assignmentId, IReadOnlyCollection<Mission> missions, IReadOnlyCollection<UAV> uavs)
+        public AssignmentSuggestionDto()
         {
-            AssignmentId = assignmentId;
-            Missions = missions;
-            UAVs = uavs;
+            AssignmentId = Guid.NewGuid().ToString();
+            Missions = Array.Empty<Mission>();
+            UAVs = Array.Empty<UAV>();
         }
 
-        public void EnsureAssignmentId()
+        public AssignmentSuggestionDto(IReadOnlyCollection<Mission> missions, IReadOnlyCollection<UAV> uavs)
+            : this()
         {
-            if (string.IsNullOrWhiteSpace(AssignmentId))
-            {
-                AssignmentId = Guid.NewGuid().ToString();
-            }
+            Missions = missions;
+            UAVs = uavs;
         }
     }
 }

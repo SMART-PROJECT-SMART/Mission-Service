@@ -23,9 +23,6 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            // Ensure AssignmentId is set (generate if not provided by client)
-            assignmentSuggestionDto.EnsureAssignmentId();
-
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
