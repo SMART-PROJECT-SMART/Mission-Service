@@ -4,8 +4,8 @@ namespace Mission_Service.Services.AssignmentResultManager
 {
     public interface IAssignmentResultManager
     {
-        void StoreResult(string requestId, AssignmentChromosome result);
-        AssignmentChromosome? GetAndRemoveResult(string requestId);
-        bool HasResult(string requestId);
+        void StoreResult(string assignmentId, AssignmentChromosome result);
+        AssignmentChromosome? GetAndRemoveResult(string assignmentId);
+        bool HasResult(string assignmentId);
     }
 }

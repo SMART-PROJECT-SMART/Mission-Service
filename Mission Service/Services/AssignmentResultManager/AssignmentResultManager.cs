@@ -12,20 +12,20 @@ namespace Mission_Service.Services.AssignmentResultManager
             _assignmentResults = new ConcurrentDictionary<string, AssignmentChromosome>();
         }
 
-        public void StoreResult(string requestId, AssignmentChromosome result)
+        public void StoreResult(string assignmentId, AssignmentChromosome result)
         {
-            _assignmentResults.TryAdd(requestId, result);
+            _assignmentResults.TryAdd(assignmentId, result);
         }
 
-        public AssignmentChromosome? GetAndRemoveResult(string requestId)
+        public AssignmentChromosome? GetAndRemoveResult(string assignmentId)
         {
-            _assignmentResults.TryRemove(requestId, out AssignmentChromosome? result);
+            _assignmentResults.TryRemove(assignmentId, out AssignmentChromosome? result);
             return result;
         }
 
-        public bool HasResult(string requestId)
+        public bool HasResult(string assignmentId)
         {
-            return _assignmentResults.ContainsKey(requestId);
+            return _assignmentResults.ContainsKey(assignmentId);
         }
     }
 }

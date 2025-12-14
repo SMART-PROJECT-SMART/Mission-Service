@@ -58,7 +58,7 @@ public static class TelemetryScoreCalculator
         }
 
         Location uavLocation = LocationProximityCalculator.ExtractUAVLocation(uavTelemetryData);
-        double proximityScore = LocationProximityCalculator.CalculateProximityScore(
+        double proximityScore = LocationProximityCalculator.CalculateNormelizedProximityScore(
             uavLocation,
             missionLocation
         );

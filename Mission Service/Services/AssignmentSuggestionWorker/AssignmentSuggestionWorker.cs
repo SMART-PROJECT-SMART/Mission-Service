@@ -42,7 +42,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
 
                 if (bestResult != null)
                 {
-                    _assignmentResultManager.StoreResult(request.RequestId, bestResult);
+                    _assignmentResultManager.StoreResult(request.AssignmentId, bestResult);
                 }
             }
         }

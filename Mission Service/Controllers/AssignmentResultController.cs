@@ -17,37 +17,37 @@ namespace Mission_Service.Controllers
             _assignmentResultManager = assignmentResultManager;
         }
 
-        [HttpGet("{requestId}")]
-        public IActionResult GetAssignmentResult(string requestId)
+        [HttpGet("{assignmentId}")]
+        public IActionResult GetAssignmentResult(string assignmentId)
         {
-            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(requestId);
+            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(assignmentId);
 
             if (result != null) return Ok(result);
             var notFoundResponse = new AssignmentResultNotFoundResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
-                requestId
+                assignmentId
             );
 
             return NotFound(notFoundResponse);
 
         }
 
-        [HttpGet("{requestId}/" + MissionServiceConstants.Actions.STATUS)]
-        public IActionResult CheckAssignmentStatus(string requestId)
+        [HttpGet("{assignmentId}/" + MissionServiceConstants.Actions.STATUS)]
+        public IActionResult CheckAssignmentStatus(string assignmentId)
         {
-            bool isReady = _assignmentResultManager.HasResult(requestId);
+            bool isReady = _assignmentResultManager.HasResult(assignmentId);
 
             string? resultUrl = isReady
                 ? Url.Action(
                     nameof(GetAssignmentResult),
                     MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
-                    new { requestId },
+                    new { assignmentId },
                     Request.Scheme
                 )
                 : null;
 
             var statusResponse = new AssignmentStatusResponse(
-                requestId,
+                assignmentId,
                 isReady,
                 isReady
                     ? MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_READY

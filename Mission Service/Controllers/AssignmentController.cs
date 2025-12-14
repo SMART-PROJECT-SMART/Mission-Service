@@ -23,21 +23,21 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            // Ensure RequestId is set (generate if not provided by client)
-            assignmentSuggestionDto.EnsureRequestId();
+            // Ensure AssignmentId is set (generate if not provided by client)
+            assignmentSuggestionDto.EnsureAssignmentId();
 
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
-                new { requestId = assignmentSuggestionDto.RequestId },
+                new { assignmentId = assignmentSuggestionDto.AssignmentId },
                 Request.Scheme
             );
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
-                assignmentSuggestionDto.RequestId!,
+                assignmentSuggestionDto.AssignmentId!,
                 statusUrl!
             );
 
