@@ -4,9 +4,7 @@
     {
         public int ChannelSize { get; set; }
 
-        public AssignmentRequestQueueConfiguration()
-        {
-        }
+        public AssignmentRequestQueueConfiguration() { }
 
         public AssignmentRequestQueueConfiguration(int channelSize)
         {

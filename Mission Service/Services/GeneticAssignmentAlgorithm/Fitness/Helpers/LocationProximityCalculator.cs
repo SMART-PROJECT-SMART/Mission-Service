@@ -7,7 +7,10 @@ public static class LocationProximityCalculator
 {
     public static bool IsLocationField(TelemetryFields field)
     {
-        return field is TelemetryFields.Latitude or TelemetryFields.Longitude or TelemetryFields.Altitude;
+        return field
+            is TelemetryFields.Latitude
+                or TelemetryFields.Longitude
+                or TelemetryFields.Altitude;
     }
 
     public static Location ExtractUAVLocation(Dictionary<TelemetryFields, double> uavTelemetryData)
@@ -19,7 +22,10 @@ public static class LocationProximityCalculator
         return new Location(latitude, longitude, altitude);
     }
 
-    public static double CalculateNormelizedProximityScore(Location uavLocation, Location missionLocation)
+    public static double CalculateNormelizedProximityScore(
+        Location uavLocation,
+        Location missionLocation
+    )
     {
         double distance = uavLocation.CalculateDistanceTo(missionLocation);
         double normalizedProximity = 1.0 / (1.0 + distance);

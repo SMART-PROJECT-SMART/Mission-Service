@@ -13,10 +13,12 @@ namespace Mission_Service.Services.AssignmentRequestQueue
         {
             var options = new BoundedChannelOptions(queueConfig.Value.ChannelSize)
             {
-                FullMode = BoundedChannelFullMode.Wait
+                FullMode = BoundedChannelFullMode.Wait,
             };
 
-            _assignmentSuggestionRequestQueue = Channel.CreateBounded<AssignmentSuggestionDto>(options);
+            _assignmentSuggestionRequestQueue = Channel.CreateBounded<AssignmentSuggestionDto>(
+                options
+            );
         }
 
         public async Task QueueAssignmentSuggestionRequest(

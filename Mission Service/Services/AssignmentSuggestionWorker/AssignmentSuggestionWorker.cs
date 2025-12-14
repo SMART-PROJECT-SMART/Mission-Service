@@ -1,11 +1,11 @@
 ﻿using Mission_Service.Common.Constants;
+using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.Dto;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentResultManager;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
-using Mission_Service.Common.Enums;
 
 namespace Mission_Service.Services.AssignmentSuggestionWorker
 {
@@ -34,7 +34,10 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                 )
             )
             {
-                _assignmentResultManager.UpdateStatus(request.AssignmentId, AssignmentStatus.Processing);
+                _assignmentResultManager.UpdateStatus(
+                    request.AssignmentId,
+                    AssignmentStatus.Processing
+                );
 
                 AssignmentResult assignmentResult = _assignmentAlgorithm.PreformAssignmentAlgorithm(
                     request.Missions,

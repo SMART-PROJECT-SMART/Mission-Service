@@ -4,6 +4,6 @@
     {
         Pending,
         Processing,
-        Completed
+        Completed,
     }
 }

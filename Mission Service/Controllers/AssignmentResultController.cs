@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
+using Mission_Service.Common.Enums;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentResultManager;
-using Mission_Service.Common.Enums;
 
 namespace Mission_Service.Controllers
 {
@@ -21,9 +21,12 @@ namespace Mission_Service.Controllers
         [HttpGet("{assignmentId}")]
         public IActionResult GetAssignmentResult(string assignmentId)
         {
-            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(assignmentId);
+            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(
+                assignmentId
+            );
 
-            if (result != null) return Ok(result);
+            if (result != null)
+                return Ok(result);
 
             var notFoundResponse = new AssignmentResultNotFoundResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
@@ -68,12 +71,17 @@ namespace Mission_Service.Controllers
             return Ok(statusResponse);
         }
 
-        private string GetStatusMessage(AssignmentStatus status) => status switch
-        {
-            AssignmentStatus.Pending => MissionServiceConstants.APIResponses.ASSIGNMENT_PENDING,
-            AssignmentStatus.Processing => MissionServiceConstants.APIResponses.ASSIGNMENT_PROCESSING,
-            AssignmentStatus.Completed => MissionServiceConstants.APIResponses.ASSIGNMENT_COMPLETED,
-            _ => MissionServiceConstants.APIResponses.ASSIGNMENT_PROCESSING
-        };
+        private string GetStatusMessage(AssignmentStatus status) =>
+            status switch
+            {
+                AssignmentStatus.Pending => MissionServiceConstants.APIResponses.ASSIGNMENT_PENDING,
+                AssignmentStatus.Processing => MissionServiceConstants
+                    .APIResponses
+                    .ASSIGNMENT_PROCESSING,
+                AssignmentStatus.Completed => MissionServiceConstants
+                    .APIResponses
+                    .ASSIGNMENT_COMPLETED,
+                _ => MissionServiceConstants.APIResponses.ASSIGNMENT_PROCESSING,
+            };
     }
 }

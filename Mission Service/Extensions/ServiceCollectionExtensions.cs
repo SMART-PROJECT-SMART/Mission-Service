@@ -2,20 +2,20 @@
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Models;
+using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentResultManager;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.AssignmentSuggestionWorker;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
-using Mission_Service.Services.AssignmentRequestQueue;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
 
 namespace Mission_Service.Extensions
 {

@@ -117,12 +117,14 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 _algorithmConfig.PopulationSize
             );
 
-            int numberOfOffspringNeeded = _algorithmConfig.PopulationSize - eliteChromosomes.Count();
-            IEnumerable<AssignmentChromosome> generatedOffspring = _offspringGenerator.CreateOffspring(
-                currentPopulation,
-                numberOfOffspringNeeded,
-                availableUAVs as IReadOnlyList<UAV> ?? availableUAVs.ToList()
-            );
+            int numberOfOffspringNeeded =
+                _algorithmConfig.PopulationSize - eliteChromosomes.Count();
+            IEnumerable<AssignmentChromosome> generatedOffspring =
+                _offspringGenerator.CreateOffspring(
+                    currentPopulation,
+                    numberOfOffspringNeeded,
+                    availableUAVs as IReadOnlyList<UAV> ?? availableUAVs.ToList()
+                );
 
             _parallelExecutor.RepairPopulationInParallel(
                 generatedOffspring,
@@ -138,8 +140,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
             List<AssignmentChromosome> combinedOffspring = new List<AssignmentChromosome>();
             combinedOffspring.AddRange(validOffspringChromosomes);
 
-            int remainingPopulationSlots =
-                numberOfOffspringNeeded - combinedOffspring.Count;
+            int remainingPopulationSlots = numberOfOffspringNeeded - combinedOffspring.Count;
             if (remainingPopulationSlots > 0 && invalidOffspringChromosomesSortedByQuality.Any())
             {
                 combinedOffspring.AddRange(
@@ -165,8 +166,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 .Select(uav => uav.UavType)
                 .ToHashSet();
 
-            return allMissions
-                .Where(mission => availableUAVTypes.Contains(mission.RequiredUAVType));
+            return allMissions.Where(mission =>
+                availableUAVTypes.Contains(mission.RequiredUAVType)
+            );
         }
 
         private bool IsNewChromosomeBetterThanCurrent(

@@ -17,7 +17,8 @@ namespace Mission_Service.Controllers
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
-            IAssignmentResultManager assignmentResultManager)
+            IAssignmentResultManager assignmentResultManager
+        )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;

@@ -13,7 +13,10 @@
             UAVs = Array.Empty<UAV>();
         }
 
-        public AssignmentSuggestionDto(IReadOnlyCollection<Mission> missions, IReadOnlyCollection<UAV> uavs)
+        public AssignmentSuggestionDto(
+            IReadOnlyCollection<Mission> missions,
+            IReadOnlyCollection<UAV> uavs
+        )
             : this()
         {
             Missions = missions;

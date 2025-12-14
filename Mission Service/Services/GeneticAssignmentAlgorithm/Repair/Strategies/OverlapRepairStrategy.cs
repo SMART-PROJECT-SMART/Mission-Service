@@ -40,7 +40,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
         )
         {
             // Order by start time but don't materialize until necessary
-            IOrderedEnumerable<AssignmentGene> sortedAssignments = assignments.OrderBy(a => a.StartTime);
+            IOrderedEnumerable<AssignmentGene> sortedAssignments = assignments.OrderBy(a =>
+                a.StartTime
+            );
             int count = assignments.Count();
 
             if (count < 2)
