@@ -5,6 +5,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentResultManager;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
+using Mission_Service.Common.Enums;
 
 namespace Mission_Service.Services.AssignmentSuggestionWorker
 {
@@ -33,6 +34,8 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                 )
             )
             {
+                _assignmentResultManager.UpdateStatus(request.AssignmentId, AssignmentStatus.Processing);
+
                 AssignmentResult assignmentResult = _assignmentAlgorithm.PreformAssignmentAlgorithm(
                     request.Missions,
                     request.UAVs

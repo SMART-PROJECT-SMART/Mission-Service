@@ -4,6 +4,7 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue;
+using Mission_Service.Services.AssignmentResultManager;
 
 namespace Mission_Service.Controllers
 {
@@ -12,10 +13,14 @@ namespace Mission_Service.Controllers
     public class AssignmentController : ControllerBase
     {
         private readonly IAssignmentSuggestionQueue _queue;
+        private readonly IAssignmentResultManager _assignmentResultManager;
 
-        public AssignmentController(IAssignmentSuggestionQueue queue)
+        public AssignmentController(
+            IAssignmentSuggestionQueue queue,
+            IAssignmentResultManager assignmentResultManager)
         {
             _queue = queue;
+            _assignmentResultManager = assignmentResultManager;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
@@ -23,6 +28,8 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
+            _assignmentResultManager.CreateExecution(assignmentSuggestionDto.AssignmentId);
+
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(

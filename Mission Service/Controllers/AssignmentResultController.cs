@@ -3,6 +3,7 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentResultManager;
+using Mission_Service.Common.Enums;
 
 namespace Mission_Service.Controllers
 {
@@ -23,21 +24,32 @@ namespace Mission_Service.Controllers
             AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(assignmentId);
 
             if (result != null) return Ok(result);
+
             var notFoundResponse = new AssignmentResultNotFoundResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
                 assignmentId
             );
 
             return NotFound(notFoundResponse);
-
         }
 
         [HttpGet("{assignmentId}/" + MissionServiceConstants.Actions.STATUS)]
         public IActionResult CheckAssignmentStatus(string assignmentId)
         {
-            bool isReady = _assignmentResultManager.HasResult(assignmentId);
+            var execution = _assignmentResultManager.GetExecution(assignmentId);
 
-            string? resultUrl = isReady
+            if (execution == null)
+            {
+                var notFoundResponse = new AssignmentResultNotFoundResponse(
+                    MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
+                    assignmentId
+                );
+                return NotFound(notFoundResponse);
+            }
+
+            bool isCompleted = execution.Status == AssignmentStatus.Completed;
+
+            string? resultUrl = isCompleted
                 ? Url.Action(
                     nameof(GetAssignmentResult),
                     MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
@@ -48,14 +60,20 @@ namespace Mission_Service.Controllers
 
             var statusResponse = new AssignmentStatusResponse(
                 assignmentId,
-                isReady,
-                isReady
-                    ? MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_READY
-                    : MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_PROCESSING,
+                execution.Status.ToString(),
+                GetStatusMessage(execution.Status),
                 resultUrl
             );
 
             return Ok(statusResponse);
         }
+
+        private string GetStatusMessage(AssignmentStatus status) => status switch
+        {
+            AssignmentStatus.Pending => MissionServiceConstants.APIResponses.ASSIGNMENT_PENDING,
+            AssignmentStatus.Processing => MissionServiceConstants.APIResponses.ASSIGNMENT_PROCESSING,
+            AssignmentStatus.Completed => MissionServiceConstants.APIResponses.ASSIGNMENT_COMPLETED,
+            _ => MissionServiceConstants.APIResponses.ASSIGNMENT_PROCESSING
+        };
     }
 }

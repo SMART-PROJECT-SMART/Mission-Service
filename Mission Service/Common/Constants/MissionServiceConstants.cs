@@ -58,6 +58,9 @@
                 "Assignment request accepted and is being processed";
             public const string ASSIGNMENT_RESULT_NOT_FOUND =
                 "Assignment result not found or not ready yet";
+            public const string ASSIGNMENT_PENDING = "Assignment is queued and waiting to be processed";
+            public const string ASSIGNMENT_PROCESSING = "Assignment is currently being processed";
+            public const string ASSIGNMENT_COMPLETED = "Assignment completed successfully";
             public const string ASSIGNMENT_RESULT_READY = "Result is ready";
             public const string ASSIGNMENT_RESULT_PROCESSING = "Result is still processing";
         }
