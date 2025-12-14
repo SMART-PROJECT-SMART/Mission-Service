@@ -57,6 +57,13 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 .CreateInitialPopulation(missionsWithCompatibleUAVs, uavs)
                 .ToList();
 
+            // ✅ FIX: Repair initial population before fitness evaluation
+            _parallelExecutor.RepairPopulationInParallel(
+                currentPopulation,
+                chromosome =>
+                    _repairPipeline.RepairChromosomeViolaitions(chromosome, missionsWithCompatibleUAVs, uavs)
+            );
+
             _parallelExecutor.EvaluatePopulationFitnessInParallel(
                 currentPopulation,
                 chromosome => _fitnessCalculator.CalculateFitness(chromosome)
