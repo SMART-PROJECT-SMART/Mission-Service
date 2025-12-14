@@ -9,6 +9,7 @@
             public const string FITNESS_WEIGHTS_CONFIG_SECTION = "FitnessWeights";
             public const string ASSIGNMENT_QUEUE_CONFIG_SECTION = "AssignmentQueueConfig";
             public const string LTS_CONFIG_SECTION = "LTS";
+            public const string BASE_ADDRESS_KEY = "BaseAddress";
         }
 
         public static class MainAlgorithm

@@ -62,50 +62,49 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
 
         private async Task<IReadOnlyCollection<UAV>> FetchUAVsFromLTS(CancellationToken cancellationToken)
         {
-            HttpClient httpClient = _httpClientFactory.CreateClient(
+            HttpClient ltsHttpClient = _httpClientFactory.CreateClient(
                 MissionServiceConstants.HttpClients.LTS_HTTP_CLIENT
             );
 
-            HttpResponseMessage response = await httpClient.GetAsync(
+            HttpResponseMessage telemetryResponse = await ltsHttpClient.GetAsync(
                 MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY,
                 cancellationToken
             );
 
-            response.EnsureSuccessStatusCode();
+            telemetryResponse.EnsureSuccessStatusCode();
 
-            IEnumerable<(int TailId, IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData)>? telemetryData =
-                await response.Content.ReadFromJsonAsync<IEnumerable<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>>(
+            IEnumerable<(int TailId, IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData)>? rawTelemetryData =
+                await telemetryResponse.Content.ReadFromJsonAsync<IEnumerable<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>>(
                     cancellationToken
                 );
 
-            return ConvertTelemetryToUAVs(
-                telemetryData ?? Enumerable.Empty<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>()
-            );
+            IEnumerable<(int TailId, IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData)> telemetryDataCollection =
+                rawTelemetryData ?? Enumerable.Empty<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>();
+
+            return ConvertTelemetryToUAVs(telemetryDataCollection);
         }
 
         private IReadOnlyCollection<UAV> ConvertTelemetryToUAVs(
-            IEnumerable<(int TailId, IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData)> telemetryData
+            IEnumerable<(int TailId, IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData)> telemetryDataCollection
         )
         {
-            List<UAV> uavs = new List<UAV>();
+            List<UAV> convertedUAVs = new List<UAV>();
 
-            foreach ((int tailId, IEnumerable<KeyValuePair<TelemetryFields, double>> data) in telemetryData)
+            foreach ((int uavTailId, IEnumerable<KeyValuePair<TelemetryFields, double>> telemetryFields) in telemetryDataCollection)
             {
-                Dictionary<TelemetryFields, double> telemetryDict = data.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => kvp.Value
+                Dictionary<TelemetryFields, double> telemetryDictionary = telemetryFields.ToDictionary(
+                    field => field.Key,
+                    field => field.Value
                 );
 
-                UAVType uavType = _uavStatusService.DetermineUAVType(telemetryDict);
-                Mission? activeMission = _uavStatusService.IsInActiveMission(telemetryDict)
-                    ? _uavStatusService.GetActiveMission(tailId)
-                    : null;
+                UAVType detectedUAVType = _uavStatusService.DetermineUAVType(telemetryDictionary);
+                Mission? uavActiveMission = _uavStatusService.GetActiveMission(uavTailId);
 
-                UAV uav = new UAV(tailId, uavType, telemetryDict, activeMission);
-                uavs.Add(uav);
+                UAV constructedUAV = new UAV(uavTailId, detectedUAVType, telemetryDictionary, uavActiveMission);
+                convertedUAVs.Add(constructedUAV);
             }
 
-            return uavs;
+            return convertedUAVs;
         }
     }
 }

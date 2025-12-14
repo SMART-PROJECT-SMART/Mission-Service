@@ -7,39 +7,44 @@ namespace Mission_Service.Services.UAVStatusService
 {
     public class UAVStatusService : IUAVStatusService
     {
- private readonly ConcurrentDictionary<int, Mission> _activeMissions;
+        private readonly ConcurrentDictionary<int, Mission> _uavActiveMissionsByTailId;
 
- public UAVStatusService()
+        public UAVStatusService()
         {
-            _activeMissions = new ConcurrentDictionary<int, Mission>();
+            _uavActiveMissionsByTailId = new ConcurrentDictionary<int, Mission>();
         }
 
         public UAVType DetermineUAVType(Dictionary<TelemetryFields, double> telemetryData)
-      {
-            return telemetryData.ContainsKey(TelemetryFields.DataStorageUsedGB)
-     ? UAVType.Surveillance
-          : UAVType.Armed;
-      }
-
-      public bool IsInActiveMission(Dictionary<TelemetryFields, double> telemetryData)
         {
-  return telemetryData.TryGetValue(TelemetryFields.CurrentSpeedKmph, out double speed) && speed != 0;
-  }
+   return telemetryData.ContainsKey(TelemetryFields.DataStorageUsedGB)
+  ? UAVType.Surveillance
+                : UAVType.Armed;
+        }
+
+    public bool IsInActiveMission(Dictionary<TelemetryFields, double> telemetryData)
+        {
+            bool hasSpeed = telemetryData.TryGetValue(TelemetryFields.CurrentSpeedKmph, out double currentSpeed);
+      return hasSpeed && currentSpeed != 0;
+        }
 
         public Mission? GetActiveMission(int tailId)
-     {
-     _activeMissions.TryGetValue(tailId, out Mission? mission);
-            return mission;
-        }
-
-        public void SetActiveMission(int tailId, Mission mission)
         {
-_activeMissions.AddOrUpdate(tailId, mission, (key, existing) => mission);
-     }
+      _uavActiveMissionsByTailId.TryGetValue(tailId, out Mission? activeMission);
+ return activeMission;
+}
+
+public void SetActiveMission(int tailId, Mission mission)
+  {
+ _uavActiveMissionsByTailId.AddOrUpdate(
+     tailId, 
+    mission, 
+       (uavTailId, existingMission) => mission
+     );
+        }
 
         public void ClearActiveMission(int tailId)
-      {
-         _activeMissions.TryRemove(tailId, out _);
-        }
+        {
+            _uavActiveMissionsByTailId.TryRemove(tailId, out _);
+     }
     }
 }
