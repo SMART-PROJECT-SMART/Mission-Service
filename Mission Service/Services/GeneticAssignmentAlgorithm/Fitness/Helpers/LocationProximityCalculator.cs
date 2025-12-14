@@ -19,7 +19,7 @@ public static class LocationProximityCalculator
         return new Location(latitude, longitude, altitude);
     }
 
-    public static double CalculateProximityScore(Location uavLocation, Location missionLocation)
+    public static double CalculateNormelizedProximityScore(Location uavLocation, Location missionLocation)
     {
         double distance = uavLocation.CalculateDistanceTo(missionLocation);
         double normalizedProximity = 1.0 / (1.0 + distance);
