@@ -11,65 +11,75 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             IEnumerable<UAV> uavs
         )
         {
-            if (
-                assignmentChromosome?.Assignments == null
-                || !assignmentChromosome.Assignments.Any()
-            )
+            if (IsChromosomeEmpty(assignmentChromosome))
             {
                 return;
             }
 
-            IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome
-                .Assignments.Select(gene => RepairGeneIfNeeded(gene))
-                .Where(gene => gene != null)
-                .Cast<AssignmentGene>();
-
+            IEnumerable<AssignmentGene> repairedAssignments = RepairAllGenes(assignmentChromosome.Assignments);
             assignmentChromosome.Assignments = repairedAssignments;
         }
 
-        private AssignmentGene RepairGeneIfNeeded(AssignmentGene gene)
+        private bool IsChromosomeEmpty(AssignmentChromosome assignmentChromosome)
         {
-            if (IsAssignmentTimeWindowValid(gene))
+            return assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any();
+        }
+
+        private IEnumerable<AssignmentGene> RepairAllGenes(IEnumerable<AssignmentGene> assignments)
+        {
+            IEnumerable<AssignmentGene?> repairedGenes = assignments.Select(gene => TryRepairGene(gene));
+            IEnumerable<AssignmentGene?> validGenes = repairedGenes.Where(gene => gene != null);
+            return validGenes.Cast<AssignmentGene>();
+        }
+
+        private AssignmentGene? TryRepairGene(AssignmentGene assignmentGene)
+        {
+            if (IsGeneTimeWindowValid(assignmentGene))
             {
-                return gene;
+                return assignmentGene;
             }
 
-            DateTime validStartTime = CalculateValidStartTime(gene);
-            gene.StartTime = validStartTime;
+            return AttemptToShiftGeneIntoTimeWindow(assignmentGene);
+        }
 
-            TimeSpan validDuration = CalculateValidDuration(gene);
+        private bool IsGeneTimeWindowValid(AssignmentGene assignmentGene)
+        {
+            DateTime missionWindowStart = assignmentGene.Mission.TimeWindow.Start;
+            DateTime missionWindowEnd = assignmentGene.Mission.TimeWindow.End;
 
-            if (validDuration <= TimeSpan.Zero)
+            bool startsWithinWindow = assignmentGene.StartTime >= missionWindowStart;
+            bool endsWithinWindow = assignmentGene.EndTime <= missionWindowEnd;
+
+            return startsWithinWindow && endsWithinWindow;
+        }
+
+        private AssignmentGene? AttemptToShiftGeneIntoTimeWindow(AssignmentGene assignmentGene)
+        {
+            TimeSpan originalMissionDuration = assignmentGene.Duration;
+            DateTime adjustedStartTime = CalculateAdjustedStartTime(assignmentGene);
+            DateTime projectedEndTime = adjustedStartTime + originalMissionDuration;
+
+            if (DoesMissionFitInWindow(projectedEndTime, assignmentGene.Mission.TimeWindow.End))
             {
-                return null;
+                assignmentGene.StartTime = adjustedStartTime;
+                return assignmentGene;
             }
 
-            gene.Duration = validDuration;
-            return gene;
+            return null;
         }
 
-        private bool IsAssignmentTimeWindowValid(AssignmentGene gene)
+        private DateTime CalculateAdjustedStartTime(AssignmentGene assignmentGene)
         {
-            DateTime missionStart = gene.Mission.TimeWindow.Start;
-            DateTime missionEnd = gene.Mission.TimeWindow.End;
+            DateTime missionWindowStart = assignmentGene.Mission.TimeWindow.Start;
+            DateTime currentStartTime = assignmentGene.StartTime;
 
-            bool assignmentStartValid = gene.StartTime >= missionStart;
-            bool assignmentEndValid = gene.EndTime <= missionEnd;
-
-            return assignmentStartValid && assignmentEndValid;
+            bool startsBeforeWindow = currentStartTime < missionWindowStart;
+            return startsBeforeWindow ? missionWindowStart : currentStartTime;
         }
 
-        private DateTime CalculateValidStartTime(AssignmentGene gene)
+        private bool DoesMissionFitInWindow(DateTime projectedEndTime, DateTime missionWindowEnd)
         {
-            DateTime missionStart = gene.Mission.TimeWindow.Start;
-            return gene.StartTime < missionStart ? missionStart : gene.StartTime;
-        }
-
-        private TimeSpan CalculateValidDuration(AssignmentGene gene)
-        {
-            DateTime missionEnd = gene.Mission.TimeWindow.End;
-            TimeSpan maxPossibleDuration = missionEnd - gene.StartTime;
-            return maxPossibleDuration;
+            return projectedEndTime <= missionWindowEnd;
         }
     }
 }

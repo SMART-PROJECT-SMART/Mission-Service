@@ -80,19 +80,39 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                     continue;
 
                 UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
+                DateTime randomizedStartTime = GenerateRandomStartTimeWithinWindow(mission);
 
                 assignments.Add(
                     new AssignmentGene
                     {
                         Mission = mission,
                         UAV = selectedUav,
-                        StartTime = mission.TimeWindow.Start,
-                        Duration = mission.TimeWindow.End - mission.TimeWindow.Start,
+                        StartTime = randomizedStartTime,
+                        Duration = mission.Duration,
                     }
                 );
             }
 
             return new AssignmentChromosome { Assignments = assignments, IsValid = true };
+        }
+
+        private DateTime GenerateRandomStartTimeWithinWindow(Mission mission)
+        {
+            DateTime windowStart = mission.TimeWindow.Start;
+            DateTime windowEnd = mission.TimeWindow.End;
+            TimeSpan missionDuration = mission.Duration;
+
+            DateTime latestPossibleStart = windowEnd - missionDuration;
+
+            if (latestPossibleStart <= windowStart)
+            {
+                return windowStart;
+            }
+
+            TimeSpan availableTimeRange = latestPossibleStart - windowStart;
+            double randomSeconds = Random.Shared.NextDouble() * availableTimeRange.TotalSeconds;
+
+            return windowStart.AddSeconds(randomSeconds);
         }
     }
 }
