@@ -3,9 +3,10 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 

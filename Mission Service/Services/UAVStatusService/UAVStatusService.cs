@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Core.Common.Enums;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.UAVStatusService
 {

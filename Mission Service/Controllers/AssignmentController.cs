@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
-using Mission_Service.Services.AssignmentRequestQueue;
-using Mission_Service.Services.AssignmentResultManager;
+using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
+using Mission_Service.Services.AssignmentResultManager.Interfaces;
 
 namespace Mission_Service.Controllers
 {

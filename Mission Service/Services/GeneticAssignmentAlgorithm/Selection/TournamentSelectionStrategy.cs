@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Selection
 {

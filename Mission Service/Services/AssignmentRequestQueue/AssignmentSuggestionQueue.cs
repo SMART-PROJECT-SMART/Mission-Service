@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Models.Dto;
+using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 
 namespace Mission_Service.Services.AssignmentRequestQueue
 {

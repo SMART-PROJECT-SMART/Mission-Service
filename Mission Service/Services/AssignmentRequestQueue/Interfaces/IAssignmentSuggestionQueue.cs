@@ -1,7 +1,7 @@
 ﻿using System.Threading.Channels;
 using Mission_Service.Models.Dto;
 
-namespace Mission_Service.Services.AssignmentRequestQueue
+namespace Mission_Service.Services.AssignmentRequestQueue.Interfaces
 {
     public interface IAssignmentSuggestionQueue
     {

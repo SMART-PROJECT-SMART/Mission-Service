@@ -1,6 +1,7 @@
 ﻿using Mission_Service.Common.Constants;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
 {

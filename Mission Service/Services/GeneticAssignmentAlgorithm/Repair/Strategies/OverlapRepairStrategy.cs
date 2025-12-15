@@ -1,5 +1,6 @@
 ﻿using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 {

@@ -1,6 +1,6 @@
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 
 public interface IEliteSelector
 {

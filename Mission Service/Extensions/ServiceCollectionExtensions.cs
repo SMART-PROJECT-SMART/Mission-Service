@@ -17,6 +17,20 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.UAVStatusService;
+using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
+using Mission_Service.Services.AssignmentResultManager.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Extensions
 {
