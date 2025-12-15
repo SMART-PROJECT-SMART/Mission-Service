@@ -2,17 +2,19 @@
 {
     public class AssignmentSuggestionDto
     {
-        public List<Mission> Missions { get; set; }
-        public List<UAV> UAVs { get; set; }
-        public string CallbackURL { get; set; }
+        public string AssignmentId { get; set; }
+        public IReadOnlyCollection<Mission> Missions { get; set; }
 
-        public AssignmentSuggestionDto() { }
+        public AssignmentSuggestionDto()
+        {
+            AssignmentId = Guid.NewGuid().ToString();
+            Missions = Array.Empty<Mission>();
+        }
 
-        public AssignmentSuggestionDto(List<Mission> missions, List<UAV> uavs, string callbackURL)
+        public AssignmentSuggestionDto(IReadOnlyCollection<Mission> missions)
+            : this()
         {
             Missions = missions;
-            UAVs = uavs;
-            CallbackURL = callbackURL;
         }
     }
 }

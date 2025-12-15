@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Models.Dto;
-using Mission_Service.Services.Assignment_Request_Queue;
+using Mission_Service.Models.RO;
+using Mission_Service.Services.AssignmentRequestQueue;
+using Mission_Service.Services.AssignmentResultManager;
 
 namespace Mission_Service.Controllers
 {
@@ -11,19 +13,40 @@ namespace Mission_Service.Controllers
     public class AssignmentController : ControllerBase
     {
         private readonly IAssignmentSuggestionQueue _queue;
+        private readonly IAssignmentResultManager _assignmentResultManager;
 
-        public AssignmentController(IAssignmentSuggestionQueue queue)
+        public AssignmentController(
+            IAssignmentSuggestionQueue queue,
+            IAssignmentResultManager assignmentResultManager
+        )
         {
             _queue = queue;
+            _assignmentResultManager = assignmentResultManager;
         }
 
-        [HttpPost("create-assignment-suggestion")]
+        [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
         public async Task<IActionResult> CreateAssignmentSuggestion(
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
+            _assignmentResultManager.CreateExecution(assignmentSuggestionDto.AssignmentId);
+
             await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
-            return Ok(MissionServiceConstants.APIResponses.CREATE_ASSIGNMENT_RECIVED);
+
+            string statusUrl = Url.Action(
+                nameof(AssignmentResultController.CheckAssignmentStatus),
+                MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
+                new { assignmentId = assignmentSuggestionDto.AssignmentId },
+                Request.Scheme
+            );
+
+            var response = new AssignmentRequestAcceptedResponse(
+                MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
+                assignmentSuggestionDto.AssignmentId!,
+                statusUrl!
+            );
+
+            return Accepted(response);
         }
     }
 }

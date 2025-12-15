@@ -7,6 +7,9 @@
             public const string ALGORITHM_CONFIG_SECTION = "AlgorithmConfig";
             public const string TELEMETRY_WEIGHTS_CONFIG_SECTION = "TelemetryWeights";
             public const string FITNESS_WEIGHTS_CONFIG_SECTION = "FitnessWeights";
+            public const string ASSIGNMENT_QUEUE_CONFIG_SECTION = "AssignmentQueueConfig";
+            public const string LTS_CONFIG_SECTION = "LTS";
+            public const string BASE_ADDRESS_KEY = "BaseAddress";
         }
 
         public static class MainAlgorithm
@@ -23,6 +26,7 @@
         {
             public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;
             public const int MIN_CROSSOVER_POINT = 1;
+            public const double GENE_SELECTION_PROBABILITY = 0.5;
         }
 
         public static class TelemetryNormalization
@@ -52,13 +56,38 @@
 
         public static class APIResponses
         {
-            public const string CREATE_ASSIGNMENT_RECIVED =
-                "Create Assignment request received and will be procecced.";
+            public const string ASSIGNMENT_REQUEST_ACCEPTED =
+                "Assignment request accepted and is being processed";
+            public const string ASSIGNMENT_RESULT_NOT_FOUND =
+                "Assignment result not found or not ready yet";
+            public const string ASSIGNMENT_PENDING =
+                "Assignment is queued and waiting to be processed";
+            public const string ASSIGNMENT_PROCESSING = "Assignment is currently being processed";
+            public const string ASSIGNMENT_COMPLETED = "Assignment completed successfully";
+            public const string ASSIGNMENT_RESULT_READY = "Result is ready";
+            public const string ASSIGNMENT_RESULT_PROCESSING = "Result is still processing";
+        }
+
+        public static class Controllers
+        {
+            public const string ASSIGNMENT_RESULT_CONTROLLER = "AssignmentResult";
+        }
+
+        public static class Actions
+        {
+            public const string CREATE_ASSIGNMENT_SUGGESTION = "create-assignment-suggestion";
+            public const string STATUS = "status";
         }
 
         public static class HttpClients
         {
             public const string CALLBACK_HTTP_CLIENT = "AssignmentCallback";
+            public const string LTS_HTTP_CLIENT = "LTS";
+        }
+
+        public static class LTSEndpoints
+        {
+            public const string ALL_UAV_TELEMETRY = "all-uav-telemetry-data";
         }
     }
 }
