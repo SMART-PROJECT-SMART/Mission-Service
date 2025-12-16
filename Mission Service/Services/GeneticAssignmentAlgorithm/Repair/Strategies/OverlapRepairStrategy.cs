@@ -1,4 +1,5 @@
-﻿using Mission_Service.Common.Helpers;
+﻿using Mission_Service.Common.Constants;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
@@ -93,7 +94,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
                 return assignment1;
             }
 
-            return RandomSelectionHelper.ShouldOccur(0.5) ? assignment1 : assignment2;
+            return RandomSelectionHelper.ShouldOccur(MissionServiceConstants.Repair.EQUAL_PRIORITY_SELECTION_PROBABILITY)
+                ? assignment1
+                : assignment2;
         }
     }
 }

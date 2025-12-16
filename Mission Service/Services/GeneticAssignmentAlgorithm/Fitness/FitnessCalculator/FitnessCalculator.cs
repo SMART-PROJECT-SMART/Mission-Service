@@ -98,16 +98,7 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateActiveMissionPenalty(List<AssignmentGene> assignments)
     {
-        int activeMissionCount = 0;
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            if (assignment.UAV.ActiveMission != null)
-            {
-                activeMissionCount++;
-            }
-        }
-
+        int activeMissionCount = assignments.Count(a => a.UAV.ActiveMission != null);
         return activeMissionCount * _fitnessWeights.ActiveMissionPenalty;
     }
 }
