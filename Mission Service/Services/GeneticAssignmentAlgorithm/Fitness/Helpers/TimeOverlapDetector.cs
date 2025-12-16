@@ -1,4 +1,5 @@
 using Mission_Service.Models;
+using System.Linq;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
 
@@ -8,25 +9,9 @@ public static class TimeOverlapDetector
         List<AssignmentGene> assignments
     )
     {
-        Dictionary<int, List<AssignmentGene>> uavGroups =
-            new Dictionary<int, List<AssignmentGene>>();
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            if (
-                !uavGroups.TryGetValue(
-                    assignment.UAV.TailId,
-                    out List<AssignmentGene>? assignmentList
-                )
-            )
-            {
-                assignmentList = new List<AssignmentGene>();
-                uavGroups[assignment.UAV.TailId] = assignmentList;
-            }
-            assignmentList.Add(assignment);
-        }
-
-        return uavGroups;
+        return assignments
+            .GroupBy(assignment => assignment.UAV.TailId)
+            .ToDictionary(group => group.Key, group => group.ToList());
     }
 
     public static int CountTimeOverlaps(

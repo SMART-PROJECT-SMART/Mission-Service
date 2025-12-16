@@ -1,4 +1,5 @@
 using Mission_Service.Models;
+using System.Linq;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
 
@@ -6,44 +7,19 @@ public static class MissionAnalyzer
 {
     public static HashSet<string> GetUniqueMissionIds(List<AssignmentGene> assignments)
     {
-        HashSet<string> uniqueMissionIds = new HashSet<string>(assignments.Count);
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            uniqueMissionIds.Add(assignment.Mission.Id);
-        }
-
-        return uniqueMissionIds;
+       return assignments.Select(assignment => assignment.Mission.Id).ToHashSet();
     }
 
     public static int CountTypeMismatches(List<AssignmentGene> assignments)
     {
-        int mismatchCount = 0;
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            if (assignment.Mission.RequiredUAVType != assignment.UAV.UavType)
-            {
-                mismatchCount++;
-            }
-        }
-
-        return mismatchCount;
+        return assignments.Count(assignment => 
+        assignment.Mission.RequiredUAVType != assignment.UAV.UavType);
     }
 
     public static double CalculateTotalPriority(List<AssignmentGene> assignments)
     {
-        HashSet<string> seenMissionIds = new HashSet<string>(assignments.Count);
-        double totalPriority = 0.0;
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            if (seenMissionIds.Add(assignment.Mission.Id))
-            {
-                totalPriority += (int)assignment.Mission.Priority;
-            }
-        }
-
-        return totalPriority;
+        return assignments
+            .DistinctBy(assignment => assignment.Mission.Id)
+            .Sum(assignment => (int)assignment.Mission.Priority);
     }
 }

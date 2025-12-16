@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -68,19 +69,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IEnumerable<UAV> uavs)
         {
-            Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
-
-            foreach (UAV uav in uavs)
-            {
-                if (!uavsByType.TryGetValue(uav.UavType, out List<UAV>? uavList))
-                {
-                    uavList = new List<UAV>();
-                    uavsByType[uav.UavType] = uavList;
-                }
-                uavList.Add(uav);
-            }
-
-            return uavsByType;
+            return uavs
+                .GroupBy(uav => uav.UavType)
+                .ToDictionary(group => group.Key, group => group.ToList());
         }
 
         private UAV[] GetCompatibleUAVsExcludingCurrent(
@@ -99,27 +90,17 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private AssignmentGene SelectRandomGene(List<AssignmentGene> assignments)
         {
-            int randomIndex = Random.Shared.Next(assignments.Count);
-            return assignments[randomIndex];
+            return RandomSelectionHelper.SelectRandom(assignments);
         }
 
         private UAV SelectRandomUAV(UAV[] uavs)
         {
-            int randomIndex = Random.Shared.Next(uavs.Length);
-            return uavs[randomIndex];
+            return RandomSelectionHelper.SelectRandom(uavs);
         }
 
         private (int firstIndex, int secondIndex) SelectTwoDifferentRandomIndices(int count)
         {
-            int firstIndex = Random.Shared.Next(count);
-            int secondIndex = Random.Shared.Next(count);
-
-            while (secondIndex == firstIndex)
-            {
-                secondIndex = Random.Shared.Next(count);
-            }
-
-            return (firstIndex, secondIndex);
+            return RandomSelectionHelper.SelectTwoDifferentIndices(count);
         }
 
         private void SwapUAVsBetweenAssignments(
@@ -135,7 +116,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private bool ShouldPerformUAVSwap()
         {
-            return Random.Shared.Next(
+            return RandomSelectionHelper.GetRandomIndex(
                     MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS
                 ) == 0;
         }
