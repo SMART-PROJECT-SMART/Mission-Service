@@ -40,45 +40,34 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             HashSet<AssignmentGene> assignmentsToRemove
         )
         {
-            // Order by start time but don't materialize until necessary
-            IOrderedEnumerable<AssignmentGene> sortedAssignments = assignments.OrderBy(a =>
-                a.StartTime
-            );
-            int count = assignments.Count();
+            AssignmentGene[] sortedAssignments = assignments
+                .OrderBy(a => a.StartTime)
+                .ToArray();
 
-            if (count < 2)
+            if (sortedAssignments.Length < 2)
             {
                 return;
             }
 
-            AssignmentGene? previousAssignment = null;
-
-            foreach (AssignmentGene currentAssignment in sortedAssignments)
+            for (int i = 0; i < sortedAssignments.Length - 1; i++)
             {
+                AssignmentGene currentAssignment = sortedAssignments[i];
+
                 if (assignmentsToRemove.Contains(currentAssignment))
                 {
                     continue;
                 }
 
-                if (previousAssignment != null)
+                AssignmentGene nextAssignment = sortedAssignments[i + 1];
+
+                if (HasOverlap(currentAssignment, nextAssignment))
                 {
-                    if (assignmentsToRemove.Contains(previousAssignment))
-                    {
-                        previousAssignment = currentAssignment;
-                        continue;
-                    }
-
-                    if (HasOverlap(previousAssignment, currentAssignment))
-                    {
-                        AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
-                            previousAssignment,
-                            currentAssignment
-                        );
-                        assignmentsToRemove.Add(assignmentToRemove);
-                    }
+                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
+                        currentAssignment,
+                        nextAssignment
+                    );
+                    assignmentsToRemove.Add(assignmentToRemove);
                 }
-
-                previousAssignment = currentAssignment;
             }
         }
 

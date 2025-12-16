@@ -40,13 +40,13 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
             AssignmentGene geneToMutate = SelectRandomGene(assignments);
 
-            List<UAV> compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
+            UAV[] compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
                 geneToMutate.Mission.RequiredUAVType,
                 geneToMutate.UAV.TailId,
                 uavsByType
             );
 
-            if (compatibleUAVs.Count > 0)
+            if (compatibleUAVs.Length > 0)
             {
                 geneToMutate.UAV = SelectRandomUAV(compatibleUAVs);
             }
@@ -83,7 +83,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             return uavsByType;
         }
 
-        private List<UAV> GetCompatibleUAVsExcludingCurrent(
+        private UAV[] GetCompatibleUAVsExcludingCurrent(
             UAVType requiredType,
             int currentUAVTailId,
             Dictionary<UAVType, List<UAV>> uavsByType
@@ -91,10 +91,10 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
         {
             if (!uavsByType.TryGetValue(requiredType, out List<UAV>? uavsOfType))
             {
-                return new List<UAV>();
+                return Array.Empty<UAV>();
             }
 
-            return uavsOfType.Where(uav => uav.TailId != currentUAVTailId).ToList();
+            return uavsOfType.Where(uav => uav.TailId != currentUAVTailId).ToArray();
         }
 
         private AssignmentGene SelectRandomGene(List<AssignmentGene> assignments)
@@ -103,9 +103,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             return assignments[randomIndex];
         }
 
-        private UAV SelectRandomUAV(List<UAV> uavs)
+        private UAV SelectRandomUAV(UAV[] uavs)
         {
-            int randomIndex = Random.Shared.Next(uavs.Count);
+            int randomIndex = Random.Shared.Next(uavs.Length);
             return uavs[randomIndex];
         }
 

@@ -21,7 +21,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
             IEnumerable<UAV> uavs
         )
         {
-            // Materialize collections once for reuse across all chromosomes
             IReadOnlyList<Mission> missionList =
                 missions as IReadOnlyList<Mission> ?? missions.ToList();
             IReadOnlyList<UAV> uavList = uavs as IReadOnlyList<UAV> ?? uavs.ToList();

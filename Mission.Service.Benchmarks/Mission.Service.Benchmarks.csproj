@@ -12,4 +12,7 @@
     <ProjectReference Include="..\..\Core\Core\Core.csproj" />
     <ProjectReference Include="..\Mission Service\Mission Service.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BenchmarkDotNet.Artifacts\results\" />
+  </ItemGroup>
 </Project>
