@@ -14,13 +14,13 @@ namespace Mission.Service.Benchmarks.Configuration
     {
         public SmartBenchmarkConfig()
         {
-            AddJob(Job.Default
-                .WithLaunchCount(1)
-                .WithWarmupCount(5)
-                .WithIterationCount(15)
-                .WithGcServer(true)
-                .WithGcConcurrent(true)
-                .WithGcForce(true)
+            AddJob(
+                Job.Default.WithLaunchCount(1)
+                    .WithWarmupCount(5)
+                    .WithIterationCount(15)
+                    .WithGcServer(true)
+                    .WithGcConcurrent(true)
+                    .WithGcForce(true)
             );
 
             AddDiagnoser(MemoryDiagnoser.Default);
@@ -48,11 +48,7 @@ namespace Mission.Service.Benchmarks.Configuration
     {
         public QuickBenchmarkConfig()
         {
-            AddJob(Job.ShortRun
-                .WithGcServer(true)
-                .WithIterationCount(3)
-                .WithWarmupCount(1)
-            );
+            AddJob(Job.ShortRun.WithGcServer(true).WithIterationCount(3).WithWarmupCount(1));
 
             AddDiagnoser(MemoryDiagnoser.Default);
             AddExporter(MarkdownExporter.GitHub);

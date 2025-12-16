@@ -110,7 +110,8 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
             }
 
             bool shouldUseSecondaryParentGene =
-                Random.Shared.NextDouble() < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY;
+                Random.Shared.NextDouble()
+                < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY;
 
             return shouldUseSecondaryParentGene ? secondaryParentGene! : primaryParentGene;
         }

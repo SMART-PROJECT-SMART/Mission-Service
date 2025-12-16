@@ -123,9 +123,21 @@ public class OffspringGenerator : IOffspringGenerator
 
         return new CrossoverResult
         {
-            FirstChromosome = firstParentChromosome,
-            SecondChromosome = secondParentChromosome,
+            FirstChromosome = CloneChromosome(firstParentChromosome),
+            SecondChromosome = CloneChromosome(secondParentChromosome),
         };
+    }
+
+    private AssignmentChromosome CloneChromosome(AssignmentChromosome chromosome)
+    {
+        List<AssignmentGene> clonedGenes = new(chromosome.Assignments.Count());
+
+        foreach (AssignmentGene gene in chromosome.Assignments)
+        {
+            clonedGenes.Add(gene.Clone());
+        }
+
+        return new AssignmentChromosome { Assignments = clonedGenes, IsValid = chromosome.IsValid };
     }
 
     private void ApplyMutationToChromosome(

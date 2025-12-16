@@ -1,8 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using Core.Common.Enums;
 using Microsoft.Extensions.Options;
-using Mission.Service.Benchmarks.Configuration;
-using Mission.Service.Benchmarks.Helpers;
 using Mission_Service.Common.Enums;
 using Mission_Service.Config;
 using Mission_Service.Models;
@@ -19,6 +17,8 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
+using Mission.Service.Benchmarks.Configuration;
+using Mission.Service.Benchmarks.Helpers;
 using MissionModel = Mission_Service.Models.Mission;
 
 namespace Mission.Service.Benchmarks.Benchmarks
@@ -84,9 +84,7 @@ namespace Mission.Service.Benchmarks.Benchmarks
         [BenchmarkCategory("Component", "Population")]
         public int Population_Initialize()
         {
-            return _populationInitializer
-                .CreateInitialPopulation(_missions, _uavs)
-                .Count();
+            return _populationInitializer.CreateInitialPopulation(_missions, _uavs).Count();
         }
 
         [Benchmark(Description = "Repair - Single Chromosome")]
@@ -99,51 +97,57 @@ namespace Mission.Service.Benchmarks.Benchmarks
 
         private void InitializeComponents()
         {
-            var algorithmConfig = Options.Create(new AssignmentAlgorithmConfiguration
-            {
-                PopulationSize = 50,
-                MaxGenerations = 100,
-                ElitePrecentage = 0.1,
-                StagnationLimit = 20,
-                CrossoverProbability = 0.8,
-                MutationProbability = 0.1,
-                TournamentSize = 5
-            });
-
-            var telemetryWeights = Options.Create(new TelemetryWeightsConfiguration
-            {
-                Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
+            var algorithmConfig = Options.Create(
+                new AssignmentAlgorithmConfiguration
                 {
-                    {
-                        UAVType.Surveillance,
-                        new Dictionary<TelemetryFields, double>
-                        {
-                            { TelemetryFields.FuelAmount, 35.0 },
-                            { TelemetryFields.SignalStrength, 45.0 },
-                            { TelemetryFields.FlightTimeSec, 40.0 }
-                        }
-                    },
-                    {
-                        UAVType.Armed,
-                        new Dictionary<TelemetryFields, double>
-                        {
-                            { TelemetryFields.FuelAmount, 35.0 },
-                            { TelemetryFields.ThrustAfterInfluence, 45.0 },
-                            { TelemetryFields.CurrentSpeedKmph, 40.0 }
-                        }
-                    }
+                    PopulationSize = 50,
+                    MaxGenerations = 100,
+                    ElitePrecentage = 0.1,
+                    StagnationLimit = 20,
+                    CrossoverProbability = 0.8,
+                    MutationProbability = 0.1,
+                    TournamentSize = 5,
                 }
-            });
+            );
 
-            var fitnessWeights = Options.Create(new FitnessWeightsConfiguration
-            {
-                TelemetryOptimization = 150.0,
-                PriorityCoverage = 100.0,
-                MissionCoverageWeight = 1000.0,
-                TimeOverlapPenalty = -10000.0,
-                TypeMismatchPenalty = -10000.0,
-                ActiveMissionPenalty = -500.0
-            });
+            var telemetryWeights = Options.Create(
+                new TelemetryWeightsConfiguration
+                {
+                    Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
+                    {
+                        {
+                            UAVType.Surveillance,
+                            new Dictionary<TelemetryFields, double>
+                            {
+                                { TelemetryFields.FuelAmount, 35.0 },
+                                { TelemetryFields.SignalStrength, 45.0 },
+                                { TelemetryFields.FlightTimeSec, 40.0 },
+                            }
+                        },
+                        {
+                            UAVType.Armed,
+                            new Dictionary<TelemetryFields, double>
+                            {
+                                { TelemetryFields.FuelAmount, 35.0 },
+                                { TelemetryFields.ThrustAfterInfluence, 45.0 },
+                                { TelemetryFields.CurrentSpeedKmph, 40.0 },
+                            }
+                        },
+                    },
+                }
+            );
+
+            var fitnessWeights = Options.Create(
+                new FitnessWeightsConfiguration
+                {
+                    TelemetryOptimization = 150.0,
+                    PriorityCoverage = 100.0,
+                    MissionCoverageWeight = 1000.0,
+                    TimeOverlapPenalty = -10000.0,
+                    TypeMismatchPenalty = -10000.0,
+                    ActiveMissionPenalty = -500.0,
+                }
+            );
 
             _fitnessCalculator = new FitnessCalculator(telemetryWeights, fitnessWeights);
             _crossoverStrategy = new UniformCrossoverStrategy();
@@ -155,7 +159,7 @@ namespace Mission.Service.Benchmarks.Benchmarks
                 new TimeWindowRepairStrategy(),
                 new TypeMismatchRepairStrategy(),
                 new OverlapRepairStrategy(),
-                new DuplicateMissionRepairStrategy()
+                new DuplicateMissionRepairStrategy(),
             };
             _repairPipeline = new RepairPipline(repairStrategies);
         }

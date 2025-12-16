@@ -1,6 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Mission.Service.Benchmarks.Configuration;
-using Mission.Service.Benchmarks.Helpers;
+using Core.Common.Enums;
+using Microsoft.Extensions.Options;
+using Mission_Service.Common.Enums;
+using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
@@ -11,10 +13,8 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
-using Microsoft.Extensions.Options;
-using Mission_Service.Config;
-using Core.Common.Enums;
-using Mission_Service.Common.Enums;
+using Mission.Service.Benchmarks.Configuration;
+using Mission.Service.Benchmarks.Helpers;
 using MissionModel = Mission_Service.Models.Mission;
 
 namespace Mission.Service.Benchmarks.Benchmarks
@@ -43,7 +43,8 @@ namespace Mission.Service.Benchmarks.Benchmarks
 
             InitializeComponents();
 
-            _population = Enumerable.Range(0, PopulationSize)
+            _population = Enumerable
+                .Range(0, PopulationSize)
                 .Select(_ => TestDataGenerator.CreateSampleChromosome(_missions, _uavs))
                 .ToList();
         }
@@ -86,46 +87,51 @@ namespace Mission.Service.Benchmarks.Benchmarks
             var cloned = _population.Select(c => c.Clone()).ToList();
             _parallelExecutor.RepairPopulationInParallel(
                 cloned,
-                chromosome => _repairPipeline.RepairChromosomeViolaitions(chromosome, _missions, _uavs)
+                chromosome =>
+                    _repairPipeline.RepairChromosomeViolaitions(chromosome, _missions, _uavs)
             );
         }
 
         private void InitializeComponents()
         {
-            var telemetryWeights = Options.Create(new TelemetryWeightsConfiguration
-            {
-                Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
+            var telemetryWeights = Options.Create(
+                new TelemetryWeightsConfiguration
                 {
+                    Weights = new Dictionary<UAVType, Dictionary<TelemetryFields, double>>
                     {
-                        UAVType.Surveillance,
-                        new Dictionary<TelemetryFields, double>
                         {
-                            { TelemetryFields.FuelAmount, 35.0 },
-                            { TelemetryFields.SignalStrength, 45.0 },
-                            { TelemetryFields.FlightTimeSec, 40.0 }
-                        }
+                            UAVType.Surveillance,
+                            new Dictionary<TelemetryFields, double>
+                            {
+                                { TelemetryFields.FuelAmount, 35.0 },
+                                { TelemetryFields.SignalStrength, 45.0 },
+                                { TelemetryFields.FlightTimeSec, 40.0 },
+                            }
+                        },
+                        {
+                            UAVType.Armed,
+                            new Dictionary<TelemetryFields, double>
+                            {
+                                { TelemetryFields.FuelAmount, 35.0 },
+                                { TelemetryFields.ThrustAfterInfluence, 45.0 },
+                                { TelemetryFields.CurrentSpeedKmph, 40.0 },
+                            }
+                        },
                     },
-                    {
-                        UAVType.Armed,
-                        new Dictionary<TelemetryFields, double>
-                        {
-                            { TelemetryFields.FuelAmount, 35.0 },
-                            { TelemetryFields.ThrustAfterInfluence, 45.0 },
-                            { TelemetryFields.CurrentSpeedKmph, 40.0 }
-                        }
-                    }
                 }
-            });
+            );
 
-            var fitnessWeights = Options.Create(new FitnessWeightsConfiguration
-            {
-                TelemetryOptimization = 150.0,
-                PriorityCoverage = 100.0,
-                MissionCoverageWeight = 1000.0,
-                TimeOverlapPenalty = -10000.0,
-                TypeMismatchPenalty = -10000.0,
-                ActiveMissionPenalty = -500.0
-            });
+            var fitnessWeights = Options.Create(
+                new FitnessWeightsConfiguration
+                {
+                    TelemetryOptimization = 150.0,
+                    PriorityCoverage = 100.0,
+                    MissionCoverageWeight = 1000.0,
+                    TimeOverlapPenalty = -10000.0,
+                    TypeMismatchPenalty = -10000.0,
+                    ActiveMissionPenalty = -500.0,
+                }
+            );
 
             _fitnessCalculator = new FitnessCalculator(telemetryWeights, fitnessWeights);
             _parallelExecutor = new ParallelExecutor();
@@ -135,7 +141,7 @@ namespace Mission.Service.Benchmarks.Benchmarks
                 new TimeWindowRepairStrategy(),
                 new TypeMismatchRepairStrategy(),
                 new OverlapRepairStrategy(),
-                new DuplicateMissionRepairStrategy()
+                new DuplicateMissionRepairStrategy(),
             };
             _repairPipeline = new RepairPipline(repairStrategies);
         }

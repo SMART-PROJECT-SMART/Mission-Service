@@ -32,7 +32,7 @@
             {
                 Assignments = AssignmentsList.Select(gene => gene.Clone()).ToList(),
                 FitnessScore = FitnessScore,
-                IsValid = IsValid
+                IsValid = IsValid,
             };
         }
     }

@@ -61,7 +61,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
             _parallelExecutor.RepairPopulationInParallel(
                 currentPopulation,
                 chromosome =>
-                    _repairPipeline.RepairChromosomeViolaitions(chromosome, missionsWithCompatibleUAVs, uavs)
+                    _repairPipeline.RepairChromosomeViolaitions(
+                        chromosome,
+                        missionsWithCompatibleUAVs,
+                        uavs
+                    )
             );
 
             _parallelExecutor.EvaluatePopulationFitnessInParallel(

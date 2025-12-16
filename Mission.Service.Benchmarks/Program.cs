@@ -12,9 +12,7 @@ namespace Mission.Service.Benchmarks
                 return;
             }
 
-            BenchmarkSwitcher
-                .FromAssembly(typeof(Program).Assembly)
-                .Run(args);
+            BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
         }
 
         private static void ShowMenu()
