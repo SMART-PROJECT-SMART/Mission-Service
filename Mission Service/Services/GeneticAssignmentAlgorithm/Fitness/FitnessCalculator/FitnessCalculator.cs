@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;

@@ -1,7 +1,7 @@
 ﻿using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces
 {
     public interface IAssignmentAlgorithm
     {

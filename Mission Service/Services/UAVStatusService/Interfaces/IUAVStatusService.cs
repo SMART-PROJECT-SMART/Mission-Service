@@ -2,7 +2,7 @@ using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Core.Common.Enums;
 
-namespace Mission_Service.Services.UAVStatusService
+namespace Mission_Service.Services.UAVStatusService.Interfaces
 {
     public interface IUAVStatusService
     {

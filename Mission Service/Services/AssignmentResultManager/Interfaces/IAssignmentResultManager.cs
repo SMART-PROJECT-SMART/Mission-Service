@@ -2,7 +2,7 @@
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.AssignmentResultManager
+namespace Mission_Service.Services.AssignmentResultManager.Interfaces
 {
     public interface IAssignmentResultManager
     {

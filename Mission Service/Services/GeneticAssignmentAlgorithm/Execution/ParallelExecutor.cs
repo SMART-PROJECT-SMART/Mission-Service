@@ -1,4 +1,5 @@
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 

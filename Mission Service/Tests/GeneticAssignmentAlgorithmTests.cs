@@ -12,6 +12,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;

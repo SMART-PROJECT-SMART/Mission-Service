@@ -1,6 +1,6 @@
 ﻿using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces
 {
     public interface ICrossoverStrategy
     {

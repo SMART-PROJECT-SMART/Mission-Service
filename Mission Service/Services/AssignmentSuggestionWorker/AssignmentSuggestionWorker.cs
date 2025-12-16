@@ -2,12 +2,12 @@
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.Dto;
-using Mission_Service.Services.AssignmentRequestQueue;
-using Mission_Service.Services.AssignmentResultManager;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
 using Mission_Service.Common.Enums;
-using Mission_Service.Services.UAVStatusService;
 using Core.Common.Enums;
+using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
+using Mission_Service.Services.AssignmentResultManager.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.AssignmentSuggestionWorker
 {

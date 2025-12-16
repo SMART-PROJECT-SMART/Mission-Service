@@ -1,5 +1,6 @@
 using Mission_Service.Extensions;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 

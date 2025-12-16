@@ -1,7 +1,7 @@
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
 
 public interface IOffspringGenerator
 {

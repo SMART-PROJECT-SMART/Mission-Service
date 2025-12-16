@@ -5,12 +5,13 @@ using Mission_Service.Config;
 using Mission_Service.Extensions;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
 {
@@ -57,7 +58,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 .CreateInitialPopulation(missionsWithCompatibleUAVs, uavs)
                 .ToList();
 
-            // ✅ FIX: Repair initial population before fitness evaluation
             _parallelExecutor.RepairPopulationInParallel(
                 currentPopulation,
                 chromosome =>

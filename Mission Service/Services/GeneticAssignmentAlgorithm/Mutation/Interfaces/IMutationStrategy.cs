@@ -1,7 +1,7 @@
 ﻿using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation.Interfaces
 {
     public interface IMutationStrategy
     {

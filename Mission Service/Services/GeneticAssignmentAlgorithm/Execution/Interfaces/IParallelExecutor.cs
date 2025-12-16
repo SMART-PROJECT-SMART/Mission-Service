@@ -1,7 +1,7 @@
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 
-namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
+namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
 
 public interface IParallelExecutor
 {
