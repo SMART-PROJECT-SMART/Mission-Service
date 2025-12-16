@@ -25,11 +25,13 @@ public static class TimeOverlapDetector
             if (uavAssignments.Count <= 1)
                 continue;
 
-            uavAssignments.Sort((a, b) => a.StartTime.CompareTo(b.StartTime));
+            AssignmentGene[] sortedAssignments = uavAssignments
+                .OrderBy(a => a.StartTime)
+                .ToArray();
 
-            for (int i = 0; i < uavAssignments.Count - 1; i++)
+            for (int i = 0; i < sortedAssignments.Length - 1; i++)
             {
-                if (uavAssignments[i].EndTime > uavAssignments[i + 1].StartTime)
+                if (sortedAssignments[i].EndTime > sortedAssignments[i + 1].StartTime)
                 {
                     overlapCount++;
                 }
