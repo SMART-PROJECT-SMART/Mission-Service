@@ -25,5 +25,15 @@
         }
 
         public int AssignmentCount => AssignmentsList.Count;
+
+        public AssignmentChromosome Clone()
+        {
+            return new AssignmentChromosome
+            {
+                Assignments = AssignmentsList.Select(gene => gene.Clone()).ToList(),
+                FitnessScore = FitnessScore,
+                IsValid = IsValid
+            };
+        }
     }
 }
