@@ -1,4 +1,5 @@
-﻿using Mission_Service.Common.Constants;
+﻿using System.Runtime.InteropServices;
+using Mission_Service.Common.Constants;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
@@ -21,36 +22,38 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
                 firstChromosome
             );
 
-            return new CrossoverResult
-            {
-                FirstChromosome = firstChild,
-                SecondChromosome = secondChild,
-            };
+            return new CrossoverResult(firstChild, secondChild);
         }
 
         private AssignmentChromosome CreateMissionBasedChild(
-            AssignmentChromosome primary,
-            AssignmentChromosome secondary
+            AssignmentChromosome primaryParent,
+            AssignmentChromosome secondaryParent
         )
         {
-            List<AssignmentGene> primaryAssignments = primary.AssignmentsList;
-            List<AssignmentGene> secondaryAssignments = secondary.AssignmentsList;
-
-            Dictionary<string, AssignmentGene> secondaryLookup = BuildMissionLookup(
-                secondaryAssignments
+            ReadOnlySpan<AssignmentGene> primaryParentGenes = CollectionsMarshal.AsSpan(
+                primaryParent.AssignmentsList
+            );
+            ReadOnlySpan<AssignmentGene> secondaryParentGenes = CollectionsMarshal.AsSpan(
+                secondaryParent.AssignmentsList
             );
 
-            List<AssignmentGene> childGenes = new List<AssignmentGene>(primaryAssignments.Count);
-            HashSet<string> processedMissionIds = new HashSet<string>(primaryAssignments.Count);
+            Dictionary<string, AssignmentGene> secondaryParentLookup = BuildMissionLookupFromGenes(
+                secondaryParentGenes
+            );
+
+            List<AssignmentGene> childGenes = new(
+                primaryParentGenes.Length + secondaryParentGenes.Length
+            );
+            HashSet<string> processedMissionIds = new(primaryParentGenes.Length);
 
             InheritGenesFromPrimaryParent(
-                primaryAssignments,
-                secondaryLookup,
+                primaryParentGenes,
+                secondaryParentLookup,
                 childGenes,
                 processedMissionIds
             );
             InheritUniqueGenesFromSecondaryParent(
-                secondaryAssignments,
+                secondaryParentGenes,
                 processedMissionIds,
                 childGenes
             );
@@ -58,32 +61,33 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
             return new AssignmentChromosome { Assignments = childGenes, IsValid = true };
         }
 
-        private Dictionary<string, AssignmentGene> BuildMissionLookup(
-            List<AssignmentGene> assignments
+        private Dictionary<string, AssignmentGene> BuildMissionLookupFromGenes(
+            ReadOnlySpan<AssignmentGene> genes
         )
         {
-            Dictionary<string, AssignmentGene> lookup = new Dictionary<string, AssignmentGene>(
-                assignments.Count
-            );
+            Dictionary<string, AssignmentGene> missionLookup = new(genes.Length);
 
-            foreach (AssignmentGene gene in assignments)
+            foreach (AssignmentGene gene in genes)
             {
-                lookup[gene.Mission.Id] = gene;
+                missionLookup[gene.Mission.Id] = gene;
             }
 
-            return lookup;
+            return missionLookup;
         }
 
         private void InheritGenesFromPrimaryParent(
-            List<AssignmentGene> primaryAssignments,
-            Dictionary<string, AssignmentGene> secondaryLookup,
+            ReadOnlySpan<AssignmentGene> primaryParentGenes,
+            Dictionary<string, AssignmentGene> secondaryParentLookup,
             List<AssignmentGene> childGenes,
             HashSet<string> processedMissionIds
         )
         {
-            foreach (AssignmentGene primaryGene in primaryAssignments)
+            foreach (AssignmentGene primaryGene in primaryParentGenes)
             {
-                AssignmentGene selectedGene = SelectGeneFromParents(primaryGene, secondaryLookup);
+                AssignmentGene selectedGene = SelectGeneFromParents(
+                    primaryGene,
+                    secondaryParentLookup
+                );
 
                 childGenes.Add(selectedGene.Clone());
                 processedMissionIds.Add(selectedGene.Mission.Id);
@@ -91,31 +95,37 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
         }
 
         private AssignmentGene SelectGeneFromParents(
-            AssignmentGene primaryGene,
-            Dictionary<string, AssignmentGene> secondaryLookup
+            AssignmentGene primaryParentGene,
+            Dictionary<string, AssignmentGene> secondaryParentLookup
         )
         {
-            bool secondaryHasMission = secondaryLookup.TryGetValue(
-                primaryGene.Mission.Id,
-                out AssignmentGene? secondaryGene
+            bool secondaryParentHasSameMission = secondaryParentLookup.TryGetValue(
+                primaryParentGene.Mission.Id,
+                out AssignmentGene? secondaryParentGene
             );
-            bool shouldUseSecondary =
-                secondaryHasMission
-                && Random.Shared.NextDouble()
-                    < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY;
 
-            return shouldUseSecondary ? secondaryGene! : primaryGene;
+            if (!secondaryParentHasSameMission)
+            {
+                return primaryParentGene;
+            }
+
+            bool shouldUseSecondaryParentGene =
+                Random.Shared.NextDouble() < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY;
+
+            return shouldUseSecondaryParentGene ? secondaryParentGene! : primaryParentGene;
         }
 
         private void InheritUniqueGenesFromSecondaryParent(
-            List<AssignmentGene> secondaryAssignments,
+            ReadOnlySpan<AssignmentGene> secondaryParentGenes,
             HashSet<string> processedMissionIds,
             List<AssignmentGene> childGenes
         )
         {
-            foreach (AssignmentGene secondaryGene in secondaryAssignments)
+            foreach (AssignmentGene secondaryGene in secondaryParentGenes)
             {
-                if (processedMissionIds.Add(secondaryGene.Mission.Id))
+                bool isUniqueMission = processedMissionIds.Add(secondaryGene.Mission.Id);
+
+                if (isUniqueMission)
                 {
                     childGenes.Add(secondaryGene.Clone());
                 }
