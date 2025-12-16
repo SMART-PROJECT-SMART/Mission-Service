@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -110,10 +111,7 @@ public class OffspringGenerator : IOffspringGenerator
         AssignmentChromosome secondParentChromosome
     )
     {
-        bool shouldPerformCrossover =
-            Random.Shared.NextDouble() < _algorithmConfig.CrossoverProbability;
-
-        if (shouldPerformCrossover)
+        if (RandomSelectionHelper.ShouldOccur(_algorithmConfig.CrossoverProbability))
         {
             return _crossoverStrategy.CrossoverChromosomes(
                 firstParentChromosome,
@@ -133,10 +131,7 @@ public class OffspringGenerator : IOffspringGenerator
         IReadOnlyList<UAV> availableUAVs
     )
     {
-        bool shouldApplyMutation =
-            Random.Shared.NextDouble() < _algorithmConfig.MutationProbability;
-
-        if (shouldApplyMutation)
+        if (RandomSelectionHelper.ShouldOccur(_algorithmConfig.MutationProbability))
         {
             _mutationStrategy.MutateChromosome(chromosomeToMutate, availableUAVs);
         }

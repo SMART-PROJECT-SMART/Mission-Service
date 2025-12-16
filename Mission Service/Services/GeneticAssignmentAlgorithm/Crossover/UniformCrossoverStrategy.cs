@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using Mission_Service.Common.Constants;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
@@ -99,21 +100,14 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
             Dictionary<string, AssignmentGene> secondaryParentLookup
         )
         {
-            bool secondaryParentHasSameMission = secondaryParentLookup.TryGetValue(
-                primaryParentGene.Mission.Id,
-                out AssignmentGene? secondaryParentGene
-            );
-
-            if (!secondaryParentHasSameMission)
+            if (!secondaryParentLookup.TryGetValue(primaryParentGene.Mission.Id, out AssignmentGene? secondaryParentGene))
             {
                 return primaryParentGene;
             }
 
-            bool shouldUseSecondaryParentGene =
-                Random.Shared.NextDouble()
-                < MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY;
-
-            return shouldUseSecondaryParentGene ? secondaryParentGene! : primaryParentGene;
+            return RandomSelectionHelper.ShouldOccur(MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY)
+                ? secondaryParentGene!
+                : primaryParentGene;
         }
 
         private void InheritUniqueGenesFromSecondaryParent(
