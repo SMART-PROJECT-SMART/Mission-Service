@@ -40,9 +40,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             HashSet<AssignmentGene> assignmentsToRemove
         )
         {
-            AssignmentGene[] sortedAssignments = assignments
-                .OrderBy(a => a.StartTime)
-                .ToArray();
+            AssignmentGene[] sortedAssignments = assignments.OrderBy(a => a.StartTime).ToArray();
 
             if (sortedAssignments.Length < 2)
             {

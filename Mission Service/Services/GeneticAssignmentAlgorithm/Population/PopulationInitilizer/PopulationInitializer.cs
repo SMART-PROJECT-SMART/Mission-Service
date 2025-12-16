@@ -50,8 +50,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
 
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IReadOnlyList<UAV> uavs)
         {
-            return uavs
-                .GroupBy(uav => uav.UavType)
+            return uavs.GroupBy(uav => uav.UavType)
                 .ToDictionary(group => group.Key, group => group.ToList());
         }
 

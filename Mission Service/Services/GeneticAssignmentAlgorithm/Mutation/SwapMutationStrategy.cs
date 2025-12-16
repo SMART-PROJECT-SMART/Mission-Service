@@ -36,7 +36,10 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             }
         }
 
-        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome, Dictionary<UAVType, List<UAV>> uavsByType)
+        private void MutateUAVSwap(
+            AssignmentChromosome assignmentChromosome,
+            Dictionary<UAVType, List<UAV>> uavsByType
+        )
         {
             List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
             AssignmentGene geneToMutate = SelectRandomGene(assignments);
@@ -69,8 +72,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IEnumerable<UAV> uavs)
         {
-            return uavs
-                .GroupBy(uav => uav.UavType)
+            return uavs.GroupBy(uav => uav.UavType)
                 .ToDictionary(group => group.Key, group => group.ToList());
         }
 

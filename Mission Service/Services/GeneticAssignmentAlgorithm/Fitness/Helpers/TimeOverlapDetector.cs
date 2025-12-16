@@ -1,5 +1,5 @@
-using Mission_Service.Models;
 using System.Linq;
+using Mission_Service.Models;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
 
