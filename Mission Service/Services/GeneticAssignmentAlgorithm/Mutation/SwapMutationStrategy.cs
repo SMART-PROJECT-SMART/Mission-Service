@@ -10,8 +10,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 {
     public class SwapMutationStrategy : IMutationStrategy
     {
-        private Dictionary<UAVType, List<UAV>>? _uavsByType;
-
         public void MutateChromosome(
             AssignmentChromosome assignmentChromosome,
             IEnumerable<UAV> uavs
@@ -25,11 +23,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
                 return;
             }
 
-            InitializeUAVCacheIfNeeded(uavs);
+            Dictionary<UAVType, List<UAV>> uavsByType = GroupUAVsByType(uavs);
 
             if (ShouldPerformUAVSwap())
             {
-                MutateUAVSwap(assignmentChromosome);
+                MutateUAVSwap(assignmentChromosome, uavsByType);
             }
             else
             {
@@ -37,14 +35,15 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             }
         }
 
-        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome)
+        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome, Dictionary<UAVType, List<UAV>> uavsByType)
         {
             List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
             AssignmentGene geneToMutate = SelectRandomGene(assignments);
 
             List<UAV> compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
                 geneToMutate.Mission.RequiredUAVType,
-                geneToMutate.UAV.TailId
+                geneToMutate.UAV.TailId,
+                uavsByType
             );
 
             if (compatibleUAVs.Count > 0)
@@ -67,11 +66,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             SwapUAVsBetweenAssignments(assignments[firstIndex], assignments[secondIndex]);
         }
 
-        private void InitializeUAVCacheIfNeeded(IEnumerable<UAV> uavs)
-        {
-            _uavsByType ??= GroupUAVsByType(uavs);
-        }
-
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IEnumerable<UAV> uavs)
         {
             Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
@@ -91,10 +85,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private List<UAV> GetCompatibleUAVsExcludingCurrent(
             UAVType requiredType,
-            int currentUAVTailId
+            int currentUAVTailId,
+            Dictionary<UAVType, List<UAV>> uavsByType
         )
         {
-            if (!_uavsByType!.TryGetValue(requiredType, out List<UAV>? uavsOfType))
+            if (!uavsByType.TryGetValue(requiredType, out List<UAV>? uavsOfType))
             {
                 return new List<UAV>();
             }
