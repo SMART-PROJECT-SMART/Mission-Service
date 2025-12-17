@@ -42,7 +42,7 @@ namespace Mission_Service.Controllers
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
                 new { assignmentId = assignmentSuggestionDto.AssignmentId },
                 Request.Scheme
-            );
+            )!;
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
