@@ -49,6 +49,10 @@ namespace Mission_Service.Services.MissionScheduler
                     MissionServiceConstants.MissionExecution.LONGITUDE_KEY,
                     missionAssignment.Mission.Location.Longitude
                 )
+                .UsingJobData(
+                    MissionServiceConstants.MissionExecution.ALTITUDE_KEY,
+                    missionAssignment.Mission.Location.Altitude
+                )
                 .Build();
         }
 

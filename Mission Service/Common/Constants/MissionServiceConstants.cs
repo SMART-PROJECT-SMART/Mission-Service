@@ -132,6 +132,7 @@
             public const string TAIL_ID_KEY = "TailId";
             public const string LATITUDE_KEY = "Latitude";
             public const string LONGITUDE_KEY = "Longitude";
+            public const string ALTITUDE_KEY = "Altitude";
             public const string TRIGGER_PREFIX = "trigger-";
         }
     }

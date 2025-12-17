@@ -1,4 +1,6 @@
+using Core.Models;
 using Mission_Service.Common.Constants;
+using Mission_Service.Models.Dto;
 using Quartz;
 
 namespace Mission_Service.Services.Jobs
@@ -20,18 +22,14 @@ namespace Mission_Service.Services.Jobs
                 MissionServiceConstants.HttpClients.SIMULATOR_CLIENT
             );
 
-            object missionPayload = new
+            SimulateMissionRequest missionRequest = new SimulateMissionRequest
             {
                 TailId = missionDataMap.GetInt(MissionServiceConstants.MissionExecution.TAIL_ID_KEY),
-                Destination = new
-                {
-                    Latitude = missionDataMap.GetDouble(
-                        MissionServiceConstants.MissionExecution.LATITUDE_KEY
-                    ),
-                    Longitude = missionDataMap.GetDouble(
-                        MissionServiceConstants.MissionExecution.LONGITUDE_KEY
-                    ),
-                },
+                Destination = new Location(
+                    missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.LATITUDE_KEY),
+                    missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.LONGITUDE_KEY),
+                    missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.ALTITUDE_KEY)
+                ),
                 MissionId = missionDataMap.GetString(
                     MissionServiceConstants.MissionExecution.MISSION_ID_KEY
                 ),
@@ -39,7 +37,7 @@ namespace Mission_Service.Services.Jobs
 
             await simulatorHttpClient.PostAsJsonAsync(
                 MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                missionPayload
+                missionRequest
             );
         }
     }
