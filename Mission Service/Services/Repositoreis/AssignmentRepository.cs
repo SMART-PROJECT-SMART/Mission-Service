@@ -14,9 +14,7 @@ namespace Mission_Service.Services.Repositoreis
 
         public AssignmentRepository(IMongoDatabase mongoDatabase)
         {
-            _assignmentCollection = mongoDatabase.GetCollection<Assignment>(
-                MissionServiceConstants.MongoDB.ASSIGNMENTS_COLLECTION
-            );
+            _assignmentCollection = mongoDatabase.GetCollection<Assignment>(MissionServiceConstants.MongoDB.ASSIGNMENTS_COLLECTION);
         }
 
         public async Task SaveAssignmentAsync(ApplyAssignmentDto applyAssignmentDto)
@@ -25,19 +23,34 @@ namespace Mission_Service.Services.Repositoreis
             await _assignmentCollection.InsertOneAsync(assignmentToSave);
         }
 
-        public Task<AssignmentRo?> GetAssignmentByIdAsync(string assignmentId)
+        public async Task<AssignmentRo?> GetAssignmentByIdAsync(string assignmentId)
         {
-            throw new NotImplementedException();
+            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(a => a.Id, assignmentId);
+            Assignment? assignment = await _assignmentCollection
+                .Find(idFilter)
+                .FirstOrDefaultAsync();
+
+            return assignment?.ToRo();
         }
 
-        public Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(int skip = 0, int limit = 100)
+        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(int skip = 0, int limit = 100)
         {
-            throw new NotImplementedException();
+            List<Assignment> assignments = await _assignmentCollection
+                .Find(FilterDefinition<Assignment>.Empty)
+                .SortByDescending(a => a.CreatedAt)
+                .Skip(skip)
+                .Limit(limit)
+                .ToListAsync();
+
+            return assignments.Select(a => a.ToRo());
         }
 
-        public Task DeleteAssignmentAsync(string assignmentId)
+        public async Task<bool> DeleteAssignmentAsync(string assignmentId)
         {
-            throw new NotImplementedException();
+            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(a => a.Id, assignmentId);
+            DeleteResult deleteResult = await _assignmentCollection.DeleteOneAsync(idFilter);
+
+            return deleteResult.DeletedCount > 0;
         }
     }
 }
