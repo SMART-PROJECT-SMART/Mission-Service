@@ -50,7 +50,7 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost("apply-assignment")]
-        public IActionResult ApplyAssignment(ApplyAssignmetnDto applyAssignmetnDto)
+        public IActionResult ApplyAssignment(ApplyAssignmentDto applyAssignmetnDto)
         {
             return Ok();
         }

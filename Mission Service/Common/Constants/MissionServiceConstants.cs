@@ -13,6 +13,11 @@
             public const string BASE_ADDRESS_KEY = "BaseAddress";
         }
 
+        public static class MongoDB
+        {
+            public const string ASSIGNMENTS_COLLECTION = "assignments";
+        }
+
         public static class MainAlgorithm
         {
             public const int AMOUNT_OF_MUTATION_OPTIONS = 2;

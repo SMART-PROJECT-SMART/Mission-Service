@@ -94,7 +94,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
                 return assignment1;
             }
 
-            return RandomSelectionHelper.ShouldOccur(MissionServiceConstants.Repair.EQUAL_PRIORITY_SELECTION_PROBABILITY)
+            return RandomSelectionHelper.ShouldOccur(
+                MissionServiceConstants.Repair.EQUAL_PRIORITY_SELECTION_PROBABILITY
+            )
                 ? assignment1
                 : assignment2;
         }

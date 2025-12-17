@@ -7,7 +7,7 @@ public class ParallelExecutor : IParallelExecutor
 {
     private static readonly ParallelOptions _parallelOptions = new()
     {
-        MaxDegreeOfParallelism = Environment.ProcessorCount
+        MaxDegreeOfParallelism = Environment.ProcessorCount,
     };
 
     public void EvaluatePopulationFitnessInParallel(
@@ -27,10 +27,6 @@ public class ParallelExecutor : IParallelExecutor
         Action<AssignmentChromosome> repairSingleChromosome
     )
     {
-        Parallel.ForEach(
-            chromosomePopulationToRepair,
-            _parallelOptions,
-            repairSingleChromosome
-        );
+        Parallel.ForEach(chromosomePopulationToRepair, _parallelOptions, repairSingleChromosome);
     }
 }

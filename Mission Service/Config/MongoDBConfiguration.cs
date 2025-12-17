@@ -9,7 +9,14 @@
         public TimeSpan MaxConnectionIdleTime { get; set; }
         public TimeSpan ServerSelectionTimeout { get; set; }
 
-        public MongoDBConfiguration(string connectionString, string databaseName, int maxConnectionPoolSize, int minConnectionPoolSize, TimeSpan maxConnectionIdleTime, TimeSpan serverSelectionTimeout)
+        public MongoDBConfiguration(
+            string connectionString,
+            string databaseName,
+            int maxConnectionPoolSize,
+            int minConnectionPoolSize,
+            TimeSpan maxConnectionIdleTime,
+            TimeSpan serverSelectionTimeout
+        )
         {
             ConnectionString = connectionString;
             DatabaseName = databaseName;
