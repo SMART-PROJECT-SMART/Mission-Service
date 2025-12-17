@@ -240,7 +240,10 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddQuartzServices(this IServiceCollection services)
         {
             services.AddTransient<Services.Jobs.MissionExecutorJob>();
-            services.AddSingleton<Services.MissionScheduler.Interfaces.IMissionScheduler, Services.MissionScheduler.MissionScheduler>();
+            services.AddSingleton<
+                Services.MissionScheduler.Interfaces.IMissionScheduler,
+                Services.MissionScheduler.MissionScheduler
+            >();
 
             services.AddQuartz(q =>
             {
@@ -261,7 +264,9 @@ namespace Mission_Service.Extensions
                 MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
                 client =>
                 {
-                    string? baseUrl = configuration[MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY];
+                    string? baseUrl = configuration[
+                        MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY
+                    ];
 
                     if (!string.IsNullOrEmpty(baseUrl))
                     {
