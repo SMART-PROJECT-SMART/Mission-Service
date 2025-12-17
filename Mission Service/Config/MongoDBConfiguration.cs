@@ -2,12 +2,14 @@
 {
     public class MongoDBConfiguration
     {
-        public string ConnectionString { get; set; }
-        public string DatabaseName { get; set; }
+        public string ConnectionString { get; set; } = string.Empty;
+        public string DatabaseName { get; set; } = string.Empty;
         public int MaxConnectionPoolSize { get; set; }
         public int MinConnectionPoolSize { get; set; }
         public TimeSpan MaxConnectionIdleTime { get; set; }
         public TimeSpan ServerSelectionTimeout { get; set; }
+
+        public MongoDBConfiguration() { }
 
         public MongoDBConfiguration(
             string connectionString,

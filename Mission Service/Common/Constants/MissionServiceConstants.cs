@@ -31,6 +31,8 @@
             public const string ASSIGNMENT_ID_REQUIRED = "Assignment ID is required";
             public const string MISSIONS_REQUIRED = "Missions are required";
             public const string MISSIONS_MIN_LENGTH = "At least one mission is required";
+            public const string ASSIGNMENTS_LENGTH_MISMATCH =
+                "Suggested and actual assignments must have the same length";
         }
 
         public static class MainAlgorithm

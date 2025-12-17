@@ -10,21 +10,8 @@ namespace Mission_Service.Extensions
         {
             return new Assignment
             {
-                // Id is null - MongoDB will auto-generate it
-                SuggestedAssignments = dto
-                    .SuggestedAssignments.Select(kvp => new MissionToUavAssignment
-                    {
-                        Mission = kvp.Key,
-                        UavTailId = kvp.Value,
-                    })
-                    .ToList(),
-                ActualAssignments = dto
-                    .ActualAssignments.Select(kvp => new MissionToUavAssignment
-                    {
-                        Mission = kvp.Key,
-                        UavTailId = kvp.Value,
-                    })
-                    .ToList(),
+                SuggestedAssignments = dto.SuggestedAssignments.ToList(),
+                ActualAssignments = dto.ActualAssignments.ToList(),
                 CreatedAt = DateTime.UtcNow,
             };
         }
