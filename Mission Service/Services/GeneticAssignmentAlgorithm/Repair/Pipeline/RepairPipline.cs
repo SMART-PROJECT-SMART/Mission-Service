@@ -45,16 +45,12 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline
                 }
             }
 
-            List<AssignmentGene> finalAssignments = assignmentChromosome.AssignmentsList;
-            HashSet<string> assignedMissionIds = new HashSet<string>(finalAssignments.Count);
+            HashSet<string> assignedMissionIds = assignmentChromosome.AssignmentsList
+                .Select(a => a.Mission.Id)
+                .ToHashSet();
 
-            foreach (AssignmentGene assignment in finalAssignments)
-            {
-                assignedMissionIds.Add(assignment.Mission.Id);
-            }
-
-            bool allMissionsAssigned = missions.All(m => assignedMissionIds.Contains(m.Id));
-            assignmentChromosome.IsValid = allMissionsAssigned && assignmentChromosome.IsValid;
+            assignmentChromosome.IsValid =
+                missions.All(m => assignedMissionIds.Contains(m.Id)) && assignmentChromosome.IsValid;
         }
     }
 }

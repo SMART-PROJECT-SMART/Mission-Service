@@ -17,18 +17,23 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
                 return;
             }
 
-            IEnumerable<AssignmentGene> repairedAssignments = RepairAllGenes(assignmentChromosome.Assignments);
+            IEnumerable<AssignmentGene> repairedAssignments = RepairAllGenes(
+                assignmentChromosome.Assignments
+            );
             assignmentChromosome.Assignments = repairedAssignments;
         }
 
         private bool IsChromosomeEmpty(AssignmentChromosome assignmentChromosome)
         {
-            return assignmentChromosome?.Assignments == null || !assignmentChromosome.Assignments.Any();
+            return assignmentChromosome?.Assignments == null
+                || !assignmentChromosome.Assignments.Any();
         }
 
         private IEnumerable<AssignmentGene> RepairAllGenes(IEnumerable<AssignmentGene> assignments)
         {
-            IEnumerable<AssignmentGene?> repairedGenes = assignments.Select(gene => TryRepairGene(gene));
+            IEnumerable<AssignmentGene?> repairedGenes = assignments.Select(gene =>
+                TryRepairGene(gene)
+            );
             IEnumerable<AssignmentGene?> validGenes = repairedGenes.Where(gene => gene != null);
             return validGenes.Cast<AssignmentGene>();
         }

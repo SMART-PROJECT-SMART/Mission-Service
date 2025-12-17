@@ -1,4 +1,5 @@
-﻿using Mission_Service.Models;
+﻿using Mission_Service.Common.Helpers;
+using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
 
@@ -58,9 +59,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 
         private UAV SelectRandomUAV(IEnumerable<UAV> compatibleUAVs)
         {
-            int count = compatibleUAVs.Count();
-            int randomIndex = Random.Shared.Next(count);
-            return compatibleUAVs.ElementAt(randomIndex);
+            return RandomSelectionHelper.SelectRandom(compatibleUAVs);
         }
     }
 }

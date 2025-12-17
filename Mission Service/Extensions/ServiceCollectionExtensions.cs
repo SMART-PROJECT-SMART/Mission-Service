@@ -3,33 +3,33 @@ using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue;
+using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
+using Mission_Service.Services.AssignmentResultManager.Interfaces;
 using Mission_Service.Services.AssignmentSuggestionWorker;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
-using Mission_Service.Services.UAVStatusService;
-using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
-using Mission_Service.Services.AssignmentResultManager.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Extensions
@@ -107,14 +107,14 @@ namespace Mission_Service.Extensions
             this IServiceCollection services
         )
         {
-            services.AddSingleton<IAssignmentAlgorithm, GeneticAssignmentAlgorithm>();
-            services.AddSingleton<IFitnessCalculator, FitnessCalculator>();
-            services.AddSingleton<IPopulationInitializer, PopulationInitializer>();
-            services.AddSingleton<ISelectionStrategy, TournamentSelectionStrategy>();
-            services.AddSingleton<ICrossoverStrategy, UniformCrossoverStrategy>();
-            services.AddSingleton<IMutationStrategy, SwapMutationStrategy>();
-            services.AddSingleton<IEliteSelector, EliteSelector>();
-            services.AddSingleton<IOffspringGenerator, OffspringGenerator>();
+            services.AddScoped<IAssignmentAlgorithm, GeneticAssignmentAlgorithm>();
+            services.AddScoped<IFitnessCalculator, FitnessCalculator>();
+            services.AddScoped<IPopulationInitializer, PopulationInitializer>();
+            services.AddScoped<ISelectionStrategy, TournamentSelectionStrategy>();
+            services.AddScoped<ICrossoverStrategy, UniformCrossoverStrategy>();
+            services.AddScoped<IMutationStrategy, SwapMutationStrategy>();
+            services.AddScoped<IEliteSelector, EliteSelector>();
+            services.AddScoped<IOffspringGenerator, OffspringGenerator>();
             services.AddSingleton<IParallelExecutor, ParallelExecutor>();
             services.AddRepairStrategies();
             services.AddRepairPipeline();
@@ -123,16 +123,16 @@ namespace Mission_Service.Extensions
 
         private static IServiceCollection AddRepairPipeline(this IServiceCollection services)
         {
-            services.AddSingleton<IRepairPipeline, RepairPipline>();
+            services.AddScoped<IRepairPipeline, RepairPipline>();
             return services;
         }
 
         private static IServiceCollection AddRepairStrategies(this IServiceCollection services)
         {
-            services.AddSingleton<IRepairStrategy, TypeMismatchRepairStrategy>();
-            services.AddSingleton<IRepairStrategy, TimeWindowRepairStrategy>();
-            services.AddSingleton<IRepairStrategy, OverlapRepairStrategy>();
-            services.AddSingleton<IRepairStrategy, DuplicateMissionRepairStrategy>();
+            services.AddScoped<IRepairStrategy, TypeMismatchRepairStrategy>();
+            services.AddScoped<IRepairStrategy, TimeWindowRepairStrategy>();
+            services.AddScoped<IRepairStrategy, OverlapRepairStrategy>();
+            services.AddScoped<IRepairStrategy, DuplicateMissionRepairStrategy>();
             return services;
         }
 

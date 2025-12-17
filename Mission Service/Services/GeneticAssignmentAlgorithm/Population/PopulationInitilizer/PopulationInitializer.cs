@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Enums;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -21,7 +22,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
             IEnumerable<UAV> uavs
         )
         {
-            // Materialize collections once for reuse across all chromosomes
             IReadOnlyList<Mission> missionList =
                 missions as IReadOnlyList<Mission> ?? missions.ToList();
             IReadOnlyList<UAV> uavList = uavs as IReadOnlyList<UAV> ?? uavs.ToList();
@@ -50,19 +50,8 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
 
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IReadOnlyList<UAV> uavs)
         {
-            Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
-
-            foreach (UAV uav in uavs)
-            {
-                if (!uavsByType.TryGetValue(uav.UavType, out List<UAV>? uavList))
-                {
-                    uavList = new List<UAV>();
-                    uavsByType[uav.UavType] = uavList;
-                }
-                uavList.Add(uav);
-            }
-
-            return uavsByType;
+            return uavs.GroupBy(uav => uav.UavType)
+                .ToDictionary(group => group.Key, group => group.ToList());
         }
 
         private AssignmentChromosome CreateRandomAssignmentChromosome(
@@ -80,7 +69,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                 if (compatibleUAVs.Count == 0)
                     continue;
 
-                UAV selectedUav = compatibleUAVs[Random.Shared.Next(compatibleUAVs.Count)];
+                UAV selectedUav = RandomSelectionHelper.SelectRandom(compatibleUAVs);
                 DateTime randomizedStartTime = GenerateRandomStartTimeWithinWindow(mission);
 
                 assignments.Add(
@@ -110,10 +99,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                 return windowStart;
             }
 
-            TimeSpan availableTimeRange = latestPossibleStart - windowStart;
-            double randomSeconds = Random.Shared.NextDouble() * availableTimeRange.TotalSeconds;
-
-            return windowStart.AddSeconds(randomSeconds);
+            return RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
         }
     }
 }

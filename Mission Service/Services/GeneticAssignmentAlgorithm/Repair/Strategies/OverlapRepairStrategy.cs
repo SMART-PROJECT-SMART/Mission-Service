@@ -1,4 +1,6 @@
-﻿using Mission_Service.Models;
+﻿using Mission_Service.Common.Constants;
+using Mission_Service.Common.Helpers;
+using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
 
@@ -40,45 +42,32 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             HashSet<AssignmentGene> assignmentsToRemove
         )
         {
-            // Order by start time but don't materialize until necessary
-            IOrderedEnumerable<AssignmentGene> sortedAssignments = assignments.OrderBy(a =>
-                a.StartTime
-            );
-            int count = assignments.Count();
+            AssignmentGene[] sortedAssignments = assignments.OrderBy(a => a.StartTime).ToArray();
 
-            if (count < 2)
+            if (sortedAssignments.Length < 2)
             {
                 return;
             }
 
-            AssignmentGene? previousAssignment = null;
-
-            foreach (AssignmentGene currentAssignment in sortedAssignments)
+            for (int i = 0; i < sortedAssignments.Length - 1; i++)
             {
+                AssignmentGene currentAssignment = sortedAssignments[i];
+
                 if (assignmentsToRemove.Contains(currentAssignment))
                 {
                     continue;
                 }
 
-                if (previousAssignment != null)
+                AssignmentGene nextAssignment = sortedAssignments[i + 1];
+
+                if (HasOverlap(currentAssignment, nextAssignment))
                 {
-                    if (assignmentsToRemove.Contains(previousAssignment))
-                    {
-                        previousAssignment = currentAssignment;
-                        continue;
-                    }
-
-                    if (HasOverlap(previousAssignment, currentAssignment))
-                    {
-                        AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
-                            previousAssignment,
-                            currentAssignment
-                        );
-                        assignmentsToRemove.Add(assignmentToRemove);
-                    }
+                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
+                        currentAssignment,
+                        nextAssignment
+                    );
+                    assignmentsToRemove.Add(assignmentToRemove);
                 }
-
-                previousAssignment = currentAssignment;
             }
         }
 
@@ -105,7 +94,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
                 return assignment1;
             }
 
-            return Random.Shared.Next(2) == 0 ? assignment1 : assignment2;
+            return RandomSelectionHelper.ShouldOccur(MissionServiceConstants.Repair.EQUAL_PRIORITY_SELECTION_PROBABILITY)
+                ? assignment1
+                : assignment2;
         }
     }
 }

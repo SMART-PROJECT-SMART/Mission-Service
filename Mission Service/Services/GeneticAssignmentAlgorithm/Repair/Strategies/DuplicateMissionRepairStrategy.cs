@@ -21,14 +21,13 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             }
 
             List<AssignmentGene> assignmentList = assignmentChromosome.AssignmentsList;
-            HashSet<string> seenMissions = new HashSet<string>();
-            List<AssignmentGene> uniqueAssignments = new List<AssignmentGene>();
+            HashSet<string> seenMissions = new();
+            List<AssignmentGene> uniqueAssignments = new();
 
             foreach (AssignmentGene assignment in assignmentList)
             {
-                if (!seenMissions.Contains(assignment.Mission.Id))
+                if (seenMissions.Add(assignment.Mission.Id))
                 {
-                    seenMissions.Add(assignment.Mission.Id);
                     uniqueAssignments.Add(assignment);
                 }
             }

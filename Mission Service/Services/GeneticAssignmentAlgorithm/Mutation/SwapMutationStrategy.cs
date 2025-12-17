@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
@@ -10,8 +11,6 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 {
     public class SwapMutationStrategy : IMutationStrategy
     {
-        private Dictionary<UAVType, List<UAV>>? _uavsByType;
-
         public void MutateChromosome(
             AssignmentChromosome assignmentChromosome,
             IEnumerable<UAV> uavs
@@ -25,11 +24,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
                 return;
             }
 
-            InitializeUAVCacheIfNeeded(uavs);
+            Dictionary<UAVType, List<UAV>> uavsByType = GroupUAVsByType(uavs);
 
             if (ShouldPerformUAVSwap())
             {
-                MutateUAVSwap(assignmentChromosome);
+                MutateUAVSwap(assignmentChromosome, uavsByType);
             }
             else
             {
@@ -37,17 +36,21 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             }
         }
 
-        private void MutateUAVSwap(AssignmentChromosome assignmentChromosome)
+        private void MutateUAVSwap(
+            AssignmentChromosome assignmentChromosome,
+            Dictionary<UAVType, List<UAV>> uavsByType
+        )
         {
             List<AssignmentGene> assignments = assignmentChromosome.AssignmentsList;
             AssignmentGene geneToMutate = SelectRandomGene(assignments);
 
-            List<UAV> compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
+            UAV[] compatibleUAVs = GetCompatibleUAVsExcludingCurrent(
                 geneToMutate.Mission.RequiredUAVType,
-                geneToMutate.UAV.TailId
+                geneToMutate.UAV.TailId,
+                uavsByType
             );
 
-            if (compatibleUAVs.Count > 0)
+            if (compatibleUAVs.Length > 0)
             {
                 geneToMutate.UAV = SelectRandomUAV(compatibleUAVs);
             }
@@ -67,64 +70,39 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
             SwapUAVsBetweenAssignments(assignments[firstIndex], assignments[secondIndex]);
         }
 
-        private void InitializeUAVCacheIfNeeded(IEnumerable<UAV> uavs)
-        {
-            _uavsByType ??= GroupUAVsByType(uavs);
-        }
-
         private Dictionary<UAVType, List<UAV>> GroupUAVsByType(IEnumerable<UAV> uavs)
         {
-            Dictionary<UAVType, List<UAV>> uavsByType = new Dictionary<UAVType, List<UAV>>();
-
-            foreach (UAV uav in uavs)
-            {
-                if (!uavsByType.TryGetValue(uav.UavType, out List<UAV>? uavList))
-                {
-                    uavList = new List<UAV>();
-                    uavsByType[uav.UavType] = uavList;
-                }
-                uavList.Add(uav);
-            }
-
-            return uavsByType;
+            return uavs.GroupBy(uav => uav.UavType)
+                .ToDictionary(group => group.Key, group => group.ToList());
         }
 
-        private List<UAV> GetCompatibleUAVsExcludingCurrent(
+        private UAV[] GetCompatibleUAVsExcludingCurrent(
             UAVType requiredType,
-            int currentUAVTailId
+            int currentUAVTailId,
+            Dictionary<UAVType, List<UAV>> uavsByType
         )
         {
-            if (!_uavsByType!.TryGetValue(requiredType, out List<UAV>? uavsOfType))
+            if (!uavsByType.TryGetValue(requiredType, out List<UAV>? uavsOfType))
             {
-                return new List<UAV>();
+                return Array.Empty<UAV>();
             }
 
-            return uavsOfType.Where(uav => uav.TailId != currentUAVTailId).ToList();
+            return uavsOfType.Where(uav => uav.TailId != currentUAVTailId).ToArray();
         }
 
         private AssignmentGene SelectRandomGene(List<AssignmentGene> assignments)
         {
-            int randomIndex = Random.Shared.Next(assignments.Count);
-            return assignments[randomIndex];
+            return RandomSelectionHelper.SelectRandom(assignments);
         }
 
-        private UAV SelectRandomUAV(List<UAV> uavs)
+        private UAV SelectRandomUAV(UAV[] uavs)
         {
-            int randomIndex = Random.Shared.Next(uavs.Count);
-            return uavs[randomIndex];
+            return RandomSelectionHelper.SelectRandom(uavs);
         }
 
         private (int firstIndex, int secondIndex) SelectTwoDifferentRandomIndices(int count)
         {
-            int firstIndex = Random.Shared.Next(count);
-            int secondIndex = Random.Shared.Next(count);
-
-            while (secondIndex == firstIndex)
-            {
-                secondIndex = Random.Shared.Next(count);
-            }
-
-            return (firstIndex, secondIndex);
+            return RandomSelectionHelper.SelectTwoDifferentIndices(count);
         }
 
         private void SwapUAVsBetweenAssignments(
@@ -140,7 +118,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Mutation
 
         private bool ShouldPerformUAVSwap()
         {
-            return Random.Shared.Next(
+            return RandomSelectionHelper.GetRandomIndex(
                     MissionServiceConstants.MainAlgorithm.AMOUNT_OF_MUTATION_OPTIONS
                 ) == 0;
         }

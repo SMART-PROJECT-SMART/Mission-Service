@@ -29,6 +29,11 @@
             public const double GENE_SELECTION_PROBABILITY = 0.5;
         }
 
+        public static class Repair
+        {
+            public const double EQUAL_PRIORITY_SELECTION_PROBABILITY = 0.5;
+        }
+
         public static class TelemetryNormalization
         {
             public const double MAX_PERCENTAGE = 100.0;

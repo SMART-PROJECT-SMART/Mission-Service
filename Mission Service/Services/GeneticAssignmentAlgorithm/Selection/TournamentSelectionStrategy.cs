@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Config;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
@@ -32,8 +33,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Selection
                 contestantIndex++
             )
             {
-                int randomIndex = Random.Shared.Next(populationList.Count);
-                tournamentContestants.Add(populationList[randomIndex]);
+                tournamentContestants.Add(RandomSelectionHelper.SelectRandom(populationList));
             }
 
             AssignmentChromosome bestChromosome = tournamentContestants

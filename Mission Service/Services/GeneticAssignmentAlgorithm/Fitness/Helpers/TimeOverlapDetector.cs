@@ -1,3 +1,4 @@
+using System.Linq;
 using Mission_Service.Models;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
@@ -8,25 +9,9 @@ public static class TimeOverlapDetector
         List<AssignmentGene> assignments
     )
     {
-        Dictionary<int, List<AssignmentGene>> uavGroups =
-            new Dictionary<int, List<AssignmentGene>>();
-
-        foreach (AssignmentGene assignment in assignments)
-        {
-            if (
-                !uavGroups.TryGetValue(
-                    assignment.UAV.TailId,
-                    out List<AssignmentGene>? assignmentList
-                )
-            )
-            {
-                assignmentList = new List<AssignmentGene>();
-                uavGroups[assignment.UAV.TailId] = assignmentList;
-            }
-            assignmentList.Add(assignment);
-        }
-
-        return uavGroups;
+        return assignments
+            .GroupBy(assignment => assignment.UAV.TailId)
+            .ToDictionary(group => group.Key, group => group.ToList());
     }
 
     public static int CountTimeOverlaps(
@@ -40,11 +25,13 @@ public static class TimeOverlapDetector
             if (uavAssignments.Count <= 1)
                 continue;
 
-            uavAssignments.Sort((a, b) => a.StartTime.CompareTo(b.StartTime));
+            AssignmentGene[] sortedAssignments = uavAssignments
+                .OrderBy(a => a.StartTime)
+                .ToArray();
 
-            for (int i = 0; i < uavAssignments.Count - 1; i++)
+            for (int i = 0; i < sortedAssignments.Length - 1; i++)
             {
-                if (uavAssignments[i].EndTime > uavAssignments[i + 1].StartTime)
+                if (sortedAssignments[i].EndTime > sortedAssignments[i + 1].StartTime)
                 {
                     overlapCount++;
                 }

@@ -246,14 +246,19 @@ public class GeneticAssignmentAlgorithmTests
             },
         };
 
-        List<UAV> uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
+        List<UAV> uavs = new List<UAV>
+        {
+            new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()),
+        };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
         var bestChromosome = result.Assignments.First();
 
         // Assert - Check no time overlaps for same UAV
-        List<AssignmentGene> uavAssignments = bestChromosome.Assignments.OrderBy(a => a.StartTime).ToList();
+        List<AssignmentGene> uavAssignments = bestChromosome
+            .Assignments.OrderBy(a => a.StartTime)
+            .ToList();
 
         for (int i = 0; i < uavAssignments.Count - 1; i++)
         {
