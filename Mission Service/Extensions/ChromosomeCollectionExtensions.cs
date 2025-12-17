@@ -38,15 +38,7 @@ public static class ChromosomeCollectionExtensions
         this IEnumerable<AssignmentChromosome> chromosomePopulation
     )
     {
-        AssignmentChromosome? best = chromosomePopulation.MaxBy(c => c.FitnessScore);
-
-        if (best == null)
-        {
-            throw new ArgumentException(
-                "Population cannot be null or empty",
-                nameof(chromosomePopulation)
-            );
-        }
+        AssignmentChromosome best = chromosomePopulation.MaxBy(c => c.FitnessScore)!;
 
         return best;
     }

@@ -12,10 +12,7 @@ namespace Mission_Service.Services.UAVTelemetryService
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUAVStatusService _uavStatusService;
 
-        public IUAVFetcher(
-            IHttpClientFactory httpClientFactory,
-            IUAVStatusService uavStatusService
-        )
+        public IUAVFetcher(IHttpClientFactory httpClientFactory, IUAVStatusService uavStatusService)
         {
             _httpClientFactory = httpClientFactory;
             _uavStatusService = uavStatusService;

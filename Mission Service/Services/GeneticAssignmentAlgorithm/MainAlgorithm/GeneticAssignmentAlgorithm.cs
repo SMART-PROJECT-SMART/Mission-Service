@@ -5,13 +5,12 @@ using Mission_Service.Config;
 using Mission_Service.Extensions;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Population.PopulationInitilizer.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction.Interfaces;
-using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
 {
@@ -19,8 +18,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
     {
         private readonly IFitnessCalculator _fitnessCalculator;
         private readonly IPopulationInitializer _populationInitializer;
-        private readonly IEliteSelector _eliteSelector;
-        private readonly IOffspringGenerator _offspringGenerator;
+        private readonly IEvolutionStrategy _evolutionStrategy;
         private readonly IParallelExecutor _parallelExecutor;
         private readonly IRepairPipeline _repairPipeline;
         private readonly AssignmentAlgorithmConfiguration _algorithmConfig;
@@ -28,8 +26,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
         public GeneticAssignmentAlgorithm(
             IFitnessCalculator fitnessCalculator,
             IPopulationInitializer populationInitializer,
-            IEliteSelector eliteSelector,
-            IOffspringGenerator offspringGenerator,
+            IEvolutionStrategy evolutionStrategy,
             IParallelExecutor parallelExecutor,
             IRepairPipeline repairPipeline,
             IOptions<AssignmentAlgorithmConfiguration> algorithmConfig
@@ -37,8 +34,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
         {
             _fitnessCalculator = fitnessCalculator;
             _populationInitializer = populationInitializer;
-            _eliteSelector = eliteSelector;
-            _offspringGenerator = offspringGenerator;
+            _evolutionStrategy = evolutionStrategy;
             _parallelExecutor = parallelExecutor;
             _repairPipeline = repairPipeline;
             _algorithmConfig = algorithmConfig.Value;
@@ -54,23 +50,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 uavs
             );
 
-            IReadOnlyList<AssignmentChromosome> currentPopulation = _populationInitializer
-                .CreateInitialPopulation(missionsWithCompatibleUAVs, uavs)
-                .ToList();
-
-            _parallelExecutor.RepairPopulationInParallel(
-                currentPopulation,
-                chromosome =>
-                    _repairPipeline.RepairChromosomeViolaitions(
-                        chromosome,
-                        missionsWithCompatibleUAVs,
-                        uavs
-                    )
-            );
-
-            _parallelExecutor.EvaluatePopulationFitnessInParallel(
-                currentPopulation,
-                chromosome => _fitnessCalculator.CalculateFitness(chromosome)
+            IReadOnlyList<AssignmentChromosome> currentPopulation = InitializePopulation(
+                missionsWithCompatibleUAVs,
+                uavs
             );
 
             AssignmentChromosome bestChromosomeFound =
@@ -83,7 +65,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 currentGeneration++
             )
             {
-                currentPopulation = CreateNextGenerationPopulation(
+                currentPopulation = _evolutionStrategy.CreateNextGeneration(
                     currentPopulation,
                     missionsWithCompatibleUAVs,
                     uavs
@@ -116,56 +98,27 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
             return new AssignmentResult(new[] { bestChromosomeFound });
         }
 
-        private IReadOnlyList<AssignmentChromosome> CreateNextGenerationPopulation(
-            IReadOnlyList<AssignmentChromosome> currentPopulation,
+        private IReadOnlyList<AssignmentChromosome> InitializePopulation(
             IEnumerable<Mission> missions,
-            IEnumerable<UAV> availableUAVs
+            IEnumerable<UAV> uavs
         )
         {
-            IEnumerable<AssignmentChromosome> eliteChromosomes = _eliteSelector.SelectElite(
-                currentPopulation,
-                _algorithmConfig.ElitePrecentage,
-                _algorithmConfig.PopulationSize
-            );
-
-            int numberOfOffspringNeeded =
-                _algorithmConfig.PopulationSize - eliteChromosomes.Count();
-            IEnumerable<AssignmentChromosome> generatedOffspring =
-                _offspringGenerator.CreateOffspring(
-                    currentPopulation,
-                    numberOfOffspringNeeded,
-                    availableUAVs as IReadOnlyList<UAV> ?? availableUAVs.ToList()
-                );
+            IReadOnlyList<AssignmentChromosome> initialPopulation = _populationInitializer
+                .CreateInitialPopulation(missions, uavs)
+                .ToList();
 
             _parallelExecutor.RepairPopulationInParallel(
-                generatedOffspring,
+                initialPopulation,
                 chromosome =>
-                    _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, availableUAVs)
+                    _repairPipeline.RepairChromosomeViolaitions(chromosome, missions, uavs)
             );
 
-            IEnumerable<AssignmentChromosome> validOffspringChromosomes =
-                generatedOffspring.FilterValidChromosomes();
-            IEnumerable<AssignmentChromosome> invalidOffspringChromosomesSortedByQuality =
-                generatedOffspring.FilterAndOrderInvalidChromosomesByQuality();
-
-            List<AssignmentChromosome> combinedOffspring = new List<AssignmentChromosome>();
-            combinedOffspring.AddRange(validOffspringChromosomes);
-
-            int remainingPopulationSlots = numberOfOffspringNeeded - combinedOffspring.Count;
-            if (remainingPopulationSlots > 0 && invalidOffspringChromosomesSortedByQuality.Any())
-            {
-                combinedOffspring.AddRange(
-                    invalidOffspringChromosomesSortedByQuality.Take(remainingPopulationSlots)
-                );
-            }
-
-            List<AssignmentChromosome> nextGenerationPopulation = new List<AssignmentChromosome>(
-                _algorithmConfig.PopulationSize
+            _parallelExecutor.EvaluatePopulationFitnessInParallel(
+                initialPopulation,
+                chromosome => _fitnessCalculator.CalculateFitness(chromosome)
             );
-            nextGenerationPopulation.AddRange(eliteChromosomes);
-            nextGenerationPopulation.AddRange(combinedOffspring);
 
-            return nextGenerationPopulation;
+            return initialPopulation;
         }
 
         private static IEnumerable<Mission> FilterMissionsWithCompatibleUAVs(

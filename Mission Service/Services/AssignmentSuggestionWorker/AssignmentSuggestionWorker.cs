@@ -44,9 +44,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                     AssignmentStatus.Processing
                 );
 
-                IReadOnlyCollection<UAV> uavs = await _iuavFetcher.FetchUAVsAsync(
-                    stoppingToken
-                );
+                IReadOnlyCollection<UAV> uavs = await _iuavFetcher.FetchUAVsAsync(stoppingToken);
 
                 using (IServiceScope scope = _serviceScopeFactory.CreateScope())
                 {

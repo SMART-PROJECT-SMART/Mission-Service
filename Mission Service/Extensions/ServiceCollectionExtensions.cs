@@ -163,6 +163,10 @@ namespace Mission_Service.Extensions
             services.AddScoped<IMutationStrategy, SwapMutationStrategy>();
             services.AddScoped<IEliteSelector, EliteSelector>();
             services.AddScoped<IOffspringGenerator, OffspringGenerator>();
+            services.AddScoped<
+                Services.GeneticAssignmentAlgorithm.Evolution.Interfaces.IEvolutionStrategy,
+                Services.GeneticAssignmentAlgorithm.Evolution.StandardEvolutionStrategy
+            >();
             services.AddSingleton<IParallelExecutor, ParallelExecutor>();
             services.AddRepairStrategies();
             services.AddRepairPipeline();
@@ -218,7 +222,10 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddUAVServices(this IServiceCollection services)
         {
             services.AddSingleton<IUAVStatusService, UAVStatusService>();
-            services.AddSingleton<Services.UAVTelemetryService.Interfaces.IUAVFetcher, Services.UAVTelemetryService.IUAVFetcher>();
+            services.AddSingleton<
+                Services.UAVTelemetryService.Interfaces.IUAVFetcher,
+                Services.UAVTelemetryService.IUAVFetcher
+            >();
             return services;
         }
 
