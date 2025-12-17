@@ -1,6 +1,7 @@
+using Mission_Service.Models;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Mission_Service.Models.Entities
+namespace Mission_Service.DataBase.MongoDB.Entities
 {
     public class MissionToUavAssignment
     {

@@ -1,13 +1,13 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Mission_Service.Models.Entities
+namespace Mission_Service.DataBase.MongoDB.Entities
 {
     public class Assignment
     {
         [BsonId]
-        [BsonRequired]
-        public string Id { get; set; } = string.Empty;
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string? Id { get; set; }
 
         [BsonRequired]
         public List<MissionToUavAssignment> SuggestedAssignments { get; set; } = new();

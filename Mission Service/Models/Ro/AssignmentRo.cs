@@ -1,4 +1,4 @@
-﻿using Mission_Service.Models.Entities;
+﻿using Mission_Service.DataBase.MongoDB.Entities;
 
 namespace Mission_Service.Models.Ro
 {

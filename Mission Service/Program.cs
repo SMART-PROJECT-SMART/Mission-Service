@@ -7,6 +7,7 @@ builder.Services.AddAssignmentAlgorithmServices();
 builder.Services.AddBackgroundServices();
 builder.Services.AddHttpClients(builder.Configuration);
 builder.Services.AddUAVServices();
+builder.Services.AddMongoDbServices();
 
 var app = builder.Build();
 

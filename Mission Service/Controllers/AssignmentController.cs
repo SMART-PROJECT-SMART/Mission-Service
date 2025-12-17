@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
+using Mission_Service.DataBase.MongoDB.Services;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
@@ -14,14 +15,17 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentSuggestionQueue _queue;
         private readonly IAssignmentResultManager _assignmentResultManager;
+        private readonly IAssignmentService _assignmentService;
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
-            IAssignmentResultManager assignmentResultManager
+            IAssignmentResultManager assignmentResultManager,
+            IAssignmentService assignmentService
         )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;
+            _assignmentService = assignmentService;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
@@ -50,9 +54,16 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost("apply-assignment")]
-        public IActionResult ApplyAssignment(ApplyAssignmentDto applyAssignmetnDto)
+        public async Task<IActionResult> ApplyAssignment(ApplyAssignmentDto applyAssignmentDto)
         {
-            return Ok();
+            bool isCreated = await _assignmentService.CreateAssignmentAsync(applyAssignmentDto);
+
+            if (!isCreated)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }
     }
 }
