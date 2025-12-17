@@ -48,5 +48,11 @@ namespace Mission_Service.Controllers
 
             return Accepted(response);
         }
+
+        [HttpPost("apply-assignment")]
+        public Task<IActionResult> ApplyAssignment(ApplyAssignmetnDto applyAssignmetnDto)
+        {
+
+        }
     }
 }
