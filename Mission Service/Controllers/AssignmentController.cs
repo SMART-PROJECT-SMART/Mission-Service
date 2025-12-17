@@ -6,7 +6,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
-using Quartz;
+using Mission_Service.Services.MissionScheduler.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -17,19 +17,19 @@ namespace Mission_Service.Controllers
         private readonly IAssignmentSuggestionQueue _queue;
         private readonly IAssignmentResultManager _assignmentResultManager;
         private readonly IAssignmentService _assignmentService;
-        private readonly ISchedulerFactory _schedulerFactory;
+        private readonly IMissionScheduler _missionScheduler;
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
             IAssignmentResultManager assignmentResultManager,
             IAssignmentService assignmentService,
-            ISchedulerFactory schedulerFactory
+            IMissionScheduler missionScheduler
         )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;
             _assignmentService = assignmentService;
-            _schedulerFactory = schedulerFactory;
+            _missionScheduler = missionScheduler;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
@@ -67,25 +67,7 @@ namespace Mission_Service.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            var scheduler = await _schedulerFactory.GetScheduler();
-
-            foreach (var assignment in applyAssignmentDto.ActualAssignments)
-            {
-                var job = JobBuilder.Create<Services.Jobs.MissionExecutorJob>()
-                    .WithIdentity(assignment.Mission.Id)
-                    .UsingJobData(MissionServiceConstants.MissionExecution.MISSION_ID_KEY, assignment.Mission.Id)
-                    .UsingJobData(MissionServiceConstants.MissionExecution.TAIL_ID_KEY, assignment.UavTailId)
-                    .UsingJobData(MissionServiceConstants.MissionExecution.LATITUDE_KEY, assignment.Mission.Location.Latitude)
-                    .UsingJobData(MissionServiceConstants.MissionExecution.LONGITUDE_KEY, assignment.Mission.Location.Longitude)
-                    .Build();
-
-                var trigger = TriggerBuilder.Create()
-                    .WithIdentity($"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{assignment.Mission.Id}")
-                    .StartNow()
-                    .Build();
-
-                await scheduler.ScheduleJob(job, trigger);
-            }
+            await _missionScheduler.ScheduleMissionsAsync(applyAssignmentDto.ActualAssignments);
 
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }

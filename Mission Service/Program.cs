@@ -10,12 +10,7 @@ builder.Services.AddHttpClients(builder.Configuration);
 builder.Services.AddUAVServices();
 builder.Services.AddMongoDbServices();
 builder.Services.AddQuartzServices();
-
-builder.Services.AddHttpClient(MissionServiceConstants.HttpClients.SIMULATOR_CLIENT, client =>
-{
-    client.BaseAddress = new Uri(builder.Configuration[MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY]);
-    client.Timeout = TimeSpan.FromMinutes(5);
-});
+builder.Services.AddSimulatorHttpClient(builder.Configuration);
 
 var app = builder.Build();
 

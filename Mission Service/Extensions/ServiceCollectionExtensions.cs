@@ -38,6 +38,7 @@ using Mission_Service.Services.UAVStatusService.Interfaces;
 using Mission_Service.Services.UAVTelemetryService;
 using Mission_Service.Services.UAVTelemetryService.Interfaces;
 using MongoDB.Driver;
+using Quartz;
 using IUAVFetcher = Mission_Service.Services.UAVTelemetryService.IUAVFetcher;
 
 namespace Mission_Service.Extensions
@@ -239,6 +240,7 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddQuartzServices(this IServiceCollection services)
         {
             services.AddTransient<Services.Jobs.MissionExecutorJob>();
+            services.AddSingleton<Services.MissionScheduler.Interfaces.IMissionScheduler, Services.MissionScheduler.MissionScheduler>();
 
             services.AddQuartz(q =>
             {
@@ -246,6 +248,29 @@ namespace Mission_Service.Extensions
             });
 
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+            return services;
+        }
+
+        public static IServiceCollection AddSimulatorHttpClient(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            services.AddHttpClient(
+                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
+                client =>
+                {
+                    string? baseUrl = configuration[MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY];
+
+                    if (!string.IsNullOrEmpty(baseUrl))
+                    {
+                        client.BaseAddress = new Uri(baseUrl);
+                    }
+
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                }
+            );
 
             return services;
         }
