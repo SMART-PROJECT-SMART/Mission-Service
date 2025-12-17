@@ -11,21 +11,21 @@ namespace Mission_Service.Extensions
             return new Assignment
             {
                 // Id is null - MongoDB will auto-generate it
-                SuggestedAssignments = dto.SuggestedAssignments
-                    .Select(kvp => new MissionToUavAssignment
+                SuggestedAssignments = dto
+                    .SuggestedAssignments.Select(kvp => new MissionToUavAssignment
                     {
                         Mission = kvp.Key,
-                        UavTailId = kvp.Value
+                        UavTailId = kvp.Value,
                     })
                     .ToList(),
-                ActualAssignments = dto.ActualAssignments
-                    .Select(kvp => new MissionToUavAssignment
+                ActualAssignments = dto
+                    .ActualAssignments.Select(kvp => new MissionToUavAssignment
                     {
                         Mission = kvp.Key,
-                        UavTailId = kvp.Value
+                        UavTailId = kvp.Value,
                     })
                     .ToList(),
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
             };
         }
 
@@ -34,7 +34,7 @@ namespace Mission_Service.Extensions
             return new AssignmentRo
             {
                 SuggestedAssignments = assignment.SuggestedAssignments,
-                ActualAssignments = assignment.ActualAssignments
+                ActualAssignments = assignment.ActualAssignments,
             };
         }
     }

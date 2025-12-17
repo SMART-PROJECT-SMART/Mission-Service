@@ -1,9 +1,9 @@
 ﻿using Mission_Service.Common.Constants;
 using Mission_Service.DataBase.MongoDB.Entities;
+using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
 using Mission_Service.Extensions;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.Ro;
-using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
 using MongoDB.Driver;
 
 namespace Mission_Service.DataBase.MongoDB.Repositoreis
@@ -29,7 +29,10 @@ namespace Mission_Service.DataBase.MongoDB.Repositoreis
 
         public async Task<AssignmentRo?> GetAssignmentByIdAsync(string assignmentId)
         {
-            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(assignment => assignment.Id, assignmentId);
+            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(
+                assignment => assignment.Id,
+                assignmentId
+            );
 
             Assignment? assignmentEntity = await _assignmentCollection
                 .Find(idFilter)
@@ -38,7 +41,10 @@ namespace Mission_Service.DataBase.MongoDB.Repositoreis
             return assignmentEntity?.ToRo();
         }
 
-        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(int skipCount = 0, int limitCount = 100)
+        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(
+            int skipCount = 0,
+            int limitCount = 100
+        )
         {
             List<Assignment> assignmentEntities = await _assignmentCollection
                 .Find(FilterDefinition<Assignment>.Empty)
@@ -52,7 +58,10 @@ namespace Mission_Service.DataBase.MongoDB.Repositoreis
 
         public async Task<bool> DeleteAssignmentAsync(string assignmentId)
         {
-            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(assignment => assignment.Id, assignmentId);
+            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(
+                assignment => assignment.Id,
+                assignmentId
+            );
 
             DeleteResult deleteResult = await _assignmentCollection.DeleteOneAsync(idFilter);
 

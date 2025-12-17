@@ -21,10 +21,13 @@
 
         public static class ValidationMessages
         {
-            public const string SUGGESTED_ASSIGNMENTS_REQUIRED = "Suggested assignments are required";
-            public const string SUGGESTED_ASSIGNMENTS_MIN_LENGTH = "At least one suggested assignment is required";
+            public const string SUGGESTED_ASSIGNMENTS_REQUIRED =
+                "Suggested assignments are required";
+            public const string SUGGESTED_ASSIGNMENTS_MIN_LENGTH =
+                "At least one suggested assignment is required";
             public const string ACTUAL_ASSIGNMENTS_REQUIRED = "Actual assignments are required";
-            public const string ACTUAL_ASSIGNMENTS_MIN_LENGTH = "At least one actual assignment is required";
+            public const string ACTUAL_ASSIGNMENTS_MIN_LENGTH =
+                "At least one actual assignment is required";
             public const string ASSIGNMENT_ID_REQUIRED = "Assignment ID is required";
             public const string MISSIONS_REQUIRED = "Missions are required";
             public const string MISSIONS_MIN_LENGTH = "At least one mission is required";

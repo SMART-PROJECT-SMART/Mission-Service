@@ -24,7 +24,10 @@ namespace Mission_Service.DataBase.MongoDB.Services
             return await _assignmentRepository.GetAssignmentByIdAsync(assignmentId);
         }
 
-        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(int skipCount = 0, int limitCount = 100)
+        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(
+            int skipCount = 0,
+            int limitCount = 100
+        )
         {
             return await _assignmentRepository.GetAllAssignmentsAsync(skipCount, limitCount);
         }

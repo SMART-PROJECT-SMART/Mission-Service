@@ -2,6 +2,9 @@
 using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
+using Mission_Service.DataBase.MongoDB.Repositoreis;
+using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
+using Mission_Service.DataBase.MongoDB.Services;
 using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
@@ -33,9 +36,6 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
 using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 using MongoDB.Driver;
-using Mission_Service.DataBase.MongoDB.Repositoreis;
-using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
-using Mission_Service.DataBase.MongoDB.Services;
 
 namespace Mission_Service.Extensions
 {
@@ -61,26 +61,39 @@ namespace Mission_Service.Extensions
             return services;
         }
 
-        private static IServiceCollection AddMongoDbConfiguration(this IServiceCollection services,
-            IConfiguration configuration)
+        private static IServiceCollection AddMongoDbConfiguration(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
         {
             services.Configure<MongoDBConfiguration>(
-                configuration.GetSection(MissionServiceConstants.Configuration.MONGODB_CONFIG_SECTION));
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.MONGODB_CONFIG_SECTION
+                )
+            );
             services.AddSingleton<IMongoClient>(serviceProvider =>
             {
-                MongoDBConfiguration mongoDbConfiguration =
-                    serviceProvider.GetRequiredService<IOptions<MongoDBConfiguration>>().Value;
-                MongoClientSettings mongoClientSettings =
-                    MongoClientSettings.FromConnectionString(mongoDbConfiguration.ConnectionString);
-                mongoClientSettings.MaxConnectionPoolSize = mongoDbConfiguration.MaxConnectionPoolSize;
-                mongoClientSettings.MinConnectionPoolSize = mongoDbConfiguration.MinConnectionPoolSize;
-                mongoClientSettings.MaxConnectionIdleTime = mongoDbConfiguration.MaxConnectionIdleTime;
-                mongoClientSettings.ServerSelectionTimeout = mongoDbConfiguration.ServerSelectionTimeout;
+                MongoDBConfiguration mongoDbConfiguration = serviceProvider
+                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
+                    .Value;
+                MongoClientSettings mongoClientSettings = MongoClientSettings.FromConnectionString(
+                    mongoDbConfiguration.ConnectionString
+                );
+                mongoClientSettings.MaxConnectionPoolSize =
+                    mongoDbConfiguration.MaxConnectionPoolSize;
+                mongoClientSettings.MinConnectionPoolSize =
+                    mongoDbConfiguration.MinConnectionPoolSize;
+                mongoClientSettings.MaxConnectionIdleTime =
+                    mongoDbConfiguration.MaxConnectionIdleTime;
+                mongoClientSettings.ServerSelectionTimeout =
+                    mongoDbConfiguration.ServerSelectionTimeout;
                 return new MongoClient(mongoClientSettings);
             });
             services.AddSingleton(serviceProvider =>
             {
-                MongoDBConfiguration mongoDbConfiguration = serviceProvider.GetRequiredService<IOptions<MongoDBConfiguration>>().Value;
+                MongoDBConfiguration mongoDbConfiguration = serviceProvider
+                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
+                    .Value;
                 IMongoClient mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
                 return mongoClient.GetDatabase(mongoDbConfiguration.DatabaseName);
             });

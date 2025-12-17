@@ -9,7 +9,10 @@ namespace Mission_Service.DataBase.MongoDB.Services
 
         Task<AssignmentRo?> GetAssignmentByIdAsync(string assignmentId);
 
-        Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(int skipCount = 0, int limitCount = 100);
+        Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(
+            int skipCount = 0,
+            int limitCount = 100
+        );
 
         Task<bool> DeleteAssignmentAsync(string assignmentId);
     }
