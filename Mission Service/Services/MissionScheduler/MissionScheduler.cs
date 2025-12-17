@@ -15,50 +15,50 @@ namespace Mission_Service.Services.MissionScheduler
             _schedulerFactory = schedulerFactory;
         }
 
-        public async Task ScheduleMissionsAsync(IEnumerable<MissionToUavAssignment> assignments)
+        public async Task ScheduleMissionsAsync(IEnumerable<MissionToUavAssignment> missionAssignments)
         {
-            IScheduler scheduler = await _schedulerFactory.GetScheduler();
+            IScheduler quartzScheduler = await _schedulerFactory.GetScheduler();
 
-            foreach (MissionToUavAssignment assignment in assignments)
+            foreach (MissionToUavAssignment missionAssignment in missionAssignments)
             {
-                IJobDetail job = CreateJob(assignment);
-                ITrigger trigger = CreateTrigger(assignment.Mission.Id);
+                IJobDetail missionExecutionJob = CreateMissionExecutionJob(missionAssignment);
+                ITrigger missionExecutionTrigger = CreateImmediateTrigger(missionAssignment.Mission.Id);
 
-                await scheduler.ScheduleJob(job, trigger);
+                await quartzScheduler.ScheduleJob(missionExecutionJob, missionExecutionTrigger);
             }
         }
 
-        private static IJobDetail CreateJob(MissionToUavAssignment assignment)
+        private static IJobDetail CreateMissionExecutionJob(MissionToUavAssignment missionAssignment)
         {
             return JobBuilder
                 .Create<MissionExecutorJob>()
-                .WithIdentity(assignment.Mission.Id)
+                .WithIdentity(missionAssignment.Mission.Id)
                 .UsingJobData(
                     MissionServiceConstants.MissionExecution.MISSION_ID_KEY,
-                    assignment.Mission.Id
+                    missionAssignment.Mission.Id
                 )
                 .UsingJobData(
                     MissionServiceConstants.MissionExecution.TAIL_ID_KEY,
-                    assignment.UavTailId
+                    missionAssignment.UavTailId
                 )
                 .UsingJobData(
                     MissionServiceConstants.MissionExecution.LATITUDE_KEY,
-                    assignment.Mission.Location.Latitude
+                    missionAssignment.Mission.Location.Latitude
                 )
                 .UsingJobData(
                     MissionServiceConstants.MissionExecution.LONGITUDE_KEY,
-                    assignment.Mission.Location.Longitude
+                    missionAssignment.Mission.Location.Longitude
                 )
                 .Build();
         }
 
-        private static ITrigger CreateTrigger(string missionId)
+        private static ITrigger CreateImmediateTrigger(string missionId)
         {
+            string triggerIdentity = $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionId}";
+
             return TriggerBuilder
                 .Create()
-                .WithIdentity(
-                    $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionId}"
-                )
+                .WithIdentity(triggerIdentity)
                 .StartNow()
                 .Build();
         }

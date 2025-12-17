@@ -14,32 +14,32 @@ namespace Mission_Service.Services.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var dataMap = context.JobDetail.JobDataMap;
+            JobDataMap missionDataMap = context.JobDetail.JobDataMap;
 
-            var client = _httpClientFactory.CreateClient(
+            HttpClient simulatorHttpClient = _httpClientFactory.CreateClient(
                 MissionServiceConstants.HttpClients.SIMULATOR_CLIENT
             );
 
-            var payload = new
+            object missionPayload = new
             {
-                TailId = dataMap.GetInt(MissionServiceConstants.MissionExecution.TAIL_ID_KEY),
+                TailId = missionDataMap.GetInt(MissionServiceConstants.MissionExecution.TAIL_ID_KEY),
                 Destination = new
                 {
-                    Latitude = dataMap.GetDouble(
+                    Latitude = missionDataMap.GetDouble(
                         MissionServiceConstants.MissionExecution.LATITUDE_KEY
                     ),
-                    Longitude = dataMap.GetDouble(
+                    Longitude = missionDataMap.GetDouble(
                         MissionServiceConstants.MissionExecution.LONGITUDE_KEY
                     ),
                 },
-                MissionId = dataMap.GetString(
+                MissionId = missionDataMap.GetString(
                     MissionServiceConstants.MissionExecution.MISSION_ID_KEY
                 ),
             };
 
-            await client.PostAsJsonAsync(
+            await simulatorHttpClient.PostAsJsonAsync(
                 MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                payload
+                missionPayload
             );
         }
     }

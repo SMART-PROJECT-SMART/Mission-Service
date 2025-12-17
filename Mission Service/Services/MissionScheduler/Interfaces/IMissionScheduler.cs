@@ -4,6 +4,6 @@ namespace Mission_Service.Services.MissionScheduler.Interfaces
 {
     public interface IMissionScheduler
     {
-        Task ScheduleMissionsAsync(IEnumerable<MissionToUavAssignment> assignments);
+        Task ScheduleMissionsAsync(IEnumerable<MissionToUavAssignment> missionAssignments);
     }
 }
