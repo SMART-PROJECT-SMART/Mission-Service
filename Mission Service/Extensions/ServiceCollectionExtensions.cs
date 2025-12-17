@@ -235,5 +235,19 @@ namespace Mission_Service.Extensions
             services.AddScoped<IAssignmentService, AssignmentService>();
             return services;
         }
+
+        public static IServiceCollection AddQuartzServices(this IServiceCollection services)
+        {
+            services.AddTransient<Services.Jobs.MissionExecutorJob>();
+
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+            });
+
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+            return services;
+        }
     }
 }

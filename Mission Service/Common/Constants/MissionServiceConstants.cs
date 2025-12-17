@@ -11,6 +11,8 @@
             public const string MONGODB_CONFIG_SECTION = "MongoDbConfiguration";
             public const string LTS_CONFIG_SECTION = "LTS";
             public const string BASE_ADDRESS_KEY = "BaseAddress";
+            public const string SIMULATOR_CONFIG_SECTION = "Simulator";
+            public const string SIMULATOR_BASE_URL_KEY = "Simulator:BaseUrl";
         }
 
         public static class MongoDB
@@ -111,11 +113,26 @@
         {
             public const string CALLBACK_HTTP_CLIENT = "AssignmentCallback";
             public const string LTS_HTTP_CLIENT = "LTS";
+            public const string SIMULATOR_CLIENT = "Simulator";
         }
 
         public static class LTSEndpoints
         {
             public const string ALL_UAV_TELEMETRY = "all-uav-telemetry-data";
+        }
+
+        public static class SimulatorEndpoints
+        {
+            public const string SIMULATE = "/api/simulation/simulate";
+        }
+
+        public static class MissionExecution
+        {
+            public const string MISSION_ID_KEY = "MissionId";
+            public const string TAIL_ID_KEY = "TailId";
+            public const string LATITUDE_KEY = "Latitude";
+            public const string LONGITUDE_KEY = "Longitude";
+            public const string TRIGGER_PREFIX = "trigger-";
         }
     }
 }
