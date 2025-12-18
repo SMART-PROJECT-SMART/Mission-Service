@@ -46,19 +46,22 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
 
                 IReadOnlyCollection<UAV> uavs = await _iuavFetcher.FetchUAVsAsync(stoppingToken);
 
-                using (IServiceScope scope = _serviceScopeFactory.CreateScope())
-                {
-                    IAssignmentAlgorithm assignmentAlgorithm =
-                        scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
+                AssignmentChromosome assignmentResult = ExecuteAlgorithm(request, uavs);
 
-                    AssignmentResult assignmentResult =
-                        assignmentAlgorithm.PreformAssignmentAlgorithm(request.Missions, uavs);
-
-                    AssignmentChromosome bestResult = assignmentResult.Assignments.FirstOrDefault();
-
-                    _assignmentResultManager.StoreResult(request.AssignmentId, bestResult);
-                }
+                _assignmentResultManager.StoreResult(request.AssignmentId, assignmentResult);
             }
+        }
+
+        private AssignmentChromosome ExecuteAlgorithm(AssignmentSuggestionDto request,IReadOnlyCollection<UAV> uavs)
+        {
+            using IServiceScope scope = _serviceScopeFactory.CreateScope();
+            IAssignmentAlgorithm assignmentAlgorithm =
+                scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
+
+            AssignmentResult assignmentResult =
+                assignmentAlgorithm.PreformAssignmentAlgorithm(request.Missions, uavs);
+
+            return assignmentResult.Assignments.First();
         }
     }
 }
