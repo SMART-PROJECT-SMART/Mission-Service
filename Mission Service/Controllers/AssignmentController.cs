@@ -6,7 +6,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
-using Mission_Service.Services.MissionScheduler.Interfaces;
+using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
 
 namespace Mission_Service.Controllers
 {

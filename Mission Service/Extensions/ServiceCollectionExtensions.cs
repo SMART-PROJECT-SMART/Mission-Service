@@ -33,6 +33,9 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.Quartz.Jobs;
+using Mission_Service.Services.Quartz.MissionScheduler;
+using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
 using Mission_Service.Services.UAVFetcher;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
@@ -235,10 +238,10 @@ namespace Mission_Service.Extensions
 
         public static IServiceCollection AddQuartzServices(this IServiceCollection services)
         {
-            services.AddTransient<Services.Jobs.MissionExecutorJob>();
+            services.AddTransient<MissionExecutorJob>();
             services.AddSingleton<
-                Services.MissionScheduler.Interfaces.IMissionScheduler,
-                Services.MissionScheduler.MissionScheduler
+                IMissionScheduler,
+                MissionScheduler
             >();
 
             services.AddQuartz(q =>

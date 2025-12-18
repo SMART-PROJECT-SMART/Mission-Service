@@ -1,10 +1,10 @@
 using Mission_Service.Common.Constants;
 using Mission_Service.DataBase.MongoDB.Entities;
-using Mission_Service.Services.Jobs;
-using Mission_Service.Services.MissionScheduler.Interfaces;
+using Mission_Service.Services.Quartz.Jobs;
+using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
 using Quartz;
 
-namespace Mission_Service.Services.MissionScheduler
+namespace Mission_Service.Services.Quartz.MissionScheduler
 {
     public class MissionScheduler : IMissionScheduler
     {
@@ -24,9 +24,7 @@ namespace Mission_Service.Services.MissionScheduler
             foreach (MissionToUavAssignment missionAssignment in missionAssignments)
             {
                 IJobDetail missionExecutionJob = CreateMissionExecutionJob(missionAssignment);
-                ITrigger missionExecutionTrigger = CreateImmediateTrigger(
-                    missionAssignment.Mission.Id
-                );
+                ITrigger missionExecutionTrigger = CreateScheduledTrigger(missionAssignment);
 
                 await quartzScheduler.ScheduleJob(missionExecutionJob, missionExecutionTrigger);
             }
@@ -62,12 +60,16 @@ namespace Mission_Service.Services.MissionScheduler
                 .Build();
         }
 
-        private static ITrigger CreateImmediateTrigger(string missionId)
+        private static ITrigger CreateScheduledTrigger(MissionToUavAssignment missionAssignment)
         {
             string triggerIdentity =
-                $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionId}";
+                $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionAssignment.Mission.Id}";
 
-            return TriggerBuilder.Create().WithIdentity(triggerIdentity).StartNow().Build();
+            return TriggerBuilder
+                .Create()
+                .WithIdentity(triggerIdentity)
+                .StartAt(missionAssignment.StartTime)
+                .Build();
         }
     }
 }

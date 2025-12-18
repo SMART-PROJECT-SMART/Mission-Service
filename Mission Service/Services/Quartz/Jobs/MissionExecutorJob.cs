@@ -5,7 +5,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 using Quartz;
 
-namespace Mission_Service.Services.Jobs
+namespace Mission_Service.Services.Quartz.Jobs
 {
     public class MissionExecutorJob : IJob
     {

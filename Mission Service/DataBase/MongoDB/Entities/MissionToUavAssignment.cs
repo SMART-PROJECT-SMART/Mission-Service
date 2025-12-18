@@ -10,5 +10,8 @@ namespace Mission_Service.DataBase.MongoDB.Entities
 
         [BsonRequired]
         public int UavTailId { get; set; }
+
+        [BsonRequired]
+        public DateTime StartTime { get; set; }
     }
 }
