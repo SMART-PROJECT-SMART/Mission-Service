@@ -55,7 +55,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                     uavs
                 );
 
-                AssignmentChromosome bestResult = assignmentResult.Assignments.FirstOrDefault();
+                AssignmentChromosome bestResult = assignmentResult.Assignments.First();
 
                 _assignmentResultManager.StoreResult(request.AssignmentId, bestResult);
             }
