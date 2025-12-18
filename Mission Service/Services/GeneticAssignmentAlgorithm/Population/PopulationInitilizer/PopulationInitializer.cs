@@ -94,12 +94,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
 
             DateTime latestPossibleStart = windowEnd - missionDuration;
 
-            if (latestPossibleStart <= windowStart)
-            {
-                return windowStart;
-            }
-
-            return RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
+            return latestPossibleStart <= windowStart
+                ? windowStart
+                : RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
         }
     }
 }

@@ -7,12 +7,12 @@ using Mission_Service.Services.UAVTelemetryService.Interfaces;
 
 namespace Mission_Service.Services.UAVTelemetryService
 {
-    public class IUAVFetcher : Interfaces.IUAVFetcher
+    public class UAVFetcher : Interfaces.IUAVFetcher
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUAVStatusService _uavStatusService;
 
-        public IUAVFetcher(IHttpClientFactory httpClientFactory, IUAVStatusService uavStatusService)
+        public UAVFetcher(IHttpClientFactory httpClientFactory, IUAVStatusService uavStatusService)
         {
             _httpClientFactory = httpClientFactory;
             _uavStatusService = uavStatusService;
