@@ -17,23 +17,23 @@ public class EliteSelector : IEliteSelector
             elitePercentageOfPopulation
         );
 
-        if (numberOfEliteChromosomesToSelect == 0)
+        switch (numberOfEliteChromosomesToSelect)
         {
-            return Enumerable.Empty<AssignmentChromosome>();
+            case 0:
+                return Enumerable.Empty<AssignmentChromosome>();
+            case 1:
+            {
+                AssignmentChromosome singleBestChromosome = chromosomePopulation.MaxBy(c =>
+                    c.FitnessScore
+                )!;
+                return [singleBestChromosome];
+            }
+            default:
+                return SelectTopChromosomesByFitnessScore(
+                    chromosomePopulation,
+                    numberOfEliteChromosomesToSelect
+                );
         }
-
-        if (numberOfEliteChromosomesToSelect == 1)
-        {
-            AssignmentChromosome singleBestChromosome = chromosomePopulation.MaxBy(c =>
-                c.FitnessScore
-            )!;
-            return [singleBestChromosome];
-        }
-
-        return SelectTopChromosomesByFitnessScore(
-            chromosomePopulation,
-            numberOfEliteChromosomesToSelect
-        );
     }
 
     private int CalculateEliteChromosomeCount(int totalPopulationSize, double elitePercentage)
