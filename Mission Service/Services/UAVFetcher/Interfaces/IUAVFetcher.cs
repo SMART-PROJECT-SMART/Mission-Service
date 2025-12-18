@@ -1,6 +1,6 @@
 using Mission_Service.Models;
 
-namespace Mission_Service.Services.UAVTelemetryService.Interfaces
+namespace Mission_Service.Services.UAVFetcher.Interfaces
 {
     public interface IUAVFetcher
     {

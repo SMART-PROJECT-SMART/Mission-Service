@@ -7,7 +7,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
-using Mission_Service.Services.UAVTelemetryService.Interfaces;
+using Mission_Service.Services.UAVFetcher.Interfaces;
 
 namespace Mission_Service.Services.AssignmentSuggestionWorker
 {
@@ -46,27 +46,19 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
 
                 IReadOnlyCollection<UAV> uavs = await _iuavFetcher.FetchUAVsAsync(stoppingToken);
 
-                AssignmentChromosome assignmentResult = ExecuteAlgorithm(request, uavs);
+                using IServiceScope scope = _serviceScopeFactory.CreateScope();
+                IAssignmentAlgorithm assignmentAlgorithm =
+                    scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
 
-                _assignmentResultManager.StoreResult(request.AssignmentId, assignmentResult);
+                AssignmentResult assignmentResult = assignmentAlgorithm.PreformAssignmentAlgorithm(
+                    request.Missions,
+                    uavs
+                );
+
+                AssignmentChromosome bestResult = assignmentResult.Assignments.FirstOrDefault();
+
+                _assignmentResultManager.StoreResult(request.AssignmentId, bestResult);
             }
-        }
-
-        private AssignmentChromosome ExecuteAlgorithm(
-            AssignmentSuggestionDto request,
-            IReadOnlyCollection<UAV> uavs
-        )
-        {
-            using IServiceScope scope = _serviceScopeFactory.CreateScope();
-            IAssignmentAlgorithm assignmentAlgorithm =
-                scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
-
-            AssignmentResult assignmentResult = assignmentAlgorithm.PreformAssignmentAlgorithm(
-                request.Missions,
-                uavs
-            );
-
-            return assignmentResult.Assignments.First();
         }
     }
 }

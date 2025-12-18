@@ -33,10 +33,10 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.UAVFetcher;
+using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
-using Mission_Service.Services.UAVTelemetryService;
-using Mission_Service.Services.UAVTelemetryService.Interfaces;
 using MongoDB.Driver;
 using Quartz;
 
@@ -221,11 +221,8 @@ namespace Mission_Service.Extensions
 
         public static IServiceCollection AddUAVServices(this IServiceCollection services)
         {
-            services.AddSingleton<IUAVStatusService, UAVStatusService>();
-            services.AddSingleton<
-                Services.UAVTelemetryService.Interfaces.IUAVFetcher,
-                Services.UAVTelemetryService.UAVFetcher
-            >();
+            services.AddSingleton<IUAVStatusService, UAVStatus>();
+            services.AddSingleton<IUAVFetcher, UAVFetcher>();
             return services;
         }
 
