@@ -2,12 +2,12 @@ using Core.Common.Enums;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
+using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService.Interfaces;
-using Mission_Service.Services.UAVTelemetryService.Interfaces;
 
-namespace Mission_Service.Services.UAVTelemetryService
+namespace Mission_Service.Services.UAVFetcher
 {
-    public class UAVFetcher : Interfaces.IUAVFetcher
+    public class UAVFetcher : IUAVFetcher
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUAVStatusService _uavStatusService;
@@ -25,9 +25,9 @@ namespace Mission_Service.Services.UAVTelemetryService
             IEnumerable<(
                 int TailId,
                 IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )> telemetryDataCollection = await FetchUAVFromLTS(cancellationToken);
+            )> uavDataCollection = await FetchUAVFromLTS(cancellationToken);
 
-            return ConvertUAVDataToUAVObject(telemetryDataCollection);
+            return ConvertUAVDataToUAVObject(uavDataCollection);
         }
 
         private async Task<
@@ -63,7 +63,7 @@ namespace Mission_Service.Services.UAVTelemetryService
             IEnumerable<(
                 int TailId,
                 IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )> telemetryDataCollection
+            )> uavDataCollection
         )
         {
             List<UAV> convertedUAVs = new List<UAV>();
@@ -72,7 +72,7 @@ namespace Mission_Service.Services.UAVTelemetryService
                 (
                     int uavTailId,
                     IEnumerable<KeyValuePair<TelemetryFields, double>> telemetryFields
-                ) in telemetryDataCollection
+                ) in uavDataCollection
             )
             {
                 Dictionary<TelemetryFields, double> telemetryDictionary =
