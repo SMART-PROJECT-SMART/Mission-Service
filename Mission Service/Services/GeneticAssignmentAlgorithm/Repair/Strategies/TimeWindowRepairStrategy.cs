@@ -31,8 +31,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 
         private IEnumerable<AssignmentGene> RepairAllGenes(IEnumerable<AssignmentGene> assignments)
         {
-            IEnumerable<AssignmentGene?> repairedGenes = assignments.Select(gene =>
-                TryRepairGene(gene)
+            IEnumerable<AssignmentGene?> repairedGenes = assignments.Select(TryRepairGene
             );
             IEnumerable<AssignmentGene?> validGenes = repairedGenes.Where(gene => gene != null);
             return validGenes.Cast<AssignmentGene>();
@@ -40,12 +39,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 
         private AssignmentGene? TryRepairGene(AssignmentGene assignmentGene)
         {
-            if (IsGeneTimeWindowValid(assignmentGene))
-            {
-                return assignmentGene;
-            }
-
-            return AttemptToShiftGeneIntoTimeWindow(assignmentGene);
+            return IsGeneTimeWindowValid(assignmentGene) ? assignmentGene : AttemptToShiftGeneIntoTimeWindow(assignmentGene);
         }
 
         private bool IsGeneTimeWindowValid(AssignmentGene assignmentGene)
@@ -65,13 +59,10 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             DateTime adjustedStartTime = CalculateAdjustedStartTime(assignmentGene);
             DateTime projectedEndTime = adjustedStartTime + originalMissionDuration;
 
-            if (DoesMissionFitInWindow(projectedEndTime, assignmentGene.Mission.TimeWindow.End))
-            {
-                assignmentGene.StartTime = adjustedStartTime;
-                return assignmentGene;
-            }
+            if (!DoesMissionFitInWindow(projectedEndTime, assignmentGene.Mission.TimeWindow.End)) return null;
+            assignmentGene.StartTime = adjustedStartTime;
+            return assignmentGene;
 
-            return null;
         }
 
         private DateTime CalculateAdjustedStartTime(AssignmentGene assignmentGene)
