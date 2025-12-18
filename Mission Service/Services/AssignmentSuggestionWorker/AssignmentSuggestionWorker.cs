@@ -52,14 +52,19 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
             }
         }
 
-        private AssignmentChromosome ExecuteAlgorithm(AssignmentSuggestionDto request,IReadOnlyCollection<UAV> uavs)
+        private AssignmentChromosome ExecuteAlgorithm(
+            AssignmentSuggestionDto request,
+            IReadOnlyCollection<UAV> uavs
+        )
         {
             using IServiceScope scope = _serviceScopeFactory.CreateScope();
             IAssignmentAlgorithm assignmentAlgorithm =
                 scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
 
-            AssignmentResult assignmentResult =
-                assignmentAlgorithm.PreformAssignmentAlgorithm(request.Missions, uavs);
+            AssignmentResult assignmentResult = assignmentAlgorithm.PreformAssignmentAlgorithm(
+                request.Missions,
+                uavs
+            );
 
             return assignmentResult.Assignments.First();
         }

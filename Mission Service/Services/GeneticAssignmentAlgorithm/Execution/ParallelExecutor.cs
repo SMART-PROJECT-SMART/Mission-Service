@@ -11,7 +11,7 @@ public class ParallelExecutor : IParallelExecutor
     {
         _parallelOptions = new ParallelOptions()
         {
-            MaxDegreeOfParallelism = Environment.ProcessorCount
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
         };
     }
 

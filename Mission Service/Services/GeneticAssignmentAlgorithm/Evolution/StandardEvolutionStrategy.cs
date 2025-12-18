@@ -105,9 +105,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution
             int numberOfOffspringNeeded
         )
         {
-            return generatedOffspring
-                .OrderByBestQuality()
-                .Take(numberOfOffspringNeeded);
+            return generatedOffspring.OrderByBestQuality().Take(numberOfOffspringNeeded);
         }
 
         private IReadOnlyList<AssignmentChromosome> AssembleNextGeneration(
