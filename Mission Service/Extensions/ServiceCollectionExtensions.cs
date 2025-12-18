@@ -239,10 +239,7 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddQuartzServices(this IServiceCollection services)
         {
             services.AddTransient<MissionExecutorJob>();
-            services.AddSingleton<
-                IMissionScheduler,
-                MissionScheduler
-            >();
+            services.AddSingleton<IMissionScheduler, MissionScheduler>();
 
             services.AddQuartz(q =>
             {
