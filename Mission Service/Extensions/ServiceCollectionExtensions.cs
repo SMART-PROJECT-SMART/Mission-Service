@@ -39,7 +39,6 @@ using Mission_Service.Services.UAVTelemetryService;
 using Mission_Service.Services.UAVTelemetryService.Interfaces;
 using MongoDB.Driver;
 using Quartz;
-using IUAVFetcher = Mission_Service.Services.UAVTelemetryService.IUAVFetcher;
 
 namespace Mission_Service.Extensions
 {
@@ -225,7 +224,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IUAVStatusService, UAVStatusService>();
             services.AddSingleton<
                 Services.UAVTelemetryService.Interfaces.IUAVFetcher,
-                Services.UAVTelemetryService.IUAVFetcher
+                Services.UAVTelemetryService.UAVFetcher
             >();
             return services;
         }

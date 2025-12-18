@@ -83,7 +83,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                 );
             }
 
-            return new AssignmentChromosome { Assignments = assignments, IsValid = true };
+            return new AssignmentChromosome { Assignments = assignments };
         }
 
         private DateTime GenerateRandomStartTimeWithinWindow(Mission mission)

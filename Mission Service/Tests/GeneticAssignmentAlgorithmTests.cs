@@ -144,7 +144,7 @@ public class GeneticAssignmentAlgorithmTests
         var bestChromosome = result.Assignments.First();
 
         // Assert
-        Assert.True(bestChromosome.IsValid);
+        Assert.Equal(missions.Count, bestChromosome.AssignmentCount);
         Assert.True(bestChromosome.FitnessScore > 0);
     }
 
@@ -400,7 +400,6 @@ public class GeneticAssignmentAlgorithmTests
         var bestChromosome = result.Assignments.First();
 
         // Assert
-        Assert.True(bestChromosome.IsValid);
         Assert.True(bestChromosome.FitnessScore > 0);
         Assert.Equal(3, bestChromosome.Assignments.Count());
     }

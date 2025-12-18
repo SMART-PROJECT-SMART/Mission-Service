@@ -270,7 +270,7 @@ namespace Mission_Service.Controllers
                 foreach (var chromosome in result.Assignments)
                 {
                     _logger.LogInformation(
-                        $"CHROMOSOME - Fitness: {chromosome.FitnessScore:F6}, Valid: {chromosome.IsValid}, Assignments: {chromosome.Assignments.Count()}"
+                        $"CHROMOSOME - Fitness: {chromosome.FitnessScore:F6}, Assignments: {chromosome.Assignments.Count()}"
                     );
 
                     foreach (var gene in chromosome.Assignments)
@@ -312,7 +312,6 @@ namespace Mission_Service.Controllers
                         Assignments = result.Assignments.Select(c => new
                         {
                             c.FitnessScore,
-                            c.IsValid,
                             AssignmentCount = c.Assignments.Count(),
                             Details = c.Assignments.Select(g => new
                             {

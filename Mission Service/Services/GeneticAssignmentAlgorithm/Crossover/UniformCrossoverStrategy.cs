@@ -59,7 +59,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
                 childGenes
             );
 
-            return new AssignmentChromosome { Assignments = childGenes, IsValid = true };
+            return new AssignmentChromosome { Assignments = childGenes };
         }
 
         private Dictionary<string, AssignmentGene> BuildMissionLookupFromGenes(

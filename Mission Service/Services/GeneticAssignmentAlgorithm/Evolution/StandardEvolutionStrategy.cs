@@ -105,23 +105,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution
             int numberOfOffspringNeeded
         )
         {
-            IEnumerable<AssignmentChromosome> validOffspring =
-                generatedOffspring.FilterValidChromosomes();
-
-            IEnumerable<AssignmentChromosome> invalidOffspringSortedByQuality =
-                generatedOffspring.FilterAndOrderInvalidChromosomesByQuality();
-
-            List<AssignmentChromosome> combinedOffspring = new List<AssignmentChromosome>();
-            combinedOffspring.AddRange(validOffspring);
-
-            int remainingSlots = numberOfOffspringNeeded - combinedOffspring.Count;
-
-            if (remainingSlots > 0 && invalidOffspringSortedByQuality.Any())
-            {
-                combinedOffspring.AddRange(invalidOffspringSortedByQuality.Take(remainingSlots));
-            }
-
-            return combinedOffspring;
+            return generatedOffspring
+                .OrderByBestQuality()
+                .Take(numberOfOffspringNeeded);
         }
 
         private IReadOnlyList<AssignmentChromosome> AssembleNextGeneration(

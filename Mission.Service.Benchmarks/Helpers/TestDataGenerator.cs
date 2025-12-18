@@ -97,7 +97,7 @@ namespace Mission.Service.Benchmarks.Helpers
                 }
             }
 
-            return new AssignmentChromosome { Assignments = assignments, IsValid = true };
+            return new AssignmentChromosome { Assignments = assignments };
         }
     }
 }
