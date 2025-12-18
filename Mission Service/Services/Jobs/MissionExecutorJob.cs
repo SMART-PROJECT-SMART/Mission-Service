@@ -24,10 +24,14 @@ namespace Mission_Service.Services.Jobs
 
             SimulateMissionRequest missionRequest = new SimulateMissionRequest
             {
-                TailId = missionDataMap.GetInt(MissionServiceConstants.MissionExecution.TAIL_ID_KEY),
+                TailId = missionDataMap.GetInt(
+                    MissionServiceConstants.MissionExecution.TAIL_ID_KEY
+                ),
                 Destination = new Location(
                     missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.LATITUDE_KEY),
-                    missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.LONGITUDE_KEY),
+                    missionDataMap.GetDouble(
+                        MissionServiceConstants.MissionExecution.LONGITUDE_KEY
+                    ),
                     missionDataMap.GetDouble(MissionServiceConstants.MissionExecution.ALTITUDE_KEY)
                 ),
                 MissionId = missionDataMap.GetString(

@@ -15,20 +15,26 @@ namespace Mission_Service.Services.MissionScheduler
             _schedulerFactory = schedulerFactory;
         }
 
-        public async Task ScheduleMissionsAsync(IEnumerable<MissionToUavAssignment> missionAssignments)
+        public async Task ScheduleMissionsAsync(
+            IEnumerable<MissionToUavAssignment> missionAssignments
+        )
         {
             IScheduler quartzScheduler = await _schedulerFactory.GetScheduler();
 
             foreach (MissionToUavAssignment missionAssignment in missionAssignments)
             {
                 IJobDetail missionExecutionJob = CreateMissionExecutionJob(missionAssignment);
-                ITrigger missionExecutionTrigger = CreateImmediateTrigger(missionAssignment.Mission.Id);
+                ITrigger missionExecutionTrigger = CreateImmediateTrigger(
+                    missionAssignment.Mission.Id
+                );
 
                 await quartzScheduler.ScheduleJob(missionExecutionJob, missionExecutionTrigger);
             }
         }
 
-        private static IJobDetail CreateMissionExecutionJob(MissionToUavAssignment missionAssignment)
+        private static IJobDetail CreateMissionExecutionJob(
+            MissionToUavAssignment missionAssignment
+        )
         {
             return JobBuilder
                 .Create<MissionExecutorJob>()
@@ -58,13 +64,10 @@ namespace Mission_Service.Services.MissionScheduler
 
         private static ITrigger CreateImmediateTrigger(string missionId)
         {
-            string triggerIdentity = $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionId}";
+            string triggerIdentity =
+                $"{MissionServiceConstants.MissionExecution.TRIGGER_PREFIX}{missionId}";
 
-            return TriggerBuilder
-                .Create()
-                .WithIdentity(triggerIdentity)
-                .StartNow()
-                .Build();
+            return TriggerBuilder.Create().WithIdentity(triggerIdentity).StartNow().Build();
         }
     }
 }

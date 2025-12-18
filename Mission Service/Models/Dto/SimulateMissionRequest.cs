@@ -4,8 +4,8 @@ namespace Mission_Service.Models.Dto
 {
     public class SimulateMissionRequest
     {
-     public int TailId { get; set; }
-    public Location Destination { get; set; } = new();
+        public int TailId { get; set; }
+        public Location Destination { get; set; } = new();
         public string MissionId { get; set; } = string.Empty;
     }
 }
