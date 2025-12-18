@@ -23,8 +23,8 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             }
 
             List<AssignmentGene> assignmentList = assignmentChromosome.AssignmentsList;
-            IEnumerable<IGrouping<int, AssignmentGene>> groupedByUAV = assignmentList.GroupBy(a =>
-                a.UAV.TailId
+            IEnumerable<IGrouping<int, AssignmentGene>> groupedByUAV = assignmentList.GroupBy(gene =>
+                gene.UAV.TailId
             );
 
             HashSet<AssignmentGene> assignmentsToRemove = new HashSet<AssignmentGene>();
@@ -60,14 +60,13 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 
                 AssignmentGene nextAssignment = sortedAssignments[i + 1];
 
-                if (HasOverlap(currentAssignment, nextAssignment))
-                {
-                    AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
-                        currentAssignment,
-                        nextAssignment
-                    );
-                    assignmentsToRemove.Add(assignmentToRemove);
-                }
+                if (!HasOverlap(currentAssignment, nextAssignment)) continue;
+
+                AssignmentGene assignmentToRemove = SelectAssignmentToRemove(
+                    currentAssignment,
+                    nextAssignment
+                );
+                assignmentsToRemove.Add(assignmentToRemove);
             }
         }
 
