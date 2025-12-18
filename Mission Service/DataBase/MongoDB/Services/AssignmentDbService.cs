@@ -4,11 +4,11 @@ using Mission_Service.Models.Ro;
 
 namespace Mission_Service.DataBase.MongoDB.Services
 {
-    public class AssignmentService : IAssignmentService
+    public class AssignmentDbService : IAssignmentDBService
     {
         private readonly IAssignmentRepository _assignmentRepository;
 
-        public AssignmentService(IAssignmentRepository assignmentRepository)
+        public AssignmentDbService(IAssignmentRepository assignmentRepository)
         {
             _assignmentRepository = assignmentRepository;
         }

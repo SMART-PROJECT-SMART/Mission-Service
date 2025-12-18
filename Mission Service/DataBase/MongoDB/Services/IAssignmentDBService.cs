@@ -3,7 +3,7 @@ using Mission_Service.Models.Ro;
 
 namespace Mission_Service.DataBase.MongoDB.Services
 {
-    public interface IAssignmentService
+    public interface IAssignmentDBService
     {
         Task<bool> CreateAssignmentAsync(ApplyAssignmentDto applyAssignmentDto);
 

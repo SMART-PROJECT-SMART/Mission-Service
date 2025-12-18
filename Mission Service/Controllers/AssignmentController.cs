@@ -16,19 +16,19 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentSuggestionQueue _queue;
         private readonly IAssignmentResultManager _assignmentResultManager;
-        private readonly IAssignmentService _assignmentService;
+        private readonly IAssignmentDBService _assignmentDbService;
         private readonly IMissionScheduler _missionScheduler;
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
             IAssignmentResultManager assignmentResultManager,
-            IAssignmentService assignmentService,
+            IAssignmentDBService assignmentDbService,
             IMissionScheduler missionScheduler
         )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;
-            _assignmentService = assignmentService;
+            _assignmentDbService = assignmentDbService;
             _missionScheduler = missionScheduler;
         }
 
@@ -60,7 +60,7 @@ namespace Mission_Service.Controllers
         [HttpPost("apply-assignment")]
         public async Task<IActionResult> ApplyAssignment(ApplyAssignmentDto applyAssignmentDto)
         {
-            bool isCreated = await _assignmentService.CreateAssignmentAsync(applyAssignmentDto);
+            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(applyAssignmentDto);
 
             if (!isCreated)
             {
