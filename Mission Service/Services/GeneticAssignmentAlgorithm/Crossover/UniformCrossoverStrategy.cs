@@ -59,7 +59,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
                 childGenes
             );
 
-            return new AssignmentChromosome { Assignments = childGenes, IsValid = true };
+            return new AssignmentChromosome { Assignments = childGenes };
         }
 
         private Dictionary<string, AssignmentGene> BuildMissionLookupFromGenes(
@@ -100,12 +100,19 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover
             Dictionary<string, AssignmentGene> secondaryParentLookup
         )
         {
-            if (!secondaryParentLookup.TryGetValue(primaryParentGene.Mission.Id, out AssignmentGene? secondaryParentGene))
+            if (
+                !secondaryParentLookup.TryGetValue(
+                    primaryParentGene.Mission.Id,
+                    out AssignmentGene? secondaryParentGene
+                )
+            )
             {
                 return primaryParentGene;
             }
 
-            return RandomSelectionHelper.ShouldOccur(MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY)
+            return RandomSelectionHelper.ShouldOccur(
+                MissionServiceConstants.Crossover.GENE_SELECTION_PROBABILITY
+            )
                 ? secondaryParentGene!
                 : primaryParentGene;
         }

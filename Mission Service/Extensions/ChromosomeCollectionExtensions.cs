@@ -4,20 +4,6 @@ namespace Mission_Service.Extensions;
 
 public static class ChromosomeCollectionExtensions
 {
-    public static IEnumerable<AssignmentChromosome> FilterValidChromosomes(
-        this IEnumerable<AssignmentChromosome> chromosomes
-    )
-    {
-        return chromosomes.Where(chromosome => chromosome.IsValid);
-    }
-
-    public static IEnumerable<AssignmentChromosome> FilterInvalidChromosomes(
-        this IEnumerable<AssignmentChromosome> chromosomes
-    )
-    {
-        return chromosomes.Where(chromosome => !chromosome.IsValid);
-    }
-
     public static IEnumerable<AssignmentChromosome> OrderByBestQuality(
         this IEnumerable<AssignmentChromosome> chromosomes
     )
@@ -27,26 +13,11 @@ public static class ChromosomeCollectionExtensions
             .ThenByDescending(chromosome => chromosome.FitnessScore);
     }
 
-    public static IEnumerable<AssignmentChromosome> FilterAndOrderInvalidChromosomesByQuality(
-        this IEnumerable<AssignmentChromosome> chromosomes
-    )
-    {
-        return chromosomes.FilterInvalidChromosomes().OrderByBestQuality();
-    }
-
     public static AssignmentChromosome FindChromosomeWithHighestFitness(
         this IEnumerable<AssignmentChromosome> chromosomePopulation
     )
     {
-        AssignmentChromosome? best = chromosomePopulation.MaxBy(c => c.FitnessScore);
-
-        if (best == null)
-        {
-            throw new ArgumentException(
-                "Population cannot be null or empty",
-                nameof(chromosomePopulation)
-            );
-        }
+        AssignmentChromosome best = chromosomePopulation.MaxBy(c => c.FitnessScore)!;
 
         return best;
     }

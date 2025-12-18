@@ -5,6 +5,7 @@ using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
@@ -99,11 +100,18 @@ public class GeneticAssignmentAlgorithmTests
         };
         var repairPipeline = new RepairPipline(repairStrategies);
 
+        var evolutionStrategy = new StandardEvolutionStrategy(
+            eliteSelector,
+            offspringGenerator,
+            parallelExecutor,
+            repairPipeline,
+            Options.Create(_config)
+        );
+
         _algorithm = new GeneticAssignmentAlgorithm(
             fitnessCalculator,
             populationInitializer,
-            eliteSelector,
-            offspringGenerator,
+            evolutionStrategy,
             parallelExecutor,
             repairPipeline,
             Options.Create(_config)
@@ -136,7 +144,7 @@ public class GeneticAssignmentAlgorithmTests
         var bestChromosome = result.Assignments.First();
 
         // Assert
-        Assert.True(bestChromosome.IsValid);
+        Assert.Equal(missions.Count, bestChromosome.AssignmentCount);
         Assert.True(bestChromosome.FitnessScore > 0);
     }
 
@@ -392,7 +400,6 @@ public class GeneticAssignmentAlgorithmTests
         var bestChromosome = result.Assignments.First();
 
         // Assert
-        Assert.True(bestChromosome.IsValid);
         Assert.True(bestChromosome.FitnessScore > 0);
         Assert.Equal(3, bestChromosome.Assignments.Count());
     }

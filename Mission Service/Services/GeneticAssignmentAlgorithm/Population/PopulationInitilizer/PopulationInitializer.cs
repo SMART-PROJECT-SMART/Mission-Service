@@ -83,7 +83,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                 );
             }
 
-            return new AssignmentChromosome { Assignments = assignments, IsValid = true };
+            return new AssignmentChromosome { Assignments = assignments };
         }
 
         private DateTime GenerateRandomStartTimeWithinWindow(Mission mission)
@@ -94,12 +94,9 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
 
             DateTime latestPossibleStart = windowEnd - missionDuration;
 
-            if (latestPossibleStart <= windowStart)
-            {
-                return windowStart;
-            }
-
-            return RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
+            return latestPossibleStart <= windowStart
+                ? windowStart
+                : RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
         }
     }
 }

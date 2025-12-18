@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
+using Mission_Service.DataBase.MongoDB.Services;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
+using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -14,14 +16,20 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentSuggestionQueue _queue;
         private readonly IAssignmentResultManager _assignmentResultManager;
+        private readonly IAssignmentDBService _assignmentDbService;
+        private readonly IMissionScheduler _missionScheduler;
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
-            IAssignmentResultManager assignmentResultManager
+            IAssignmentResultManager assignmentResultManager,
+            IAssignmentDBService assignmentDbService,
+            IMissionScheduler missionScheduler
         )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;
+            _assignmentDbService = assignmentDbService;
+            _missionScheduler = missionScheduler;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
@@ -38,7 +46,7 @@ namespace Mission_Service.Controllers
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
                 new { assignmentId = assignmentSuggestionDto.AssignmentId },
                 Request.Scheme
-            );
+            )!;
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
@@ -47,6 +55,21 @@ namespace Mission_Service.Controllers
             );
 
             return Accepted(response);
+        }
+
+        [HttpPost("apply-assignment")]
+        public async Task<IActionResult> ApplyAssignment(ApplyAssignmentDto applyAssignmentDto)
+        {
+            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(applyAssignmentDto);
+
+            if (!isCreated)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            await _missionScheduler.ScheduleMissionsAsync(applyAssignmentDto.ActualAssignments);
+
+            return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }
     }
 }

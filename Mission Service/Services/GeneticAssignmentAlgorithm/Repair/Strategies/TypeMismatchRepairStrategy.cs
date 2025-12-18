@@ -21,10 +21,8 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
                 return;
             }
 
-            IEnumerable<AssignmentGene> repairedAssignments = assignmentChromosome
-                .Assignments.Select(gene => RepairGeneIfNeeded(gene, uavs))
-                .Where(gene => gene != null)
-                .Cast<AssignmentGene>();
+            IEnumerable<AssignmentGene> repairedAssignments =
+                assignmentChromosome.Assignments.Select(gene => RepairGeneIfNeeded(gene, uavs));
 
             assignmentChromosome.Assignments = repairedAssignments;
         }

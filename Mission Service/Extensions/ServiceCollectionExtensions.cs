@@ -1,6 +1,10 @@
 ﻿using System.Security.AccessControl;
+using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
+using Mission_Service.DataBase.MongoDB.Repositoreis;
+using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
+using Mission_Service.DataBase.MongoDB.Services;
 using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
@@ -29,8 +33,15 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
+using Mission_Service.Services.Quartz.Jobs;
+using Mission_Service.Services.Quartz.MissionScheduler;
+using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
+using Mission_Service.Services.UAVFetcher;
+using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
+using MongoDB.Driver;
+using Quartz;
 
 namespace Mission_Service.Extensions
 {
@@ -52,6 +63,46 @@ namespace Mission_Service.Extensions
             services.AddTelemetryWeightsConfig(configuration);
             services.AddFitnessWeightsConfig(configuration);
             services.AddAssignmentQueueConfig(configuration);
+            services.AddMongoDbConfiguration(configuration);
+            return services;
+        }
+
+        private static IServiceCollection AddMongoDbConfiguration(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            services.Configure<MongoDBConfiguration>(
+                configuration.GetSection(
+                    MissionServiceConstants.Configuration.MONGODB_CONFIG_SECTION
+                )
+            );
+            services.AddSingleton<IMongoClient>(serviceProvider =>
+            {
+                MongoDBConfiguration mongoDbConfiguration = serviceProvider
+                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
+                    .Value;
+                MongoClientSettings mongoClientSettings = MongoClientSettings.FromConnectionString(
+                    mongoDbConfiguration.ConnectionString
+                );
+                mongoClientSettings.MaxConnectionPoolSize =
+                    mongoDbConfiguration.MaxConnectionPoolSize;
+                mongoClientSettings.MinConnectionPoolSize =
+                    mongoDbConfiguration.MinConnectionPoolSize;
+                mongoClientSettings.MaxConnectionIdleTime =
+                    mongoDbConfiguration.MaxConnectionIdleTime;
+                mongoClientSettings.ServerSelectionTimeout =
+                    mongoDbConfiguration.ServerSelectionTimeout;
+                return new MongoClient(mongoClientSettings);
+            });
+            services.AddSingleton(serviceProvider =>
+            {
+                MongoDBConfiguration mongoDbConfiguration = serviceProvider
+                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
+                    .Value;
+                IMongoClient mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
+                return mongoClient.GetDatabase(mongoDbConfiguration.DatabaseName);
+            });
             return services;
         }
 
@@ -115,6 +166,10 @@ namespace Mission_Service.Extensions
             services.AddScoped<IMutationStrategy, SwapMutationStrategy>();
             services.AddScoped<IEliteSelector, EliteSelector>();
             services.AddScoped<IOffspringGenerator, OffspringGenerator>();
+            services.AddScoped<
+                Services.GeneticAssignmentAlgorithm.Evolution.Interfaces.IEvolutionStrategy,
+                Services.GeneticAssignmentAlgorithm.Evolution.StandardEvolutionStrategy
+            >();
             services.AddSingleton<IParallelExecutor, ParallelExecutor>();
             services.AddRepairStrategies();
             services.AddRepairPipeline();
@@ -169,7 +224,58 @@ namespace Mission_Service.Extensions
 
         public static IServiceCollection AddUAVServices(this IServiceCollection services)
         {
-            services.AddSingleton<IUAVStatusService, UAVStatusService>();
+            services.AddSingleton<IUAVStatusService, UAVStatus>();
+            services.AddSingleton<IUAVFetcher, UAVFetcher>();
+            return services;
+        }
+
+        public static IServiceCollection AddMongoDbServices(this IServiceCollection services)
+        {
+            services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+            services.AddScoped<IAssignmentService, AssignmentService>();
+            return services;
+        }
+
+        public static IServiceCollection AddQuartzServices(this IServiceCollection services)
+        {
+            services.AddTransient<MissionExecutorJob>();
+            services.AddSingleton<
+                IMissionScheduler,
+                MissionScheduler
+            >();
+
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+            });
+
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+            return services;
+        }
+
+        public static IServiceCollection AddSimulatorHttpClient(
+            this IServiceCollection services,
+            IConfiguration configuration
+        )
+        {
+            services.AddHttpClient(
+                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
+                client =>
+                {
+                    string? baseUrl = configuration[
+                        MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY
+                    ];
+
+                    if (!string.IsNullOrEmpty(baseUrl))
+                    {
+                        client.BaseAddress = new Uri(baseUrl);
+                    }
+
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                }
+            );
+
             return services;
         }
     }

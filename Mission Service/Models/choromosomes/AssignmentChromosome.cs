@@ -6,7 +6,6 @@
 
         public IEnumerable<AssignmentGene> Assignments { get; set; }
         public double FitnessScore { get; set; }
-        public bool IsValid { get; set; }
 
         public List<AssignmentGene> AssignmentsList
         {
@@ -32,7 +31,6 @@
             {
                 Assignments = AssignmentsList.Select(gene => gene.Clone()).ToList(),
                 FitnessScore = FitnessScore,
-                IsValid = IsValid,
             };
         }
     }

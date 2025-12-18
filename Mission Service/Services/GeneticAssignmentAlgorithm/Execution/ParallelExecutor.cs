@@ -5,10 +5,15 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 
 public class ParallelExecutor : IParallelExecutor
 {
-    private static readonly ParallelOptions _parallelOptions = new()
+    private readonly ParallelOptions _parallelOptions;
+
+    public ParallelExecutor()
     {
-        MaxDegreeOfParallelism = Environment.ProcessorCount
-    };
+        _parallelOptions = new ParallelOptions()
+        {
+            MaxDegreeOfParallelism = Environment.ProcessorCount,
+        };
+    }
 
     public void EvaluatePopulationFitnessInParallel(
         IReadOnlyList<AssignmentChromosome> chromosomePopulationToEvaluate,
@@ -27,10 +32,6 @@ public class ParallelExecutor : IParallelExecutor
         Action<AssignmentChromosome> repairSingleChromosome
     )
     {
-        Parallel.ForEach(
-            chromosomePopulationToRepair,
-            _parallelOptions,
-            repairSingleChromosome
-        );
+        Parallel.ForEach(chromosomePopulationToRepair, _parallelOptions, repairSingleChromosome);
     }
 }

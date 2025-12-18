@@ -6,11 +6,11 @@ using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.UAVStatusService
 {
-    public class UAVStatusService : IUAVStatusService
+    public class UAVStatus : IUAVStatusService
     {
         private readonly ConcurrentDictionary<int, Mission> _uavActiveMissionsByTailId;
 
-        public UAVStatusService()
+        public UAVStatus()
         {
             _uavActiveMissionsByTailId = new ConcurrentDictionary<int, Mission>();
         }

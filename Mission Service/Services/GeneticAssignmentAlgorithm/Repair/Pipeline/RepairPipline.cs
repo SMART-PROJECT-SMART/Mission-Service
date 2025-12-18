@@ -36,21 +36,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline
 
                 int assignmentCountAfterRepair = assignmentChromosome.AssignmentCount;
 
-                if (
-                    assignmentCountBeforeRepair == assignmentCountAfterRepair
-                    && assignmentChromosome.IsValid
-                )
+                if (assignmentCountBeforeRepair == assignmentCountAfterRepair)
                 {
                     break;
                 }
             }
-
-            HashSet<string> assignedMissionIds = assignmentChromosome.AssignmentsList
-                .Select(a => a.Mission.Id)
-                .ToHashSet();
-
-            assignmentChromosome.IsValid =
-                missions.All(m => assignedMissionIds.Contains(m.Id)) && assignmentChromosome.IsValid;
         }
     }
 }
