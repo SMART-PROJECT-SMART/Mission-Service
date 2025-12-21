@@ -1,14 +1,14 @@
 ﻿using System.Threading.Channels;
 using Microsoft.Extensions.Options;
 using Mission_Service.Config;
-using Mission_Service.Models.Dto;
+using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 
 namespace Mission_Service.Services.AssignmentRequestQueue
 {
     public class AssignmentSuggestionQueue : IAssignmentSuggestionQueue
     {
-        private readonly Channel<AssignmentSuggestionDto> _assignmentSuggestionRequestQueue;
+        private readonly Channel<AssignmentSuggestionRequest> _assignmentSuggestionRequestQueue;
 
         public AssignmentSuggestionQueue(IOptions<AssignmentRequestQueueConfiguration> queueConfig)
         {
@@ -17,19 +17,19 @@ namespace Mission_Service.Services.AssignmentRequestQueue
                 FullMode = BoundedChannelFullMode.Wait,
             };
 
-            _assignmentSuggestionRequestQueue = Channel.CreateBounded<AssignmentSuggestionDto>(
+            _assignmentSuggestionRequestQueue = Channel.CreateBounded<AssignmentSuggestionRequest>(
                 options
             );
         }
 
         public async Task QueueAssignmentSuggestionRequest(
-            AssignmentSuggestionDto assignmentSuggestionDto
+            AssignmentSuggestionRequest assignmentSuggestionRequest
         )
         {
-            await _assignmentSuggestionRequestQueue.Writer.WriteAsync(assignmentSuggestionDto);
+            await _assignmentSuggestionRequestQueue.Writer.WriteAsync(assignmentSuggestionRequest);
         }
 
-        public ChannelReader<AssignmentSuggestionDto> AssignmentSuggestionReader =>
+        public ChannelReader<AssignmentSuggestionRequest> AssignmentSuggestionReader =>
             _assignmentSuggestionRequestQueue.Reader;
     }
 }

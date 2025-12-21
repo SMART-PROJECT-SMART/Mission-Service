@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.DataBase.MongoDB.Services;
+using Mission_Service.Models;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
@@ -36,20 +37,23 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            _assignmentResultManager.CreateExecution(assignmentSuggestionDto.AssignmentId);
+            string assignmentId = Guid.NewGuid().ToString();
 
-            await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
+            _assignmentResultManager.CreateExecution(assignmentId);
+
+            var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
+            await _queue.QueueAssignmentSuggestionRequest(request);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
-                new { assignmentId = assignmentSuggestionDto.AssignmentId },
+                new { assignmentId },
                 Request.Scheme
             )!;
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
-                assignmentSuggestionDto.AssignmentId!,
+                assignmentId,
                 statusUrl!
             );
 

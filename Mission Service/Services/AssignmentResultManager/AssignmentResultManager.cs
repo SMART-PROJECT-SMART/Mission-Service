@@ -17,7 +17,7 @@ namespace Mission_Service.Services.AssignmentResultManager
 
         public void CreateExecution(string assignmentId)
         {
-            var execution = new AssignmentExecution(assignmentId);
+            var execution = new AssignmentExecution();
             _assignmentExecutions.TryAdd(assignmentId, execution);
         }
 

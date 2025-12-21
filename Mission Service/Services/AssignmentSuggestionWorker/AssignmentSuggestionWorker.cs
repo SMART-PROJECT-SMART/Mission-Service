@@ -34,7 +34,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await foreach (
-                AssignmentSuggestionDto request in _assignmentSuggestionQueue.AssignmentSuggestionReader.ReadAllAsync(
+                AssignmentSuggestionRequest request in _assignmentSuggestionQueue.AssignmentSuggestionReader.ReadAllAsync(
                     stoppingToken
                 )
             )
@@ -51,7 +51,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                     scope.ServiceProvider.GetRequiredService<IAssignmentAlgorithm>();
 
                 AssignmentResult assignmentResult = assignmentAlgorithm.PreformAssignmentAlgorithm(
-                    request.Missions,
+                    request.Dto.Missions,
                     uavs
                 );
 
