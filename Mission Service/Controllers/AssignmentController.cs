@@ -6,7 +6,7 @@ using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
-using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
+using Mission_Service.Services.MissionExecutor.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -17,19 +17,19 @@ namespace Mission_Service.Controllers
         private readonly IAssignmentSuggestionQueue _queue;
         private readonly IAssignmentResultManager _assignmentResultManager;
         private readonly IAssignmentDBService _assignmentDbService;
-        private readonly IMissionScheduler _missionScheduler;
+        private readonly IMissionExecutor _missionExecutor;
 
         public AssignmentController(
             IAssignmentSuggestionQueue queue,
             IAssignmentResultManager assignmentResultManager,
             IAssignmentDBService assignmentDbService,
-            IMissionScheduler missionScheduler
+            IMissionExecutor missionExecutor
         )
         {
             _queue = queue;
             _assignmentResultManager = assignmentResultManager;
             _assignmentDbService = assignmentDbService;
-            _missionScheduler = missionScheduler;
+            _missionExecutor = missionExecutor;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
@@ -70,7 +70,7 @@ namespace Mission_Service.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            await _missionScheduler.ScheduleMissionsAsync(applyAssignmentDto.ActualAssignments);
+            await _missionExecutor.ExecuteMissionsAsync(applyAssignmentDto.ActualAssignments);
 
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }

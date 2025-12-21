@@ -30,15 +30,13 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
-using Mission_Service.Services.Quartz.Jobs;
-using Mission_Service.Services.Quartz.MissionScheduler;
-using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
+using Mission_Service.Services.MissionExecutor;
+using Mission_Service.Services.MissionExecutor.Interfaces;
 using Mission_Service.Services.UAVFetcher;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 using MongoDB.Driver;
-using Quartz;
 
 namespace Mission_Service.Extensions
 {
@@ -233,17 +231,9 @@ namespace Mission_Service.Extensions
             return services;
         }
 
-        public static IServiceCollection AddQuartzServices(this IServiceCollection services)
+        public static IServiceCollection AddMissionExecutor(this IServiceCollection services)
         {
-            services.AddTransient<MissionExecutorJob>();
-            services.AddSingleton<IMissionScheduler, MissionScheduler>();
-
-            services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionJobFactory();
-            });
-
-            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+            services.AddScoped<IMissionExecutor, MissionExecutor>();
 
             return services;
         }

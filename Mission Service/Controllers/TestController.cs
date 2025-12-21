@@ -263,21 +263,16 @@ namespace Mission_Service.Controllers
                 var duration = endTime - startTime;
 
                 _logger.LogInformation($"EXECUTION TIME: {duration.TotalMilliseconds}ms");
-                _logger.LogInformation($"CHROMOSOMES GENERATED: {result.Assignments.Count()}");
+                _logger.LogInformation(
+                    $"BEST CHROMOSOME - Fitness: {result.Assignment.FitnessScore:F6}, Assignments: {result.Assignment.Assignments.Count()}"
+                );
 
-                foreach (var chromosome in result.Assignments)
+                foreach (var gene in result.Assignment.Assignments)
                 {
                     _logger.LogInformation(
-                        $"CHROMOSOME - Fitness: {chromosome.FitnessScore:F6}, Assignments: {chromosome.Assignments.Count()}"
+                        $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
+                            + $"Start: {gene.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {gene.TimeWindow.GetDuration()}, End: {gene.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
                     );
-
-                    foreach (var gene in chromosome.Assignments)
-                    {
-                        _logger.LogInformation(
-                            $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
-                                + $"Start: {gene.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {gene.TimeWindow.GetDuration()}, End: {gene.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
-                        );
-                    }
                 }
 
                 _logger.LogInformation("========================================");
@@ -305,22 +300,17 @@ namespace Mission_Service.Controllers
                     },
                     Results = new
                     {
-                        ChromosomesGenerated = result.Assignments.Count(),
-                        BestFitnessScore = result.Assignments.FirstOrDefault()?.FitnessScore ?? 0,
-                        Assignments = result.Assignments.Select(c => new
+                        BestFitnessScore = result.Assignment.FitnessScore,
+                        AssignmentCount = result.Assignment.Assignments.Count(),
+                        Assignments = result.Assignment.Assignments.Select(g => new
                         {
-                            c.FitnessScore,
-                            AssignmentCount = c.Assignments.Count(),
-                            Details = c.Assignments.Select(g => new
-                            {
-                                MissionId = g.Mission.Id,
-                                UAVTailId = g.UAV.TailId,
-                                UAVType = g.UAV.UavType.ToString(),
-                                StartTime = g.TimeWindow.Start,
-                                Duration = g.TimeWindow.GetDuration(),
-                                EndTime = g.TimeWindow.End,
-                            }),
-                        }),
+                            MissionId = g.Mission.Id,
+                            UAVTailId = g.UAV.TailId,
+                            UAVType = g.UAV.UavType.ToString(),
+                            StartTime = g.TimeWindow.Start,
+                            Duration = g.TimeWindow.GetDuration(),
+                            EndTime = g.TimeWindow.End,
+                        })
                     },
                 };
             }

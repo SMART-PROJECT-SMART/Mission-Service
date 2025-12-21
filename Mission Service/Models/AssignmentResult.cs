@@ -4,16 +4,16 @@ namespace Mission_Service.Models
 {
     public class AssignmentResult
     {
-        public IEnumerable<AssignmentChromosome> Assignments { get; set; }
+        public AssignmentChromosome Assignment { get; set; }
 
-        public AssignmentResult(IEnumerable<AssignmentChromosome> assignments)
+        public AssignmentResult(AssignmentChromosome assignment)
         {
-            Assignments = assignments;
+            Assignment = assignment;
         }
 
         public AssignmentResult()
         {
-            Assignments = Enumerable.Empty<AssignmentChromosome>();
+            Assignment = new AssignmentChromosome();
         }
     }
 }
