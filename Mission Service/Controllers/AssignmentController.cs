@@ -36,20 +36,18 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            _assignmentResultManager.CreateExecution(assignmentSuggestionDto.AssignmentId);
-
-            await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
+            string assignmentId = await StoreRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
-                new { assignmentId = assignmentSuggestionDto.AssignmentId },
+                new { assignmentId = assignmentId },
                 Request.Scheme
             )!;
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
-                assignmentSuggestionDto.AssignmentId!,
+                assignmentId!,
                 statusUrl!
             );
 
@@ -69,6 +67,14 @@ namespace Mission_Service.Controllers
             await _missionScheduler.ScheduleMissionsAsync(applyAssignmentDto.ActualAssignments);
 
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
+        }
+
+        private async Task<string> StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
+        {
+            string assignmentId = _assignmentResultManager.CreateExecution();
+
+            await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
+            return assignmentId;
         }
     }
 }
