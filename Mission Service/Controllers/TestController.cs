@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -13,14 +14,17 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentAlgorithm _assignmentAlgorithm;
         private readonly ILogger<TestController> _logger;
+        private readonly IUAVStatusService _uavStatusService;
 
         public TestController(
             IAssignmentAlgorithm assignmentAlgorithm,
-            ILogger<TestController> logger
+            ILogger<TestController> logger,
+            IUAVStatusService uavStatusService
         )
         {
             _assignmentAlgorithm = assignmentAlgorithm;
             _logger = logger;
+            _uavStatusService = uavStatusService;
         }
 
         [HttpGet("test/run-all")]
@@ -98,6 +102,12 @@ namespace Mission_Service.Controllers
             );
             results.Add(
                 ExecuteTestCaseInternal("Test 15: Maximum Coverage", CreateMaximumCoverageData())
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 16: High Priority Reassignment From Low Priority",
+                    CreateHighPriorityReassignmentData()
+                )
             );
 
             _logger.LogInformation("========================================");
@@ -210,6 +220,27 @@ namespace Mission_Service.Controllers
         {
             var (missions, uavs) = CreateMaximumCoverageData();
             return ExecuteTestCase("Maximum Coverage", missions, uavs);
+        }
+
+        [HttpGet("test/high-priority-reassignment")]
+        public IActionResult TestHighPriorityReassignment()
+        {
+            var (missions, uavs) = CreateHighPriorityReassignmentData();
+
+            Mission lowPriorityMission = missions.First(m => m.Id == "LowPriorityMission");
+            UAV armedUav = uavs.First(u => u.UavType == UAVType.Armed);
+
+            _uavStatusService.SetActiveMission(armedUav.TailId, lowPriorityMission);
+
+            IActionResult result = ExecuteTestCase(
+                "High Priority Reassignment From Low Priority",
+                missions,
+                uavs
+            );
+
+            _uavStatusService.ClearActiveMission(armedUav.TailId);
+
+            return result;
         }
 
         private IActionResult ExecuteTestCase(
@@ -881,6 +912,38 @@ namespace Mission_Service.Controllers
                 new UAV(501, UAVType.Surveillance, CreateOptimalTelemetry()),
                 new UAV(502, UAVType.Surveillance, CreateOptimalTelemetry()),
                 new UAV(503, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreateHighPriorityReassignmentData()
+        {
+            DateTime baseTime = DateTime.Now.AddHours(1);
+            List<Mission> missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "LowPriorityMission",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.Low,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "HighPriorityMission",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
+                    Location = new Location(32.1000, 34.8000, 120),
+                },
+            };
+
+            List<UAV> uavs = new List<UAV>
+            {
+                new UAV(601, UAVType.Armed, CreateOptimalTelemetry()),
+                new UAV(602, UAVType.Surveillance, CreateOptimalTelemetry()),
             };
 
             return (missions, uavs);
