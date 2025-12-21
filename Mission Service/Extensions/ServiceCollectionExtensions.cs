@@ -1,11 +1,8 @@
-﻿using System.Security.AccessControl;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.DataBase.MongoDB.Repositoreis;
 using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
-using Mission_Service.DataBase.MongoDB.Services;
-using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager;
@@ -232,7 +229,7 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddMongoDbServices(this IServiceCollection services)
         {
             services.AddScoped<IAssignmentRepository, AssignmentRepository>();
-            services.AddScoped<IAssignmentService, AssignmentService>();
+            //services.AddScoped<IAssignmentService, AssignmentService>();
             return services;
         }
 

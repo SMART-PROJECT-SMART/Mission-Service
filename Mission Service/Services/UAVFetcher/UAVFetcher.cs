@@ -79,13 +79,11 @@ namespace Mission_Service.Services.UAVFetcher
                     telemetryFields.ToDictionary(field => field.Key, field => field.Value);
 
                 UAVType detectedUAVType = _uavStatusService.DetermineUAVType(telemetryDictionary);
-                Mission? uavActiveMission = _uavStatusService.GetActiveMission(uavTailId);
 
                 UAV constructedUAV = new UAV(
                     uavTailId,
                     detectedUAVType,
-                    telemetryDictionary,
-                    uavActiveMission
+                    telemetryDictionary
                 );
                 convertedUAVs.Add(constructedUAV);
             }

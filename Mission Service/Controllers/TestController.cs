@@ -1,8 +1,6 @@
 ﻿using Core.Common.Enums;
 using Core.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;

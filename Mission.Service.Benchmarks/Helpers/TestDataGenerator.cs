@@ -62,7 +62,6 @@ namespace Mission.Service.Benchmarks.Helpers
                             [TelemetryFields.ThrustAfterInfluence] = 50000 + random.Next(0, 30000),
                             [TelemetryFields.Altitude] = 100 + random.Next(0, 200),
                         },
-                        ActiveMission = null,
                     }
                 );
             }

@@ -5,7 +5,6 @@ namespace Mission_Service.Models.Dto
 {
     public class AssignmentSuggestionDto
     {
-        [Required(ErrorMessage = MissionServiceConstants.ValidationMessages.ASSIGNMENT_ID_REQUIRED)]
         public string AssignmentId { get; set; }
 
         [Required(ErrorMessage = MissionServiceConstants.ValidationMessages.MISSIONS_REQUIRED)]

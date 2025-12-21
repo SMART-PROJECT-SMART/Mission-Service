@@ -17,6 +17,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Inte
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
+using Mission_Service.Services.UAVStatusService;
 using Xunit;
 
 namespace Mission_Service.Tests;
@@ -71,11 +72,15 @@ public class GeneticAssignmentAlgorithmTests
             TimeOverlapPenalty = -10000.0,
             TypeMismatchPenalty = -10000.0,
             MissionCoverageWeight = 1000.0,
+            ActiveMissionPenalty = -500.0,
         };
+
+        var uavStatusService = new UAVStatus();
 
         var fitnessCalculator = new FitnessCalculator(
             Options.Create(telemetryWeights),
-            Options.Create(fitnessWeights)
+            Options.Create(fitnessWeights),
+            uavStatusService
         );
 
         var populationInitializer = new PopulationInitializer(Options.Create(_config));
