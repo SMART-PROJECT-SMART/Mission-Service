@@ -48,28 +48,29 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             DateTime missionWindowStart = assignmentGene.Mission.TimeWindow.Start;
             DateTime missionWindowEnd = assignmentGene.Mission.TimeWindow.End;
 
-            bool startsWithinWindow = assignmentGene.StartTime >= missionWindowStart;
-            bool endsWithinWindow = assignmentGene.EndTime <= missionWindowEnd;
+            bool startsWithinWindow = assignmentGene.TimeWindow.Start >= missionWindowStart;
+            bool endsWithinWindow = assignmentGene.TimeWindow.End <= missionWindowEnd;
 
             return startsWithinWindow && endsWithinWindow;
         }
 
         private AssignmentGene? AttemptToShiftGeneIntoTimeWindow(AssignmentGene assignmentGene)
         {
-            TimeSpan originalMissionDuration = assignmentGene.Duration;
+            TimeSpan assignmentDuration = assignmentGene.TimeWindow.GetDuration();
             DateTime adjustedStartTime = CalculateAdjustedStartTime(assignmentGene);
-            DateTime projectedEndTime = adjustedStartTime + originalMissionDuration;
+            DateTime projectedEndTime = adjustedStartTime + assignmentDuration;
 
             if (!DoesMissionFitInWindow(projectedEndTime, assignmentGene.Mission.TimeWindow.End))
                 return null;
-            assignmentGene.StartTime = adjustedStartTime;
+
+            assignmentGene.TimeWindow = new TimeWindow(adjustedStartTime, projectedEndTime);
             return assignmentGene;
         }
 
         private DateTime CalculateAdjustedStartTime(AssignmentGene assignmentGene)
         {
             DateTime missionWindowStart = assignmentGene.Mission.TimeWindow.Start;
-            DateTime currentStartTime = assignmentGene.StartTime;
+            DateTime currentStartTime = assignmentGene.TimeWindow.Start;
 
             bool startsBeforeWindow = currentStartTime < missionWindowStart;
             return startsBeforeWindow ? missionWindowStart : currentStartTime;

@@ -180,18 +180,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Low,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
@@ -217,9 +213,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
@@ -245,18 +239,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(4)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(1), baseTime.AddHours(5)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         List<UAV> uavs = new List<UAV>
@@ -270,13 +260,13 @@ public class GeneticAssignmentAlgorithmTests
 
         // Assert - Check no time overlaps for same UAV
         List<AssignmentGene> uavAssignments = bestChromosome
-            .Assignments.OrderBy(a => a.StartTime)
+            .Assignments.OrderBy(a => a.TimeWindow.Start)
             .ToList();
 
         for (int i = 0; i < uavAssignments.Count - 1; i++)
         {
             Assert.True(
-                uavAssignments[i].EndTime <= uavAssignments[i + 1].StartTime,
+                uavAssignments[i].TimeWindow.End <= uavAssignments[i + 1].TimeWindow.Start,
                 "Assignments should not overlap"
             );
         }
@@ -294,9 +284,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var optimalUavs = new List<UAV>
@@ -344,9 +332,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
         var uavs = new List<UAV>();
 
@@ -370,27 +356,21 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(6)),
-                Location = new Core.Models.Location(31.0, 35.0, 150),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(31.0, 35.0, 150),            },
             new Mission
             {
                 Id = "M3",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(baseTime.AddHours(6), baseTime.AddHours(9)),
-                Location = new Core.Models.Location(32.5, 34.5, 200),
-                Duration = TimeSpan.FromHours(2),
-            },
+                Location = new Core.Models.Location(32.5, 34.5, 200),            },
         };
 
         List<UAV> uavs = new List<UAV>
@@ -420,18 +400,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(3)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now.AddHours(3), DateTime.Now.AddHours(6)),
-                Location = new Core.Models.Location(31.0, 35.0, 150),
-                Duration = TimeSpan.FromMinutes(45),
-            },
+                Location = new Core.Models.Location(31.0, 35.0, 150),            },
         };
 
         List<UAV> uavs = new List<UAV>

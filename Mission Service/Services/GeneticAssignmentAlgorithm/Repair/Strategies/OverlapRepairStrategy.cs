@@ -42,7 +42,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
             HashSet<AssignmentGene> assignmentsToRemove
         )
         {
-            AssignmentGene[] sortedAssignments = assignments.OrderBy(a => a.StartTime).ToArray();
+            AssignmentGene[] sortedAssignments = assignments.OrderBy(a => a.TimeWindow.Start).ToArray();
 
             if (sortedAssignments.Length < 2)
             {
@@ -73,7 +73,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies
 
         private bool HasOverlap(AssignmentGene current, AssignmentGene next)
         {
-            return current.EndTime > next.StartTime;
+            return current.TimeWindow.End > next.TimeWindow.Start;
         }
 
         private AssignmentGene SelectAssignmentToRemove(
