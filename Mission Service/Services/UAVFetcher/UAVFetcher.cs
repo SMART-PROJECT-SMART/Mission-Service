@@ -12,17 +12,11 @@ namespace Mission_Service.Services.UAVFetcher
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IUAVStatusService _uavStatusService;
-        private readonly ILogger<UAVFetcher> _logger;
 
-        public UAVFetcher(
-            IHttpClientFactory httpClientFactory,
-            IUAVStatusService uavStatusService,
-            ILogger<UAVFetcher> logger
-        )
+        public UAVFetcher(IHttpClientFactory httpClientFactory, IUAVStatusService uavStatusService)
         {
             _httpClientFactory = httpClientFactory;
             _uavStatusService = uavStatusService;
-            _logger = logger;
         }
 
         public async Task<IReadOnlyCollection<UAV>> FetchUAVsAsync(
@@ -44,10 +38,6 @@ namespace Mission_Service.Services.UAVFetcher
                 MissionServiceConstants.HttpClients.LTS_HTTP_CLIENT
             );
 
-            string fullUrl =
-                $"{ltsHttpClient.BaseAddress}{MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY}";
-            _logger.LogInformation("Fetching UAVs from LTS: {Url}", fullUrl);
-
             HttpResponseMessage telemetryResponse = await ltsHttpClient.GetAsync(
                 MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY,
                 cancellationToken
@@ -56,9 +46,9 @@ namespace Mission_Service.Services.UAVFetcher
             telemetryResponse.EnsureSuccessStatusCode();
 
             IEnumerable<UAVTelemetryDataDto>? rawTelemetryData =
-                await telemetryResponse.Content.ReadFromJsonAsync<
-                    IEnumerable<UAVTelemetryDataDto>
-                >(cancellationToken);
+                await telemetryResponse.Content.ReadFromJsonAsync<IEnumerable<UAVTelemetryDataDto>>(
+                    cancellationToken
+                );
 
             return rawTelemetryData ?? Enumerable.Empty<UAVTelemetryDataDto>();
         }
@@ -76,11 +66,7 @@ namespace Mission_Service.Services.UAVFetcher
 
                 UAVType detectedUAVType = _uavStatusService.DetermineUAVType(telemetryDictionary);
 
-                UAV constructedUAV = new UAV(
-                    uavData.TailId,
-                    detectedUAVType,
-                    telemetryDictionary
-                );
+                UAV constructedUAV = new UAV(uavData.TailId, detectedUAVType, telemetryDictionary);
                 convertedUAVs.Add(constructedUAV);
             }
 
