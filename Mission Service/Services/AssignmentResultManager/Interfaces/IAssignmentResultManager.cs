@@ -6,7 +6,7 @@ namespace Mission_Service.Services.AssignmentResultManager.Interfaces
 {
     public interface IAssignmentResultManager
     {
-        void CreateExecution(string assignmentId);
+        string CreateExecution();
         void UpdateStatus(string assignmentId, AssignmentStatus status);
         void StoreResult(string assignmentId, AssignmentChromosome result);
         AssignmentExecution? GetExecution(string assignmentId);

@@ -15,10 +15,12 @@ namespace Mission_Service.Services.AssignmentResultManager
             _assignmentExecutions = new ConcurrentDictionary<string, AssignmentExecution>();
         }
 
-        public void CreateExecution(string assignmentId)
+        public string CreateExecution()
         {
+            string assignmentId = Guid.NewGuid().ToString();
             var execution = new AssignmentExecution();
             _assignmentExecutions.TryAdd(assignmentId, execution);
+            return assignmentId;
         }
 
         public void UpdateStatus(string assignmentId, AssignmentStatus status)

@@ -72,10 +72,7 @@ namespace Mission_Service.Controllers
 
         private string StoreRequestAndGenerateId(AssignmentSuggestionDto assignmentSuggestionDto)
         {
-            string assignmentId = Guid.NewGuid().ToString();
-
-            _assignmentResultManager.CreateExecution(assignmentId);
-
+            string assignmentId = _assignmentResultManager.CreateExecution();
             var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
             _assignmentSuggestionQueue.QueueAssignmentSuggestionRequest(request);
             return assignmentId;
