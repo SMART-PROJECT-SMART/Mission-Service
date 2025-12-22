@@ -118,12 +118,12 @@
 
         public static class LTSEndpoints
         {
-            public const string ALL_UAV_TELEMETRY = "all-uav-telemetry-data";
+            public const string ALL_UAV_TELEMETRY = "api/UAVTelemetryData/all-uav-telemetry-data";
         }
 
         public static class SimulatorEndpoints
         {
-            public const string SIMULATE = "/api/simulation/simulate";
+            public const string SIMULATE = "api/simulation/simulate";
         }
 
         public static class MissionExecution
