@@ -37,7 +37,7 @@ namespace Mission_Service.Controllers
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            string assignmentId = StoreRequestAndGenerateId(assignmentSuggestionDto);
+            string assignmentId = StoreRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
@@ -70,7 +70,7 @@ namespace Mission_Service.Controllers
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }
 
-        private string StoreRequestAndGenerateId(AssignmentSuggestionDto assignmentSuggestionDto)
+        private string StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
         {
             string assignmentId = _assignmentResultManager.CreateExecution();
             var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
