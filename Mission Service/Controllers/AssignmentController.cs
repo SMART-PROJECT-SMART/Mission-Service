@@ -14,19 +14,19 @@ namespace Mission_Service.Controllers
     [ApiController]
     public class AssignmentController : ControllerBase
     {
-        private readonly IAssignmentSuggestionQueue _queue;
+        private readonly IAssignmentSuggestionQueue _assignmentSuggestionQueue;
         private readonly IAssignmentResultManager _assignmentResultManager;
         private readonly IAssignmentDBService _assignmentDbService;
         private readonly IMissionExecutor _missionExecutor;
 
         public AssignmentController(
-            IAssignmentSuggestionQueue queue,
+            IAssignmentSuggestionQueue assignmentSuggestionQueue,
             IAssignmentResultManager assignmentResultManager,
             IAssignmentDBService assignmentDbService,
             IMissionExecutor missionExecutor
         )
         {
-            _queue = queue;
+            _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentResultManager = assignmentResultManager;
             _assignmentDbService = assignmentDbService;
             _missionExecutor = missionExecutor;
@@ -77,7 +77,7 @@ namespace Mission_Service.Controllers
             _assignmentResultManager.CreateExecution(assignmentId);
 
             var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
-            _queue.QueueAssignmentSuggestionRequest(request);
+            _assignmentSuggestionQueue.QueueAssignmentSuggestionRequest(request);
             return assignmentId;
         }
     }
