@@ -1,4 +1,3 @@
-using Mission_Service.Common.Constants;
 using Mission_Service.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
