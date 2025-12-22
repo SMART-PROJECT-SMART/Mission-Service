@@ -214,6 +214,22 @@ namespace Mission_Service.Extensions
                     }
                 }
             );
+            services.AddHttpClient(
+                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
+                client =>
+                {
+                    string? baseUrl = configuration[
+                        MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY
+                    ];
+
+                    if (!string.IsNullOrEmpty(baseUrl))
+                    {
+                        client.BaseAddress = new Uri(baseUrl);
+                    }
+
+                    client.Timeout = TimeSpan.FromMinutes(5);
+                }
+            );
 
             return services;
         }
@@ -235,31 +251,6 @@ namespace Mission_Service.Extensions
         public static IServiceCollection AddMissionExecutor(this IServiceCollection services)
         {
             services.AddScoped<IMissionExecutor, MissionExecutor>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddSimulatorHttpClient(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
-        {
-            services.AddHttpClient(
-                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
-                client =>
-                {
-                    string? baseUrl = configuration[
-                        MissionServiceConstants.Configuration.SIMULATOR_BASE_URL_KEY
-                    ];
-
-                    if (!string.IsNullOrEmpty(baseUrl))
-                    {
-                        client.BaseAddress = new Uri(baseUrl);
-                    }
-
-                    client.Timeout = TimeSpan.FromMinutes(5);
-                }
-            );
 
             return services;
         }

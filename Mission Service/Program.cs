@@ -10,7 +10,6 @@ builder.Services.AddHttpClients(builder.Configuration);
 builder.Services.AddUAVServices();
 builder.Services.AddMongoDbServices();
 builder.Services.AddMissionExecutor();
-builder.Services.AddSimulatorHttpClient(builder.Configuration);
 
 var app = builder.Build();
 
