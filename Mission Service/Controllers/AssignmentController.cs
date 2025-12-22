@@ -33,11 +33,11 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
-        public async Task<IActionResult> CreateAssignmentSuggestion(
+        public IActionResult CreateAssignmentSuggestion(
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            string assignmentId = await StoreRequestAndGenerateId(assignmentSuggestionDto);
+            string assignmentId = StoreRequestAndGenerateId(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
@@ -70,16 +70,14 @@ namespace Mission_Service.Controllers
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }
 
-        private async Task<string> StoreRequestAndGenerateId(
-            AssignmentSuggestionDto assignmentSuggestionDto
-        )
+        private string StoreRequestAndGenerateId(AssignmentSuggestionDto assignmentSuggestionDto)
         {
             string assignmentId = Guid.NewGuid().ToString();
 
             _assignmentResultManager.CreateExecution(assignmentId);
 
             var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
-            await _queue.QueueAssignmentSuggestionRequest(request);
+            _queue.QueueAssignmentSuggestionRequest(request);
             return assignmentId;
         }
     }
