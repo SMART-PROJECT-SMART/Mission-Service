@@ -5,6 +5,7 @@ using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 
@@ -12,14 +13,17 @@ public class FitnessCalculator : IFitnessCalculator
 {
     private readonly TelemetryWeightsConfiguration _telemetryWeights;
     private readonly FitnessWeightsConfiguration _fitnessWeights;
+    private readonly IUAVStatusService _uavStatusService;
 
     public FitnessCalculator(
         IOptions<TelemetryWeightsConfiguration> telemetryWeights,
-        IOptions<FitnessWeightsConfiguration> fitnessWeights
+        IOptions<FitnessWeightsConfiguration> fitnessWeights,
+        IUAVStatusService uavStatusService
     )
     {
         _telemetryWeights = telemetryWeights.Value;
         _fitnessWeights = fitnessWeights.Value;
+        _uavStatusService = uavStatusService;
     }
 
     public double CalculateFitness(AssignmentChromosome chromosome)
@@ -98,7 +102,7 @@ public class FitnessCalculator : IFitnessCalculator
 
     private double CalculateActiveMissionPenalty(List<AssignmentGene> assignments)
     {
-        int activeMissionCount = assignments.Count(a => a.UAV.ActiveMission != null);
+        int activeMissionCount = assignments.Count(a => _uavStatusService.GetActiveMission(a.UAV.TailId) != null);
         return activeMissionCount * _fitnessWeights.ActiveMissionPenalty;
     }
 }

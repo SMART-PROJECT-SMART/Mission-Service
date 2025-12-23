@@ -1,13 +1,13 @@
 ﻿using System.Threading.Channels;
-using Mission_Service.Models.Dto;
+using Mission_Service.Models;
 
 namespace Mission_Service.Services.AssignmentRequestQueue.Interfaces
 {
     public interface IAssignmentSuggestionQueue
     {
         public Task QueueAssignmentSuggestionRequest(
-            AssignmentSuggestionDto assignmentSuggestionDto
+            AssignmentSuggestionRequest assignmentSuggestionRequest
         );
-        public ChannelReader<AssignmentSuggestionDto> AssignmentSuggestionReader { get; }
+        public ChannelReader<AssignmentSuggestionRequest> AssignmentSuggestionReader { get; }
     }
 }

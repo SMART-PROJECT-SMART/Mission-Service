@@ -95,7 +95,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 }
             }
 
-            return new AssignmentResult([bestChromosomeFound]);
+            return new AssignmentResult(bestChromosomeFound);
         }
 
         private IReadOnlyList<AssignmentChromosome> InitializePopulation(
@@ -105,7 +105,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
         {
             IReadOnlyList<AssignmentChromosome> initialPopulation = _populationInitializer
                 .CreateInitialPopulation(missions, uavs)
-                .ToList();
+                .ToArray();
 
             _parallelExecutor.RepairPopulationInParallel(
                 initialPopulation,

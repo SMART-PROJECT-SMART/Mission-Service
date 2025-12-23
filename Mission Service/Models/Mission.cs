@@ -10,6 +10,5 @@ namespace Mission_Service.Models
         public MissionPriority Priority { get; set; }
         public TimeWindow TimeWindow { get; set; }
         public Location Location { get; set; }
-        public TimeSpan Duration { get; set; }
     }
 }

@@ -13,6 +13,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Pipeline.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Interfaces;
+using Mission_Service.Services.UAVStatusService;
 using Mission.Service.Benchmarks.Configuration;
 using Mission.Service.Benchmarks.Helpers;
 using MissionModel = Mission_Service.Models.Mission;
@@ -133,7 +134,9 @@ namespace Mission.Service.Benchmarks.Benchmarks
                 }
             );
 
-            _fitnessCalculator = new FitnessCalculator(telemetryWeights, fitnessWeights);
+            var uavStatusService = new UAVStatus();
+
+            _fitnessCalculator = new FitnessCalculator(telemetryWeights, fitnessWeights, uavStatusService);
             _parallelExecutor = new ParallelExecutor();
 
             var repairStrategies = new List<IRepairStrategy>

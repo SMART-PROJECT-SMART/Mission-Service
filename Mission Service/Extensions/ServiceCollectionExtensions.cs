@@ -1,11 +1,9 @@
-﻿using System.Security.AccessControl;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using Mission_Service.Common.Constants;
 using Mission_Service.Config;
 using Mission_Service.DataBase.MongoDB.Repositoreis;
 using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
 using Mission_Service.DataBase.MongoDB.Services;
-using Mission_Service.Models;
 using Mission_Service.Services.AssignmentRequestQueue;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager;
@@ -33,15 +31,13 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
-using Mission_Service.Services.Quartz.Jobs;
-using Mission_Service.Services.Quartz.MissionScheduler;
-using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
+using Mission_Service.Services.MissionExecutor;
+using Mission_Service.Services.MissionExecutor.Interfaces;
 using Mission_Service.Services.UAVFetcher;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 using MongoDB.Driver;
-using Quartz;
 
 namespace Mission_Service.Extensions
 {
@@ -218,47 +214,6 @@ namespace Mission_Service.Extensions
                     }
                 }
             );
-
-            return services;
-        }
-
-        public static IServiceCollection AddUAVServices(this IServiceCollection services)
-        {
-            services.AddSingleton<IUAVStatusService, UAVStatus>();
-            services.AddSingleton<IUAVFetcher, UAVFetcher>();
-            return services;
-        }
-
-        public static IServiceCollection AddMongoDbServices(this IServiceCollection services)
-        {
-            services.AddScoped<IAssignmentRepository, AssignmentRepository>();
-            services.AddScoped<IAssignmentService, AssignmentService>();
-            return services;
-        }
-
-        public static IServiceCollection AddQuartzServices(this IServiceCollection services)
-        {
-            services.AddTransient<MissionExecutorJob>();
-            services.AddSingleton<
-                IMissionScheduler,
-                MissionScheduler
-            >();
-
-            services.AddQuartz(q =>
-            {
-                q.UseMicrosoftDependencyInjectionJobFactory();
-            });
-
-            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-
-            return services;
-        }
-
-        public static IServiceCollection AddSimulatorHttpClient(
-            this IServiceCollection services,
-            IConfiguration configuration
-        )
-        {
             services.AddHttpClient(
                 MissionServiceConstants.HttpClients.SIMULATOR_CLIENT,
                 client =>
@@ -275,6 +230,27 @@ namespace Mission_Service.Extensions
                     client.Timeout = TimeSpan.FromMinutes(5);
                 }
             );
+
+            return services;
+        }
+
+        public static IServiceCollection AddUAVServices(this IServiceCollection services)
+        {
+            services.AddSingleton<IUAVStatusService, UAVStatus>();
+            services.AddSingleton<IUAVFetcher, UAVFetcher>();
+            return services;
+        }
+
+        public static IServiceCollection AddMongoDbServices(this IServiceCollection services)
+        {
+            services.AddScoped<IAssignmentRepository, AssignmentRepository>();
+            services.AddScoped<IAssignmentDBService, AssignmentDbService>();
+            return services;
+        }
+
+        public static IServiceCollection AddMissionExecutor(this IServiceCollection services)
+        {
+            services.AddScoped<IMissionExecutor, MissionExecutor>();
 
             return services;
         }

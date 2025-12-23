@@ -24,7 +24,6 @@ namespace Mission.Service.Benchmarks.Helpers
                         Id = $"M{i:D4}",
                         Priority = (MissionPriority)(i % 3),
                         RequiredUAVType = (UAVType)(i % 2),
-                        Duration = TimeSpan.FromHours(random.Next(1, 5)),
                         TimeWindow = new TimeWindow(
                             DateTime.UtcNow.AddHours(i),
                             DateTime.UtcNow.AddHours(i + 24)
@@ -62,7 +61,6 @@ namespace Mission.Service.Benchmarks.Helpers
                             [TelemetryFields.ThrustAfterInfluence] = 50000 + random.Next(0, 30000),
                             [TelemetryFields.Altitude] = 100 + random.Next(0, 200),
                         },
-                        ActiveMission = null,
                     }
                 );
             }
@@ -90,8 +88,11 @@ namespace Mission.Service.Benchmarks.Helpers
                         {
                             Mission = mission,
                             UAV = selectedUAV,
-                            StartTime = mission.TimeWindow.Start,
-                            Duration = mission.Duration,
+                            TimeWindow = new TimeWindow()
+                            {
+                                Start = mission.TimeWindow.Start,
+                                End = mission.TimeWindow.End,
+                            },
                         }
                     );
                 }

@@ -70,33 +70,18 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Population.Populat
                     continue;
 
                 UAV selectedUav = RandomSelectionHelper.SelectRandom(compatibleUAVs);
-                DateTime randomizedStartTime = GenerateRandomStartTimeWithinWindow(mission);
 
                 assignments.Add(
                     new AssignmentGene
                     {
                         Mission = mission,
                         UAV = selectedUav,
-                        StartTime = randomizedStartTime,
-                        Duration = mission.Duration,
+                        TimeWindow = mission.TimeWindow,
                     }
                 );
             }
 
             return new AssignmentChromosome { Assignments = assignments };
-        }
-
-        private DateTime GenerateRandomStartTimeWithinWindow(Mission mission)
-        {
-            DateTime windowStart = mission.TimeWindow.Start;
-            DateTime windowEnd = mission.TimeWindow.End;
-            TimeSpan missionDuration = mission.Duration;
-
-            DateTime latestPossibleStart = windowEnd - missionDuration;
-
-            return latestPossibleStart <= windowStart
-                ? windowStart
-                : RandomSelectionHelper.SelectRandomTime(windowStart, latestPossibleStart);
         }
     }
 }

@@ -5,13 +5,11 @@ namespace Mission_Service.Models
 {
     public class AssignmentExecution
     {
-        public string AssignmentId { get; init; }
         public AssignmentStatus Status { get; set; }
         public AssignmentChromosome? Result { get; set; }
 
-        public AssignmentExecution(string assignmentId)
+        public AssignmentExecution()
         {
-            AssignmentId = assignmentId;
             Status = AssignmentStatus.Pending;
         }
     }

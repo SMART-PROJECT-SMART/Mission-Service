@@ -1,4 +1,3 @@
-using System.Linq;
 using Mission_Service.Models;
 
 namespace Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.Helpers;
@@ -25,11 +24,13 @@ public static class TimeOverlapDetector
             if (uavAssignments.Count <= 1)
                 continue;
 
-            AssignmentGene[] sortedAssignments = uavAssignments.OrderBy(a => a.StartTime).ToArray();
+            AssignmentGene[] sortedAssignments = uavAssignments
+                .OrderBy(a => a.TimeWindow.Start)
+                .ToArray();
 
             for (int i = 0; i < sortedAssignments.Length - 1; i++)
             {
-                if (sortedAssignments[i].EndTime > sortedAssignments[i + 1].StartTime)
+                if (sortedAssignments[i].TimeWindow.End > sortedAssignments[i + 1].TimeWindow.Start)
                 {
                     overlapCount++;
                 }

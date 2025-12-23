@@ -17,6 +17,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Repair.Strategies.Inte
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Reproduction;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite;
+using Mission_Service.Services.UAVStatusService;
 using Xunit;
 
 namespace Mission_Service.Tests;
@@ -71,11 +72,15 @@ public class GeneticAssignmentAlgorithmTests
             TimeOverlapPenalty = -10000.0,
             TypeMismatchPenalty = -10000.0,
             MissionCoverageWeight = 1000.0,
+            ActiveMissionPenalty = -500.0,
         };
+
+        var uavStatusService = new UAVStatus();
 
         var fitnessCalculator = new FitnessCalculator(
             Options.Create(telemetryWeights),
-            Options.Create(fitnessWeights)
+            Options.Create(fitnessWeights),
+            uavStatusService
         );
 
         var populationInitializer = new PopulationInitializer(Options.Create(_config));
@@ -129,8 +134,7 @@ public class GeneticAssignmentAlgorithmTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Assignments);
-        Assert.NotEmpty(result.Assignments);
+        Assert.NotNull(result.Assignment);
     }
 
     [Fact]
@@ -141,11 +145,10 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
 
         // Assert
-        Assert.Equal(missions.Count, bestChromosome.AssignmentCount);
-        Assert.True(bestChromosome.FitnessScore > 0);
+        Assert.Equal(missions.Count, result.Assignment.AssignmentCount);
+        Assert.True(result.Assignment.FitnessScore > 0);
     }
 
     [Fact]
@@ -156,7 +159,7 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert
         var assignedMissionIds = bestChromosome.Assignments.Select(a => a.Mission.Id).ToHashSet();
@@ -175,25 +178,21 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Low,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert - High priority should be assigned
         var assignedMissionIds = bestChromosome.Assignments.Select(a => a.Mission.Id).ToList();
@@ -212,16 +211,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var uavs = new List<UAV> { new UAV(101, UAVType.Surveillance, CreateOptimalTelemetry()) };
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert - Should handle gracefully (either no assignment or marked invalid)
         Assert.NotNull(bestChromosome);
@@ -240,18 +237,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(4)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(1), baseTime.AddHours(5)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         List<UAV> uavs = new List<UAV>
@@ -261,17 +254,17 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert - Check no time overlaps for same UAV
         List<AssignmentGene> uavAssignments = bestChromosome
-            .Assignments.OrderBy(a => a.StartTime)
+            .Assignments.OrderBy(a => a.TimeWindow.Start)
             .ToList();
 
         for (int i = 0; i < uavAssignments.Count - 1; i++)
         {
             Assert.True(
-                uavAssignments[i].EndTime <= uavAssignments[i + 1].StartTime,
+                uavAssignments[i].TimeWindow.End <= uavAssignments[i + 1].TimeWindow.Start,
                 "Assignments should not overlap"
             );
         }
@@ -289,9 +282,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
 
         var optimalUavs = new List<UAV>
@@ -307,8 +298,8 @@ public class GeneticAssignmentAlgorithmTests
 
         // Assert
         Assert.True(
-            optimalResult.Assignments.First().FitnessScore
-                > poorResult.Assignments.First().FitnessScore
+            optimalResult.Assignment.FitnessScore
+                > poorResult.Assignment.FitnessScore
         );
     }
 
@@ -321,7 +312,7 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert
         Assert.Empty(bestChromosome.Assignments);
@@ -339,9 +330,7 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(2)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
         };
         var uavs = new List<UAV>();
 
@@ -365,27 +354,21 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1.5),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(6)),
-                Location = new Core.Models.Location(31.0, 35.0, 150),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(31.0, 35.0, 150),            },
             new Mission
             {
                 Id = "M3",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(baseTime.AddHours(6), baseTime.AddHours(9)),
-                Location = new Core.Models.Location(32.5, 34.5, 200),
-                Duration = TimeSpan.FromHours(2),
-            },
+                Location = new Core.Models.Location(32.5, 34.5, 200),            },
         };
 
         List<UAV> uavs = new List<UAV>
@@ -397,7 +380,7 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignments.First();
+        var bestChromosome = result.Assignment;
 
         // Assert
         Assert.True(bestChromosome.FitnessScore > 0);
@@ -415,18 +398,14 @@ public class GeneticAssignmentAlgorithmTests
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = MissionPriority.High,
                 TimeWindow = new TimeWindow(DateTime.Now, DateTime.Now.AddHours(3)),
-                Location = new Core.Models.Location(32.0, 34.0, 100),
-                Duration = TimeSpan.FromHours(1),
-            },
+                Location = new Core.Models.Location(32.0, 34.0, 100),            },
             new Mission
             {
                 Id = "M2",
                 RequiredUAVType = UAVType.Armed,
                 Priority = MissionPriority.Medium,
                 TimeWindow = new TimeWindow(DateTime.Now.AddHours(3), DateTime.Now.AddHours(6)),
-                Location = new Core.Models.Location(31.0, 35.0, 150),
-                Duration = TimeSpan.FromMinutes(45),
-            },
+                Location = new Core.Models.Location(31.0, 35.0, 150),            },
         };
 
         List<UAV> uavs = new List<UAV>

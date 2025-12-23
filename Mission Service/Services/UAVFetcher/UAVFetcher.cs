@@ -2,6 +2,7 @@ using Core.Common.Enums;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
+using Mission_Service.Models.Dto;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
@@ -22,20 +23,16 @@ namespace Mission_Service.Services.UAVFetcher
             CancellationToken cancellationToken
         )
         {
-            IEnumerable<(
-                int TailId,
-                IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )> uavDataCollection = await FetchUAVFromLTS(cancellationToken);
+            IEnumerable<UAVTelemetryDataDto> uavDataCollection = await FetchUAVFromLTS(
+                cancellationToken
+            );
 
             return ConvertUAVDataToUAVObject(uavDataCollection);
         }
 
-        private async Task<
-            IEnumerable<(
-                int TailId,
-                IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )>
-        > FetchUAVFromLTS(CancellationToken cancellationToken)
+        private async Task<IEnumerable<UAVTelemetryDataDto>> FetchUAVFromLTS(
+            CancellationToken cancellationToken
+        )
         {
             HttpClient ltsHttpClient = _httpClientFactory.CreateClient(
                 MissionServiceConstants.HttpClients.LTS_HTTP_CLIENT
@@ -48,45 +45,28 @@ namespace Mission_Service.Services.UAVFetcher
 
             telemetryResponse.EnsureSuccessStatusCode();
 
-            IEnumerable<(
-                int TailId,
-                IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )>? rawTelemetryData = await telemetryResponse.Content.ReadFromJsonAsync<
-                IEnumerable<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>
-            >(cancellationToken);
+            IEnumerable<UAVTelemetryDataDto>? rawTelemetryData =
+                await telemetryResponse.Content.ReadFromJsonAsync<IEnumerable<UAVTelemetryDataDto>>(
+                    cancellationToken
+                );
 
-            return rawTelemetryData
-                ?? Enumerable.Empty<(int, IEnumerable<KeyValuePair<TelemetryFields, double>>)>();
+            return rawTelemetryData ?? Enumerable.Empty<UAVTelemetryDataDto>();
         }
 
         private IReadOnlyCollection<UAV> ConvertUAVDataToUAVObject(
-            IEnumerable<(
-                int TailId,
-                IEnumerable<KeyValuePair<TelemetryFields, double>> TelemetryData
-            )> uavDataCollection
+            IEnumerable<UAVTelemetryDataDto> uavDataCollection
         )
         {
             List<UAV> convertedUAVs = new List<UAV>();
 
-            foreach (
-                (
-                    int uavTailId,
-                    IEnumerable<KeyValuePair<TelemetryFields, double>> telemetryFields
-                ) in uavDataCollection
-            )
+            foreach (UAVTelemetryDataDto uavData in uavDataCollection)
             {
                 Dictionary<TelemetryFields, double> telemetryDictionary =
-                    telemetryFields.ToDictionary(field => field.Key, field => field.Value);
+                    uavData.TelemetryData.ToDictionary(field => field.Key, field => field.Value);
 
                 UAVType detectedUAVType = _uavStatusService.DetermineUAVType(telemetryDictionary);
-                Mission? uavActiveMission = _uavStatusService.GetActiveMission(uavTailId);
 
-                UAV constructedUAV = new UAV(
-                    uavTailId,
-                    detectedUAVType,
-                    telemetryDictionary,
-                    uavActiveMission
-                );
+                UAV constructedUAV = new UAV(uavData.TailId, detectedUAVType, telemetryDictionary);
                 convertedUAVs.Add(constructedUAV);
             }
 

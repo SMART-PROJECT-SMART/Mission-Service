@@ -1,11 +1,10 @@
 ﻿using Core.Common.Enums;
 using Core.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
+using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -15,14 +14,17 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentAlgorithm _assignmentAlgorithm;
         private readonly ILogger<TestController> _logger;
+        private readonly IUAVStatusService _uavStatusService;
 
         public TestController(
             IAssignmentAlgorithm assignmentAlgorithm,
-            ILogger<TestController> logger
+            ILogger<TestController> logger,
+            IUAVStatusService uavStatusService
         )
         {
             _assignmentAlgorithm = assignmentAlgorithm;
             _logger = logger;
+            _uavStatusService = uavStatusService;
         }
 
         [HttpGet("test/run-all")]
@@ -100,6 +102,12 @@ namespace Mission_Service.Controllers
             );
             results.Add(
                 ExecuteTestCaseInternal("Test 15: Maximum Coverage", CreateMaximumCoverageData())
+            );
+            results.Add(
+                ExecuteTestCaseInternal(
+                    "Test 16: High Priority Reassignment From Low Priority",
+                    CreateHighPriorityReassignmentData()
+                )
             );
 
             _logger.LogInformation("========================================");
@@ -214,6 +222,27 @@ namespace Mission_Service.Controllers
             return ExecuteTestCase("Maximum Coverage", missions, uavs);
         }
 
+        [HttpGet("test/high-priority-reassignment")]
+        public IActionResult TestHighPriorityReassignment()
+        {
+            var (missions, uavs) = CreateHighPriorityReassignmentData();
+
+            Mission lowPriorityMission = missions.First(m => m.Id == "LowPriorityMission");
+            UAV armedUav = uavs.First(u => u.UavType == UAVType.Armed);
+
+            _uavStatusService.SetActiveMission(armedUav.TailId, lowPriorityMission);
+
+            IActionResult result = ExecuteTestCase(
+                "High Priority Reassignment From Low Priority",
+                missions,
+                uavs
+            );
+
+            _uavStatusService.ClearActiveMission(armedUav.TailId);
+
+            return result;
+        }
+
         private IActionResult ExecuteTestCase(
             string testName,
             List<Mission> missions,
@@ -265,21 +294,16 @@ namespace Mission_Service.Controllers
                 var duration = endTime - startTime;
 
                 _logger.LogInformation($"EXECUTION TIME: {duration.TotalMilliseconds}ms");
-                _logger.LogInformation($"CHROMOSOMES GENERATED: {result.Assignments.Count()}");
+                _logger.LogInformation(
+                    $"BEST CHROMOSOME - Fitness: {result.Assignment.FitnessScore:F6}, Assignments: {result.Assignment.Assignments.Count()}"
+                );
 
-                foreach (var chromosome in result.Assignments)
+                foreach (var gene in result.Assignment.Assignments)
                 {
                     _logger.LogInformation(
-                        $"CHROMOSOME - Fitness: {chromosome.FitnessScore:F6}, Assignments: {chromosome.Assignments.Count()}"
+                        $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
+                            + $"Start: {gene.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {gene.TimeWindow.GetDuration()}, End: {gene.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
                     );
-
-                    foreach (var gene in chromosome.Assignments)
-                    {
-                        _logger.LogInformation(
-                            $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
-                                + $"Start: {gene.StartTime:yyyy-MM-dd HH:mm:ss}, Duration: {gene.Duration}, End: {gene.EndTime:yyyy-MM-dd HH:mm:ss}"
-                        );
-                    }
                 }
 
                 _logger.LogInformation("========================================");
@@ -307,22 +331,17 @@ namespace Mission_Service.Controllers
                     },
                     Results = new
                     {
-                        ChromosomesGenerated = result.Assignments.Count(),
-                        BestFitnessScore = result.Assignments.FirstOrDefault()?.FitnessScore ?? 0,
-                        Assignments = result.Assignments.Select(c => new
+                        BestFitnessScore = result.Assignment.FitnessScore,
+                        AssignmentCount = result.Assignment.Assignments.Count(),
+                        Assignments = result.Assignment.Assignments.Select(g => new
                         {
-                            c.FitnessScore,
-                            AssignmentCount = c.Assignments.Count(),
-                            Details = c.Assignments.Select(g => new
-                            {
-                                MissionId = g.Mission.Id,
-                                UAVTailId = g.UAV.TailId,
-                                UAVType = g.UAV.UavType.ToString(),
-                                g.StartTime,
-                                g.Duration,
-                                g.EndTime,
-                            }),
-                        }),
+                            MissionId = g.Mission.Id,
+                            UAVTailId = g.UAV.TailId,
+                            UAVType = g.UAV.UavType.ToString(),
+                            StartTime = g.TimeWindow.Start,
+                            Duration = g.TimeWindow.GetDuration(),
+                            EndTime = g.TimeWindow.End,
+                        })
                     },
                 };
             }
@@ -352,7 +371,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(5)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -361,7 +379,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(2), DateTime.Now.AddHours(6)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -385,7 +402,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -394,7 +410,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(4), DateTime.Now.AddHours(6)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -403,7 +418,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Low,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(7), DateTime.Now.AddHours(9)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -412,7 +426,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(2), DateTime.Now.AddHours(5)),
                     Location = new Location(31.2530, 34.7915, 120),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -437,7 +450,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -446,7 +458,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(2), baseTime.AddHours(5)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -455,7 +466,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(baseTime.AddHours(4), baseTime.AddHours(7)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -478,7 +488,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(4)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -487,7 +496,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(5), DateTime.Now.AddHours(8)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -511,7 +519,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Low,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(4)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -520,7 +527,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(4)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -529,7 +535,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(4)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -552,7 +557,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(4)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -577,7 +581,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -586,7 +589,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(2), DateTime.Now.AddHours(5)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -595,7 +597,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(4), DateTime.Now.AddHours(7)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
                 new Mission
                 {
@@ -604,7 +605,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Low,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(6), DateTime.Now.AddHours(9)),
                     Location = new Location(31.2530, 34.7915, 120),
-                    Duration = TimeSpan.FromHours(1.5),
                 },
             };
 
@@ -630,7 +630,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -639,7 +638,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -648,7 +646,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(6), baseTime.AddHours(8)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -678,7 +675,6 @@ namespace Mission_Service.Controllers
                             baseTime.AddHours(i * 0.5 + 2)
                         ),
                         Location = new Location(32.0 + (i * 0.1), 34.7 + (i * 0.1), 100 + (i * 10)),
-                        Duration = TimeSpan.FromMinutes(45 + (i % 3) * 15),
                     }
                 );
             }
@@ -716,7 +712,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -725,7 +720,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(4), DateTime.Now.AddHours(6)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -752,7 +746,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Low,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -761,7 +754,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(DateTime.Now.AddHours(1), DateTime.Now.AddHours(3)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -786,7 +778,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -795,7 +786,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -804,7 +794,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -831,7 +820,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -840,7 +828,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -849,7 +836,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -858,7 +844,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
                     Location = new Location(31.2530, 34.7915, 120),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -887,7 +872,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(2)),
                     Location = new Location(32.0853, 34.7818, 100),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -896,7 +880,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(baseTime.AddHours(1), baseTime.AddHours(3)),
                     Location = new Location(31.7683, 35.2137, 150),
-                    Duration = TimeSpan.FromMinutes(45),
                 },
                 new Mission
                 {
@@ -905,7 +888,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Low,
                     TimeWindow = new TimeWindow(baseTime.AddHours(2), baseTime.AddHours(4)),
                     Location = new Location(32.4427, 34.9235, 200),
-                    Duration = TimeSpan.FromMinutes(45),
                 },
                 new Mission
                 {
@@ -914,7 +896,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.Medium,
                     TimeWindow = new TimeWindow(baseTime.AddHours(3), baseTime.AddHours(5)),
                     Location = new Location(31.2530, 34.7915, 120),
-                    Duration = TimeSpan.FromHours(1),
                 },
                 new Mission
                 {
@@ -923,7 +904,6 @@ namespace Mission_Service.Controllers
                     Priority = MissionPriority.High,
                     TimeWindow = new TimeWindow(baseTime.AddHours(4), baseTime.AddHours(6)),
                     Location = new Location(32.1500, 34.8500, 130),
-                    Duration = TimeSpan.FromHours(1),
                 },
             };
 
@@ -932,6 +912,38 @@ namespace Mission_Service.Controllers
                 new UAV(501, UAVType.Surveillance, CreateOptimalTelemetry()),
                 new UAV(502, UAVType.Surveillance, CreateOptimalTelemetry()),
                 new UAV(503, UAVType.Surveillance, CreateSubOptimalTelemetry()),
+            };
+
+            return (missions, uavs);
+        }
+
+        private (List<Mission>, List<UAV>) CreateHighPriorityReassignmentData()
+        {
+            DateTime baseTime = DateTime.Now.AddHours(1);
+            List<Mission> missions = new List<Mission>
+            {
+                new Mission
+                {
+                    Id = "LowPriorityMission",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.Low,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
+                    Location = new Location(32.0853, 34.7818, 100),
+                },
+                new Mission
+                {
+                    Id = "HighPriorityMission",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = MissionPriority.High,
+                    TimeWindow = new TimeWindow(baseTime, baseTime.AddHours(3)),
+                    Location = new Location(32.1000, 34.8000, 120),
+                },
+            };
+
+            List<UAV> uavs = new List<UAV>
+            {
+                new UAV(601, UAVType.Armed, CreateOptimalTelemetry()),
+                new UAV(602, UAVType.Surveillance, CreateOptimalTelemetry()),
             };
 
             return (missions, uavs);

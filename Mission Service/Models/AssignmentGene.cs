@@ -4,16 +4,13 @@
     {
         public Mission Mission { get; set; }
         public UAV UAV { get; set; }
-        public DateTime StartTime { get; set; }
-        public TimeSpan Duration { get; set; }
-        public DateTime EndTime => StartTime + Duration;
+        public TimeWindow TimeWindow { get; set; }
 
-        public AssignmentGene(Mission mission, UAV uav, DateTime startTime, TimeSpan duration)
+        public AssignmentGene(Mission mission, UAV uav, TimeWindow timeWindow)
         {
             Mission = mission;
             UAV = uav;
-            StartTime = startTime;
-            Duration = duration;
+            TimeWindow = timeWindow;
         }
 
         public AssignmentGene() { }
@@ -24,8 +21,7 @@
             {
                 Mission = Mission,
                 UAV = UAV,
-                StartTime = StartTime,
-                Duration = Duration,
+                TimeWindow = TimeWindow,
             };
         }
     }

@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.DataBase.MongoDB.Services;
+using Mission_Service.Models;
 using Mission_Service.Models.Dto;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentRequestQueue.Interfaces;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
-using Mission_Service.Services.Quartz.MissionScheduler.Interfaces;
+using Mission_Service.Services.MissionExecutor.Interfaces;
 
 namespace Mission_Service.Controllers
 {
@@ -14,43 +14,41 @@ namespace Mission_Service.Controllers
     [ApiController]
     public class AssignmentController : ControllerBase
     {
-        private readonly IAssignmentSuggestionQueue _queue;
+        private readonly IAssignmentSuggestionQueue _assignmentSuggestionQueue;
         private readonly IAssignmentResultManager _assignmentResultManager;
         private readonly IAssignmentDBService _assignmentDbService;
-        private readonly IMissionScheduler _missionScheduler;
+        private readonly IMissionExecutor _missionExecutor;
 
         public AssignmentController(
-            IAssignmentSuggestionQueue queue,
+            IAssignmentSuggestionQueue assignmentSuggestionQueue,
             IAssignmentResultManager assignmentResultManager,
             IAssignmentDBService assignmentDbService,
-            IMissionScheduler missionScheduler
+            IMissionExecutor missionExecutor
         )
         {
-            _queue = queue;
+            _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentResultManager = assignmentResultManager;
             _assignmentDbService = assignmentDbService;
-            _missionScheduler = missionScheduler;
+            _missionExecutor = missionExecutor;
         }
 
         [HttpPost(MissionServiceConstants.Actions.CREATE_ASSIGNMENT_SUGGESTION)]
-        public async Task<IActionResult> CreateAssignmentSuggestion(
+        public IActionResult CreateAssignmentSuggestion(
             AssignmentSuggestionDto assignmentSuggestionDto
         )
         {
-            _assignmentResultManager.CreateExecution(assignmentSuggestionDto.AssignmentId);
-
-            await _queue.QueueAssignmentSuggestionRequest(assignmentSuggestionDto);
+            string assignmentId = StoreRequest(assignmentSuggestionDto);
 
             string statusUrl = Url.Action(
                 nameof(AssignmentResultController.CheckAssignmentStatus),
                 MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
-                new { assignmentId = assignmentSuggestionDto.AssignmentId },
+                new { assignmentId },
                 Request.Scheme
             )!;
 
             var response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
-                assignmentSuggestionDto.AssignmentId!,
+                assignmentId,
                 statusUrl!
             );
 
@@ -67,9 +65,17 @@ namespace Mission_Service.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            await _missionScheduler.ScheduleMissionsAsync(applyAssignmentDto.ActualAssignments);
+            await _missionExecutor.ExecuteMissionsAsync(applyAssignmentDto.ActualAssignments);
 
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
+        }
+
+        private string StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
+        {
+            string assignmentId = _assignmentResultManager.CreateExecution();
+            var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
+            _assignmentSuggestionQueue.QueueAssignmentSuggestionRequest(request);
+            return assignmentId;
         }
     }
 }

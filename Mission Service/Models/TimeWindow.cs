@@ -12,5 +12,7 @@
         }
 
         public TimeWindow() { }
+
+        public TimeSpan GetDuration() => End - Start;
     }
 }
