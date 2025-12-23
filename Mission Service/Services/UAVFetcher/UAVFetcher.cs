@@ -61,12 +61,13 @@ namespace Mission_Service.Services.UAVFetcher
 
             foreach (UAVTelemetryDataDto uavData in uavDataCollection)
             {
-                Dictionary<TelemetryFields, double> telemetryDictionary =
-                    uavData.TelemetryData.ToDictionary(field => field.Key, field => field.Value);
+                UAVType detectedUAVType = _uavStatusService.DetermineUAVType(uavData.TelemetryData);
 
-                UAVType detectedUAVType = _uavStatusService.DetermineUAVType(telemetryDictionary);
-
-                UAV constructedUAV = new UAV(uavData.TailId, detectedUAVType, telemetryDictionary);
+                UAV constructedUAV = new UAV(
+                    uavData.TailId,
+                    detectedUAVType,
+                    uavData.TelemetryData
+                );
                 convertedUAVs.Add(constructedUAV);
             }
 
