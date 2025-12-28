@@ -9,7 +9,7 @@ namespace Mission_Service.Services.MissionExecutor
 {
     public class MissionExecutor : IMissionExecutor
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _simulatorHttpClient;
         private readonly IUAVStatusService _uavStatusService;
 
         public MissionExecutor(
@@ -17,7 +17,9 @@ namespace Mission_Service.Services.MissionExecutor
             IUAVStatusService uavStatusService
         )
         {
-            _httpClientFactory = httpClientFactory;
+            _simulatorHttpClient = httpClientFactory.CreateClient(
+                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT
+            );
             _uavStatusService = uavStatusService;
         }
 
@@ -25,31 +27,22 @@ namespace Mission_Service.Services.MissionExecutor
             IEnumerable<MissionToUavAssignment> missionAssignments
         )
         {
-            HttpClient simulatorHttpClient = CreateSimulatorClient();
-
             foreach (MissionToUavAssignment assignment in missionAssignments)
             {
-                await ExecuteSingleMissionAsync(simulatorHttpClient, assignment);
+                await ExecuteSingleMissionAsync(assignment);
             }
         }
 
-        private HttpClient CreateSimulatorClient()
-        {
-            return _httpClientFactory.CreateClient(
-                MissionServiceConstants.HttpClients.SIMULATOR_CLIENT
-            );
-        }
-
-        private async Task ExecuteSingleMissionAsync(
-            HttpClient simulatorClient,
-            MissionToUavAssignment assignment
-        )
+        private async Task ExecuteSingleMissionAsync(MissionToUavAssignment assignment)
         {
             SimulateMissionRequest request = BuildSimulationRequest(assignment);
 
-            SetUavActiveMission(assignment);
+            _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
 
-            await SendToSimulator(simulatorClient, request);
+            await _simulatorHttpClient.PostAsJsonAsync(
+                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
+                request
+            );
         }
 
         private static SimulateMissionRequest BuildSimulationRequest(
@@ -66,22 +59,6 @@ namespace Mission_Service.Services.MissionExecutor
                 ),
                 MissionId = assignment.Mission.Id,
             };
-        }
-
-        private void SetUavActiveMission(MissionToUavAssignment assignment)
-        {
-            _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
-        }
-
-        private static async Task SendToSimulator(
-            HttpClient simulatorClient,
-            SimulateMissionRequest request
-        )
-        {
-            await simulatorClient.PostAsJsonAsync(
-                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                request
-            );
         }
     }
 }

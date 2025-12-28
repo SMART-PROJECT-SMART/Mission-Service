@@ -10,12 +10,14 @@ namespace Mission_Service.Services.UAVFetcher
 {
     public class UAVFetcher : IUAVFetcher
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly HttpClient _ltsHttpClient;
         private readonly IUAVStatusService _uavStatusService;
 
         public UAVFetcher(IHttpClientFactory httpClientFactory, IUAVStatusService uavStatusService)
         {
-            _httpClientFactory = httpClientFactory;
+            _ltsHttpClient = httpClientFactory.CreateClient(
+                MissionServiceConstants.HttpClients.LTS_HTTP_CLIENT
+            );
             _uavStatusService = uavStatusService;
         }
 
@@ -34,11 +36,7 @@ namespace Mission_Service.Services.UAVFetcher
             CancellationToken cancellationToken
         )
         {
-            HttpClient ltsHttpClient = _httpClientFactory.CreateClient(
-                MissionServiceConstants.HttpClients.LTS_HTTP_CLIENT
-            );
-
-            HttpResponseMessage telemetryResponse = await ltsHttpClient.GetAsync(
+            HttpResponseMessage telemetryResponse = await _ltsHttpClient.GetAsync(
                 MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY,
                 cancellationToken
             );
