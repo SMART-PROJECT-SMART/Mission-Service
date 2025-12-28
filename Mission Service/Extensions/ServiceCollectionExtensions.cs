@@ -98,14 +98,6 @@ namespace Mission_Service.Extensions
                     mongoDbConfiguration.ServerSelectionTimeout;
                 return new MongoClient(mongoClientSettings);
             });
-            services.AddSingleton(serviceProvider =>
-            {
-                MongoDBConfiguration mongoDbConfiguration = serviceProvider
-                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
-                    .Value;
-                IMongoClient mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
-                return mongoClient.GetDatabase(mongoDbConfiguration.DatabaseName);
-            });
             return services;
         }
 

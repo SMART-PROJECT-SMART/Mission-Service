@@ -1,4 +1,6 @@
-﻿using Mission_Service.Common.Constants;
+﻿using Microsoft.Extensions.Options;
+using Mission_Service.Common.Constants;
+using Mission_Service.Config;
 using Mission_Service.DataBase.MongoDB.Entities;
 using Mission_Service.DataBase.MongoDB.Repositoreis.Interfaces;
 using Mission_Service.Extensions;
@@ -12,9 +14,13 @@ namespace Mission_Service.DataBase.MongoDB.Repositoreis
     {
         private readonly IMongoCollection<Assignment> _assignmentCollection;
 
-        public AssignmentRepository(IMongoDatabase mongoDatabase)
+        public AssignmentRepository(
+            IMongoClient mongoClient,
+            IOptions<MongoDBConfiguration> mongoDbConfig
+        )
         {
-            _assignmentCollection = mongoDatabase.GetCollection<Assignment>(
+            IMongoDatabase database = mongoClient.GetDatabase(mongoDbConfig.Value.DatabaseName);
+            _assignmentCollection = database.GetCollection<Assignment>(
                 MissionServiceConstants.MongoDB.ASSIGNMENTS_COLLECTION
             );
         }
