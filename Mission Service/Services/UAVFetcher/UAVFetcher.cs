@@ -1,6 +1,7 @@
 using Core.Common.Enums;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
+using Mission_Service.Extensions;
 using Mission_Service.Models;
 using Mission_Service.Models.Dto;
 using Mission_Service.Services.UAVFetcher.Interfaces;
@@ -29,7 +30,7 @@ namespace Mission_Service.Services.UAVFetcher
                 cancellationToken
             );
 
-            return ConvertUAVDataToUAVObject(uavDataCollection);
+            return uavDataCollection.ToUAVCollection(_uavStatusService);
         }
 
         private async Task<IEnumerable<UAVTelemetryDataDto>> FetchUAVFromLTS(
@@ -49,27 +50,6 @@ namespace Mission_Service.Services.UAVFetcher
                 );
 
             return rawTelemetryData ?? Enumerable.Empty<UAVTelemetryDataDto>();
-        }
-
-        private IReadOnlyCollection<UAV> ConvertUAVDataToUAVObject(
-            IEnumerable<UAVTelemetryDataDto> uavDataCollection
-        )
-        {
-            List<UAV> convertedUAVs = new List<UAV>();
-
-            foreach (UAVTelemetryDataDto uavData in uavDataCollection)
-            {
-                UAVType detectedUAVType = _uavStatusService.DetermineUAVType(uavData.TelemetryData);
-
-                UAV constructedUAV = new UAV(
-                    uavData.TailId,
-                    detectedUAVType,
-                    uavData.TelemetryData
-                );
-                convertedUAVs.Add(constructedUAV);
-            }
-
-            return convertedUAVs;
         }
     }
 }
