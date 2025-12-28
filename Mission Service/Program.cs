@@ -1,6 +1,6 @@
 using Mission_Service.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddWebApi();
 builder.Services.AddAppConfiguration(builder.Configuration);
 builder.Services.AddAssignmentAlgorithmServices();
@@ -10,7 +10,7 @@ builder.Services.AddUAVServices();
 builder.Services.AddMongoDbServices();
 builder.Services.AddMissionExecutor();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseRouting();
 app.MapControllers();

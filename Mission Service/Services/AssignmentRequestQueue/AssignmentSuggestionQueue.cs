@@ -12,7 +12,7 @@ namespace Mission_Service.Services.AssignmentRequestQueue
 
         public AssignmentSuggestionQueue(IOptions<AssignmentRequestQueueConfiguration> queueConfig)
         {
-            var options = new BoundedChannelOptions(queueConfig.Value.ChannelSize)
+            BoundedChannelOptions options = new BoundedChannelOptions(queueConfig.Value.ChannelSize)
             {
                 FullMode = BoundedChannelFullMode.Wait,
             };

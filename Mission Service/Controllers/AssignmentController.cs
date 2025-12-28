@@ -43,7 +43,7 @@ namespace Mission_Service.Controllers
                 Request.Scheme
             )!;
 
-            var response = new AssignmentRequestAcceptedResponse(
+            AssignmentRequestAcceptedResponse response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
                 assignmentId,
                 statusUrl!
@@ -71,7 +71,7 @@ namespace Mission_Service.Controllers
         private string StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
         {
             string assignmentId = _assignmentResultManager.CreateExecution();
-            var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
+            AssignmentSuggestionRequest request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
             _assignmentSuggestionQueue.QueueAssignmentSuggestionRequest(request);
             return assignmentId;
         }
