@@ -52,10 +52,11 @@ namespace Mission_Service.Services.MissionExecutor
             CancellationToken cancellationToken = default
         )
         {
-            foreach (MissionToUavAssignment assignment in missionAssignments)
-            {
-                await ExecuteSingleMissionAsync(assignment, cancellationToken);
-            }
+            IEnumerable<Task> missionTasks = missionAssignments.Select(assignment =>
+                ExecuteSingleMissionAsync(assignment, cancellationToken)
+            );
+
+            await Task.WhenAll(missionTasks);
         }
 
         private async Task ExecuteSingleMissionAsync(
@@ -63,22 +64,7 @@ namespace Mission_Service.Services.MissionExecutor
             CancellationToken cancellationToken = default
         )
         {
-            SimulateMissionRequest request = BuildSimulationRequest(assignment);
-
-            _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
-
-            await _simulatorHttpClient.PostAsJsonAsync(
-                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                request,
-                cancellationToken
-            );
-        }
-
-        private static SimulateMissionRequest BuildSimulationRequest(
-            MissionToUavAssignment assignment
-        )
-        {
-            return new SimulateMissionRequest
+            SimulateMissionRequest request = new SimulateMissionRequest
             {
                 TailId = assignment.UavTailId,
                 Destination = new Location(
@@ -88,6 +74,14 @@ namespace Mission_Service.Services.MissionExecutor
                 ),
                 MissionId = assignment.Mission.Id,
             };
+
+            _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
+
+            await _simulatorHttpClient.PostAsJsonAsync(
+                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
+                request,
+                cancellationToken
+            );
         }
     }
 }
