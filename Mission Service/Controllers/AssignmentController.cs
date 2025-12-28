@@ -16,19 +16,16 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentSuggestionQueue _assignmentSuggestionQueue;
         private readonly IAssignmentResultManager _assignmentResultManager;
-        private readonly IAssignmentDBService _assignmentDbService;
         private readonly IMissionExecutor _missionExecutor;
 
         public AssignmentController(
             IAssignmentSuggestionQueue assignmentSuggestionQueue,
             IAssignmentResultManager assignmentResultManager,
-            IAssignmentDBService assignmentDbService,
             IMissionExecutor missionExecutor
         )
         {
             _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentResultManager = assignmentResultManager;
-            _assignmentDbService = assignmentDbService;
             _missionExecutor = missionExecutor;
         }
 
@@ -61,22 +58,14 @@ namespace Mission_Service.Controllers
             CancellationToken cancellationToken = default
         )
         {
-            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(
+            bool success = await _missionExecutor.ApplyAndExecuteAssignmentAsync(
                 applyAssignmentDto,
                 cancellationToken
             );
 
-            if (!isCreated)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-            await _missionExecutor.ExecuteMissionsAsync(
-                applyAssignmentDto.ActualAssignments,
-                cancellationToken
-            );
-
-            return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
+            return success
+                ? CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto)
+                : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         private string StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
