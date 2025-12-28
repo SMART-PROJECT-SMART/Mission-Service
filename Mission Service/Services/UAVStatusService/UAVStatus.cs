@@ -1,6 +1,5 @@
 using System.Collections.Concurrent;
 using Core.Common.Enums;
-using Mission_Service.Common.Enums;
 using Mission_Service.Models;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
@@ -13,13 +12,6 @@ namespace Mission_Service.Services.UAVStatusService
         public UAVStatus()
         {
             _uavActiveMissionsByTailId = new ConcurrentDictionary<int, Mission>();
-        }
-
-        public UAVType DetermineUAVType(Dictionary<TelemetryFields, double> telemetryData)
-        {
-            return telemetryData.ContainsKey(TelemetryFields.DataStorageUsedGB)
-                ? UAVType.Surveillance
-                : UAVType.Armed;
         }
 
         public bool IsInActiveMission(Dictionary<TelemetryFields, double> telemetryData)

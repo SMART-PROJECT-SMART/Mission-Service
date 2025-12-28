@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
+using Mission_Service.Common.Constants;
+using Mission_Service.Models;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Controllers
@@ -12,6 +14,23 @@ namespace Mission_Service.Controllers
         public MissionStatusController(IUAVStatusService uavStatusService)
         {
             _uavStatusService = uavStatusService;
+        }
+
+        [HttpGet("active-mission/{tailId}")]
+        public IActionResult GetActiveMission(int tailId)
+        {
+            Mission? activeMission = _uavStatusService.GetActiveMission(tailId);
+
+            if (activeMission == null)
+            {
+                string message = string.Format(
+                    MissionServiceConstants.APIResponses.ACTIVE_MISSION_NOT_FOUND,
+                    tailId
+                );
+                return NotFound(new { Message = message });
+            }
+
+            return Ok(activeMission);
         }
 
         [HttpPost("mission-completed/{tailId}")]

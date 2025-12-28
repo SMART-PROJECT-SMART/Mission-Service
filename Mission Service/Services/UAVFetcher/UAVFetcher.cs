@@ -30,7 +30,7 @@ namespace Mission_Service.Services.UAVFetcher
                 cancellationToken
             );
 
-            return uavDataCollection.ToUAVCollection(_uavStatusService);
+            return uavDataCollection.ToUAVCollection();
         }
 
         private async Task<IEnumerable<UAVTelemetryDataDto>> FetchUAVFromLTS(

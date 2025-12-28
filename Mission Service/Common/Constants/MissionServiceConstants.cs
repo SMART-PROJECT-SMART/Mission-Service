@@ -96,6 +96,7 @@
             public const string ASSIGNMENT_COMPLETED = "Assignment completed successfully";
             public const string ASSIGNMENT_RESULT_READY = "Result is ready";
             public const string ASSIGNMENT_RESULT_PROCESSING = "Result is still processing";
+            public const string ACTIVE_MISSION_NOT_FOUND = "No active mission found for UAV with TailId: {0}";
         }
 
         public static class Controllers
