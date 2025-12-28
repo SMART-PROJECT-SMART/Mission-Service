@@ -19,53 +19,15 @@ namespace Mission_Service.DataBase.MongoDB.Repositoreis
             );
         }
 
-        public async Task<bool> SaveAssignmentAsync(ApplyAssignmentDto applyAssignmentDto)
-        {
-            Assignment assignmentEntity = applyAssignmentDto.ToEntity();
-            await _assignmentCollection.InsertOneAsync(assignmentEntity);
-
-            return !string.IsNullOrEmpty(assignmentEntity.Id);
-        }
-
-        public async Task<AssignmentRo?> GetAssignmentByIdAsync(string assignmentId)
-        {
-            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(
-                assignment => assignment.Id,
-                assignmentId
-            );
-
-            Assignment? assignmentEntity = await _assignmentCollection
-                .Find(idFilter)
-                .FirstOrDefaultAsync();
-
-            return assignmentEntity?.ToRo();
-        }
-
-        public async Task<IEnumerable<AssignmentRo>> GetAllAssignmentsAsync(
-            int skipCount = 0,
-            int limitCount = 100
+        public async Task<bool> SaveAssignmentAsync(
+            ApplyAssignmentDto applyAssignmentDto,
+            CancellationToken cancellationToken = default
         )
         {
-            List<Assignment> assignmentEntities = await _assignmentCollection
-                .Find(FilterDefinition<Assignment>.Empty)
-                .SortByDescending(assignment => assignment.CreatedAt)
-                .Skip(skipCount)
-                .Limit(limitCount)
-                .ToListAsync();
+            Assignment assignmentEntity = applyAssignmentDto.ToEntity();
+            await _assignmentCollection.InsertOneAsync(assignmentEntity, null, cancellationToken);
 
-            return assignmentEntities.Select(assignmentEntity => assignmentEntity.ToRo());
-        }
-
-        public async Task<bool> DeleteAssignmentAsync(string assignmentId)
-        {
-            FilterDefinition<Assignment> idFilter = Builders<Assignment>.Filter.Eq(
-                assignment => assignment.Id,
-                assignmentId
-            );
-
-            DeleteResult deleteResult = await _assignmentCollection.DeleteOneAsync(idFilter);
-
-            return deleteResult.DeletedCount > 0;
+            return !string.IsNullOrEmpty(assignmentEntity.Id);
         }
     }
 }

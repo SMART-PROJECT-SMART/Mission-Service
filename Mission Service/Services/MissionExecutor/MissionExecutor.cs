@@ -24,16 +24,20 @@ namespace Mission_Service.Services.MissionExecutor
         }
 
         public async Task ExecuteMissionsAsync(
-            IEnumerable<MissionToUavAssignment> missionAssignments
+            IEnumerable<MissionToUavAssignment> missionAssignments,
+            CancellationToken cancellationToken = default
         )
         {
             foreach (MissionToUavAssignment assignment in missionAssignments)
             {
-                await ExecuteSingleMissionAsync(assignment);
+                await ExecuteSingleMissionAsync(assignment, cancellationToken);
             }
         }
 
-        private async Task ExecuteSingleMissionAsync(MissionToUavAssignment assignment)
+        private async Task ExecuteSingleMissionAsync(
+            MissionToUavAssignment assignment,
+            CancellationToken cancellationToken = default
+        )
         {
             SimulateMissionRequest request = BuildSimulationRequest(assignment);
 
@@ -41,7 +45,8 @@ namespace Mission_Service.Services.MissionExecutor
 
             await _simulatorHttpClient.PostAsJsonAsync(
                 MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                request
+                request,
+                cancellationToken
             );
         }
 

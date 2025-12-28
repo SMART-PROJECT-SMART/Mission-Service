@@ -23,10 +23,14 @@ namespace Mission_Service.Services.AssignmentRequestQueue
         }
 
         public async Task QueueAssignmentSuggestionRequest(
-            AssignmentSuggestionRequest assignmentSuggestionRequest
+            AssignmentSuggestionRequest assignmentSuggestionRequest,
+            CancellationToken cancellationToken = default
         )
         {
-            await _assignmentSuggestionRequestQueue.Writer.WriteAsync(assignmentSuggestionRequest);
+            await _assignmentSuggestionRequestQueue.Writer.WriteAsync(
+                assignmentSuggestionRequest,
+                cancellationToken
+            );
         }
 
         public ChannelReader<AssignmentSuggestionRequest> AssignmentSuggestionReader =>

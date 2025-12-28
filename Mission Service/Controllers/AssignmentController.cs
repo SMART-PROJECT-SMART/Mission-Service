@@ -56,16 +56,25 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost("apply-assignment")]
-        public async Task<IActionResult> ApplyAssignment(ApplyAssignmentDto applyAssignmentDto)
+        public async Task<IActionResult> ApplyAssignment(
+            ApplyAssignmentDto applyAssignmentDto,
+            CancellationToken cancellationToken = default
+        )
         {
-            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(applyAssignmentDto);
+            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(
+                applyAssignmentDto,
+                cancellationToken
+            );
 
             if (!isCreated)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            await _missionExecutor.ExecuteMissionsAsync(applyAssignmentDto.ActualAssignments);
+            await _missionExecutor.ExecuteMissionsAsync(
+                applyAssignmentDto.ActualAssignments,
+                cancellationToken
+            );
 
             return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
         }
