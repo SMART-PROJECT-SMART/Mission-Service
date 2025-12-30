@@ -13,11 +13,13 @@ namespace Mission_Service.Services.MissionExecutor
         private readonly HttpClient _simulatorHttpClient;
         private readonly IUAVStatusService _uavStatusService;
         private readonly IAssignmentDBService _assignmentDbService;
+        private readonly ILogger<MissionExecutor> _logger;
 
         public MissionExecutor(
             IHttpClientFactory httpClientFactory,
             IUAVStatusService uavStatusService,
-            IAssignmentDBService assignmentDbService
+            IAssignmentDBService assignmentDbService,
+            ILogger<MissionExecutor> logger
         )
         {
             _simulatorHttpClient = httpClientFactory.CreateClient(
@@ -25,6 +27,7 @@ namespace Mission_Service.Services.MissionExecutor
             );
             _uavStatusService = uavStatusService;
             _assignmentDbService = assignmentDbService;
+            _logger = logger;
         }
 
         public async Task<bool> ApplyAndExecuteAssignmentAsync(
@@ -52,11 +55,19 @@ namespace Mission_Service.Services.MissionExecutor
             CancellationToken cancellationToken = default
         )
         {
-            IEnumerable<Task> missionTasks = missionAssignments.Select(assignment =>
+            List<MissionToUavAssignment> assignmentsList = missionAssignments.ToList();
+            _logger.LogInformation(
+                "Starting execution of {Count} mission assignments",
+                assignmentsList.Count
+            );
+
+            IEnumerable<Task> missionTasks = assignmentsList.Select(assignment =>
                 ExecuteSingleMissionAsync(assignment, cancellationToken)
             );
 
             await Task.WhenAll(missionTasks);
+
+            _logger.LogInformation("Completed execution of all mission assignments");
         }
 
         private async Task ExecuteSingleMissionAsync(
@@ -64,6 +75,12 @@ namespace Mission_Service.Services.MissionExecutor
             CancellationToken cancellationToken = default
         )
         {
+            _logger.LogInformation(
+                "Starting mission execution for UAV {TailId} with mission {MissionId}",
+                assignment.UavTailId,
+                assignment.Mission.Id
+            );
+
             SimulateMissionRequest request = new SimulateMissionRequest
             {
                 TailId = assignment.UavTailId,
@@ -77,11 +94,43 @@ namespace Mission_Service.Services.MissionExecutor
 
             _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
 
-            await _simulatorHttpClient.PostAsJsonAsync(
-                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                request,
-                cancellationToken
-            );
+            try
+            {
+                HttpResponseMessage response = await _simulatorHttpClient.PostAsJsonAsync(
+                    MissionServiceConstants.SimulatorEndpoints.SIMULATE,
+                    request,
+                    cancellationToken
+                );
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation(
+                        "Successfully started mission for UAV {TailId}",
+                        assignment.UavTailId
+                    );
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync(
+                        cancellationToken
+                    );
+                    _logger.LogError(
+                        "Failed to start mission for UAV {TailId}. Status: {StatusCode}, Response: {Response}",
+                        assignment.UavTailId,
+                        response.StatusCode,
+                        errorContent
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(
+                    ex,
+                    "Exception while starting mission for UAV {TailId}",
+                    assignment.UavTailId
+                );
+                throw;
+            }
         }
     }
 }
