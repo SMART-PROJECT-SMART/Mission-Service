@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
-using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
 
 namespace Mission_Service.Services.AssignmentResultManager
@@ -31,7 +30,7 @@ namespace Mission_Service.Services.AssignmentResultManager
             }
         }
 
-        public void StoreResult(string assignmentId, AssignmentChromosome result)
+        public void StoreResult(string assignmentId, AssignmentResult result)
         {
             if (_assignmentExecutions.TryGetValue(assignmentId, out AssignmentExecution? execution))
             {
@@ -46,7 +45,7 @@ namespace Mission_Service.Services.AssignmentResultManager
             return execution;
         }
 
-        public AssignmentChromosome? GetAndRemoveResult(string assignmentId)
+        public AssignmentResult? GetAndRemoveResult(string assignmentId)
         {
             if (_assignmentExecutions.TryRemove(assignmentId, out AssignmentExecution? execution))
             {

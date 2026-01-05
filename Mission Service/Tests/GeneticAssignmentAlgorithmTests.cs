@@ -134,7 +134,7 @@ public class GeneticAssignmentAlgorithmTests
 
         // Assert
         Assert.NotNull(result);
-        Assert.NotNull(result.Assignment);
+        Assert.NotNull(result.Pairings);
     }
 
     [Fact]
@@ -147,8 +147,8 @@ public class GeneticAssignmentAlgorithmTests
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
 
         // Assert
-        Assert.Equal(missions.Count, result.Assignment.AssignmentCount);
-        Assert.True(result.Assignment.FitnessScore > 0);
+        Assert.Equal(missions.Count, result.Pairings.Count());
+        Assert.True(result.FitnessScore > 0);
     }
 
     [Fact]
@@ -159,10 +159,9 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert
-        var assignedMissionIds = bestChromosome.Assignments.Select(a => a.Mission.Id).ToHashSet();
+        var assignedMissionIds = result.Pairings.Select(p => p.Mission.Id).ToHashSet();
         Assert.Equal(missions.Count, assignedMissionIds.Count);
     }
 
@@ -192,10 +191,9 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert - High priority should be assigned
-        var assignedMissionIds = bestChromosome.Assignments.Select(a => a.Mission.Id).ToList();
+        var assignedMissionIds = result.Pairings.Select(p => p.Mission.Id).ToList();
         Assert.Contains("M1", assignedMissionIds);
     }
 
@@ -218,10 +216,9 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert - Should handle gracefully (either no assignment or marked invalid)
-        Assert.NotNull(bestChromosome);
+        Assert.NotNull(result);
     }
 
     [Fact]
@@ -254,11 +251,10 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert - Check no time overlaps for same UAV
-        List<AssignmentGene> uavAssignments = bestChromosome
-            .Assignments.OrderBy(a => a.TimeWindow.Start)
+        List<MissionAssignmentPairing> uavAssignments = result
+            .Pairings.OrderBy(p => p.TimeWindow.Start)
             .ToList();
 
         for (int i = 0; i < uavAssignments.Count - 1; i++)
@@ -297,10 +293,7 @@ public class GeneticAssignmentAlgorithmTests
         var poorResult = _algorithm.PreformAssignmentAlgorithm(missions, poorUavs);
 
         // Assert
-        Assert.True(
-            optimalResult.Assignment.FitnessScore
-                > poorResult.Assignment.FitnessScore
-        );
+        Assert.True(optimalResult.FitnessScore > poorResult.FitnessScore);
     }
 
     [Fact]
@@ -312,10 +305,9 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert
-        Assert.Empty(bestChromosome.Assignments);
+        Assert.Empty(result.Pairings);
     }
 
     [Fact]
@@ -380,11 +372,10 @@ public class GeneticAssignmentAlgorithmTests
 
         // Act
         var result = _algorithm.PreformAssignmentAlgorithm(missions, uavs);
-        var bestChromosome = result.Assignment;
 
         // Assert
-        Assert.True(bestChromosome.FitnessScore > 0);
-        Assert.Equal(3, bestChromosome.Assignments.Count());
+        Assert.True(result.FitnessScore > 0);
+        Assert.Equal(3, result.Pairings.Count());
     }
 
     // Helper methods

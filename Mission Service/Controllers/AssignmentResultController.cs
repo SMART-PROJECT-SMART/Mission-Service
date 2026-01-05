@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
-using Mission_Service.Models.choromosomes;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
 
@@ -22,9 +21,7 @@ namespace Mission_Service.Controllers
         [HttpGet("{assignmentId}")]
         public IActionResult GetAssignmentResult(string assignmentId)
         {
-            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(
-                assignmentId
-            );
+            AssignmentResult? result = _assignmentResultManager.GetAndRemoveResult(assignmentId);
 
             if (result != null)
                 return Ok(result);

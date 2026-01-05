@@ -55,7 +55,7 @@ namespace Mission_Service.Services.AssignmentSuggestionWorker
                     uavs
                 );
 
-                _assignmentResultManager.StoreResult(request.AssignmentId, assignmentResult.Assignment);
+                _assignmentResultManager.StoreResult(request.AssignmentId, assignmentResult);
             }
         }
     }

@@ -295,14 +295,14 @@ namespace Mission_Service.Controllers
 
                 _logger.LogInformation($"EXECUTION TIME: {duration.TotalMilliseconds}ms");
                 _logger.LogInformation(
-                    $"BEST CHROMOSOME - Fitness: {result.Assignment.FitnessScore:F6}, Assignments: {result.Assignment.Assignments.Count()}"
+                    $"BEST RESULT - Fitness: {result.FitnessScore:F6}, Assignments: {result.Pairings.Count()}"
                 );
 
-                foreach (var gene in result.Assignment.Assignments)
+                foreach (var pairing in result.Pairings)
                 {
                     _logger.LogInformation(
-                        $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
-                            + $"Start: {gene.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {gene.TimeWindow.GetDuration()}, End: {gene.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
+                        $"  Mission: {pairing.Mission.Id} -> UAV: {pairing.TailId}, "
+                            + $"Start: {pairing.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {pairing.TimeWindow.GetDuration()}, End: {pairing.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
                     );
                 }
 
@@ -331,17 +331,17 @@ namespace Mission_Service.Controllers
                     },
                     Results = new
                     {
-                        BestFitnessScore = result.Assignment.FitnessScore,
-                        AssignmentCount = result.Assignment.Assignments.Count(),
-                        Assignments = result.Assignment.Assignments.Select(g => new
+                        BestFitnessScore = result.FitnessScore,
+                        AssignmentCount = result.Pairings.Count(),
+                        Assignments = result.Pairings.Select(p => new
                         {
-                            MissionId = g.Mission.Id,
-                            UAVTailId = g.UAV.TailId,
-                            UAVType = g.UAV.UavType.ToString(),
-                            StartTime = g.TimeWindow.Start,
-                            Duration = g.TimeWindow.GetDuration(),
-                            EndTime = g.TimeWindow.End,
-                        })
+                            MissionId = p.Mission.Id,
+                            UAVTailId = p.TailId,
+                            StartTime = p.TimeWindow.Start,
+                            Duration = p.TimeWindow.GetDuration(),
+                            EndTime = p.TimeWindow.End,
+                        }),
+                        UAVTelemetryData = result.UAVTelemetryData
                     },
                 };
             }

@@ -96,7 +96,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 }
             }
 
-            return new AssignmentResult(bestChromosomeFound);
+            return bestChromosomeFound.ToAssignmentResult();
         }
 
         private IReadOnlyList<AssignmentChromosome> InitializePopulation(
