@@ -7,6 +7,7 @@ namespace Mission_Service.Models
     public class Mission
     {
         public string Id { get; set; }
+        public string Title { get; set; }
         public UAVType RequiredUAVType { get; set; }
         public MissionPriority Priority { get; set; }
         public TimeWindow TimeWindow { get; set; }
