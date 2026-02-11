@@ -77,11 +77,22 @@ namespace Mission_Service.Services.MissionExecutor
 
             _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
 
-            await _simulatorHttpClient.PostAsJsonAsync(
-                MissionServiceConstants.SimulatorEndpoints.SIMULATE,
-                request,
-                cancellationToken
-            );
+            try
+            {
+                await _simulatorHttpClient.PostAsJsonAsync(
+                    MissionServiceConstants.SimulatorEndpoints.SIMULATE,
+                    request,
+                    cancellationToken
+                );
+            }
+            catch (HttpRequestException)
+            {
+                _uavStatusService.ClearActiveMission(assignment.UavTailId);
+            }
+            catch (TaskCanceledException)
+            {
+                _uavStatusService.ClearActiveMission(assignment.UavTailId);
+            }
         }
     }
 }

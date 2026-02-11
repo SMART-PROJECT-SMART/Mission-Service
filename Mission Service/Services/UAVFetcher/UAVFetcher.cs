@@ -37,19 +37,30 @@ namespace Mission_Service.Services.UAVFetcher
             CancellationToken cancellationToken
         )
         {
-            HttpResponseMessage telemetryResponse = await _ltsHttpClient.GetAsync(
-                MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY,
-                cancellationToken
-            );
-
-            telemetryResponse.EnsureSuccessStatusCode();
-
-            IEnumerable<UAVTelemetryDataDto>? rawTelemetryData =
-                await telemetryResponse.Content.ReadFromJsonAsync<IEnumerable<UAVTelemetryDataDto>>(
+            try
+            {
+                HttpResponseMessage telemetryResponse = await _ltsHttpClient.GetAsync(
+                    MissionServiceConstants.LTSEndpoints.ALL_UAV_TELEMETRY,
                     cancellationToken
                 );
 
-            return rawTelemetryData ?? Enumerable.Empty<UAVTelemetryDataDto>();
+                telemetryResponse.EnsureSuccessStatusCode();
+
+                IEnumerable<UAVTelemetryDataDto>? rawTelemetryData =
+                    await telemetryResponse.Content.ReadFromJsonAsync<IEnumerable<UAVTelemetryDataDto>>(
+                        cancellationToken
+                    );
+
+                return rawTelemetryData ?? Enumerable.Empty<UAVTelemetryDataDto>();
+            }
+            catch (HttpRequestException)
+            {
+                return Enumerable.Empty<UAVTelemetryDataDto>();
+            }
+            catch (TaskCanceledException)
+            {
+                return Enumerable.Empty<UAVTelemetryDataDto>();
+            }
         }
     }
 }
