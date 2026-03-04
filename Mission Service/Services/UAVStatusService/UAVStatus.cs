@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Core.Common.Enums;
 using Mission_Service.Models;
+using Mission_Service.Models.Ro;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.UAVStatusService
@@ -41,6 +42,15 @@ namespace Mission_Service.Services.UAVStatusService
         public void ClearActiveMission(int tailId)
         {
             _uavActiveMissionsByTailId.TryRemove(tailId, out _);
+        }
+
+        public IEnumerable<ActiveMissionRo> GetAllActiveMissions()
+        {
+            return _uavActiveMissionsByTailId.Select(entry => new ActiveMissionRo
+            {
+                TailId = entry.Key,
+                Mission = entry.Value
+            });
         }
     }
 }

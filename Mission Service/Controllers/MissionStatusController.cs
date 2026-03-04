@@ -16,6 +16,13 @@ namespace Mission_Service.Controllers
             _uavStatusService = uavStatusService;
         }
 
+        [HttpGet("active-missions")]
+        public IActionResult GetAllActiveMissions()
+        {
+            IEnumerable<Models.Ro.ActiveMissionRo> activeMissions = _uavStatusService.GetAllActiveMissions();
+            return Ok(activeMissions);
+        }
+
         [HttpGet("active-mission/{tailId}")]
         public IActionResult GetActiveMission(int tailId)
         {
