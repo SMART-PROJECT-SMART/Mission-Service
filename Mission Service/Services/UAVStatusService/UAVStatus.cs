@@ -13,6 +13,35 @@ namespace Mission_Service.Services.UAVStatusService
         public UAVStatus()
         {
             _uavActiveMissionsByTailId = new ConcurrentDictionary<int, Mission>();
+
+            // TODO: Remove — temporary seed data for development
+            _uavActiveMissionsByTailId.TryAdd(1, new Mission
+            {
+                Id = "seed-mission-1",
+                Title = "Border Surveillance Alpha",
+                RequiredUAVType = UAVType.Surveillance,
+                Priority = Common.Enums.MissionPriority.High,
+                Location = new Core.Models.Location(31.5, 34.8, 300),
+                TimeWindow = new TimeWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(2))
+            });
+            _uavActiveMissionsByTailId.TryAdd(3, new Mission
+            {
+                Id = "seed-mission-2",
+                Title = "Armed Patrol Bravo",
+                RequiredUAVType = UAVType.Armed,
+                Priority = Common.Enums.MissionPriority.Medium,
+                Location = new Core.Models.Location(32.1, 35.2, 500),
+                TimeWindow = new TimeWindow(DateTime.UtcNow.AddMinutes(30), DateTime.UtcNow.AddHours(3))
+            });
+            _uavActiveMissionsByTailId.TryAdd(5, new Mission
+            {
+                Id = "seed-mission-3",
+                Title = "Recon Delta",
+                RequiredUAVType = UAVType.Surveillance,
+                Priority = Common.Enums.MissionPriority.Low,
+                Location = new Core.Models.Location(30.9, 34.5, 250),
+                TimeWindow = new TimeWindow(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(4))
+            });
         }
 
         public bool IsInActiveMission(Dictionary<TelemetryFields, double> telemetryData)

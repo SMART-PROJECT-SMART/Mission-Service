@@ -3,6 +3,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
+using Mission_Service.Models.Dto;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
@@ -16,6 +17,8 @@ namespace Mission_Service.Controllers
         private readonly ILogger<TestController> _logger;
         private readonly IUAVStatusService _uavStatusService;
 
+        private readonly Dictionary<string, (string Label, Func<(List<Mission>, List<UAV>)> Factory)> _scenarioRegistry;
+
         public TestController(
             IAssignmentAlgorithm assignmentAlgorithm,
             ILogger<TestController> logger,
@@ -25,6 +28,59 @@ namespace Mission_Service.Controllers
             _assignmentAlgorithm = assignmentAlgorithm;
             _logger = logger;
             _uavStatusService = uavStatusService;
+
+            _scenarioRegistry = new Dictionary<string, (string, Func<(List<Mission>, List<UAV>)>)>
+            {
+                ["basic-equal-assignment"] = ("Basic Assignment", CreateBasicEqualAssignmentData),
+                ["resource-constrained"] = ("Resource Constrained", CreateResourceConstrainedData),
+                ["time-overlap-conflict"] = ("Time Overlap Conflict", CreateTimeOverlapConflictData),
+                ["priority-assignment"] = ("Priority Mix", CreatePriorityAssignmentData),
+                ["mixed-types"] = ("Mixed Types", CreateMixedTypesData),
+                ["sequential-missions"] = ("Sequential Missions", CreateSequentialMissionsData),
+                ["stress-test"] = ("Stress Test", CreateStressTestData),
+                ["parallel-missions-optimization"] = ("Parallel Missions", CreateParallelMissionsOptimizationData),
+                ["maximum-coverage"] = ("Maximum Coverage", CreateMaximumCoverageData),
+                ["high-priority-reassignment"] = ("High Priority Override", CreateHighPriorityReassignmentData),
+            };
+        }
+
+        [HttpGet("scenarios")]
+        public IActionResult GetScenarios()
+        {
+            var scenarios = _scenarioRegistry.Select(kvp =>
+            {
+                var (missions, _) = kvp.Value.Factory();
+                return new ScenarioInfoDto
+                {
+                    Key = kvp.Key,
+                    Label = kvp.Value.Label,
+                    MissionCount = missions.Count,
+                };
+            }).ToList();
+
+            return Ok(scenarios);
+        }
+
+        [HttpPost("scenarios/missions")]
+        public IActionResult GetScenarioMissions([FromBody] ScenarioRequestDto request)
+        {
+            var allMissions = new List<Mission>();
+
+            foreach (var scenarioKey in request.Scenarios)
+            {
+                if (!_scenarioRegistry.TryGetValue(scenarioKey, out var scenario))
+                    continue;
+
+                var (missions, _) = scenario.Factory();
+                foreach (var mission in missions)
+                {
+                    mission.Id = Guid.NewGuid().ToString();
+                    mission.Title ??= $"{scenario.Label} - {mission.Id[..8]}";
+                }
+                allMissions.AddRange(missions);
+            }
+
+            return Ok(allMissions);
         }
 
         [HttpGet("test/run-all")]
