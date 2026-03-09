@@ -12,6 +12,7 @@ namespace Mission_Service.Extensions
             {
                 SuggestedAssignments = dto.SuggestedAssignments.ToList(),
                 ActualAssignments = dto.ActualAssignments.ToList(),
+                AllUavTelemetryData = dto.AllUavTelemetryData,
                 CreatedAt = DateTime.UtcNow,
             };
         }
@@ -22,6 +23,7 @@ namespace Mission_Service.Extensions
             {
                 SuggestedAssignments = assignment.SuggestedAssignments,
                 ActualAssignments = assignment.ActualAssignments,
+                AllUavTelemetryData = assignment.AllUavTelemetryData,
             };
         }
     }

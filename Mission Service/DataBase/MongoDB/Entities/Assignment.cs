@@ -15,6 +15,8 @@ namespace Mission_Service.DataBase.MongoDB.Entities
         [BsonRequired]
         public List<MissionToUavAssignment> ActualAssignments { get; set; } = new();
 
+        public Dictionary<string, Dictionary<string, double>> AllUavTelemetryData { get; set; } = new();
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
