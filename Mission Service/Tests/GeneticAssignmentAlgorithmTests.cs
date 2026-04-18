@@ -68,6 +68,7 @@ public class GeneticAssignmentAlgorithmTests
         var fitnessWeights = new FitnessWeightsConfiguration
         {
             TelemetryOptimization = 150.0,
+            DistanceWeight = 300.0,
             PriorityCoverage = 100.0,
             TimeOverlapPenalty = -10000.0,
             TypeMismatchPenalty = -10000.0,

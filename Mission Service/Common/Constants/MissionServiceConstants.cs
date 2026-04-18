@@ -136,5 +136,14 @@
             public const string ALTITUDE_KEY = "Altitude";
             public const string TRIGGER_PREFIX = "trigger-";
         }
+
+        public static class GeoDistance
+        {
+            public const double EARTH_RADIUS_KM = 6371.0;
+            public const double PROXIMITY_NUMERATOR = 1.0;
+            public const double HALF_DIVISOR = 2.0;
+            public const double FULL_ANGLE_MULTIPLIER = 2.0;
+            public const double DEGREES_TO_RADIANS_FACTOR = Math.PI / 180.0;
+        }
     }
 }

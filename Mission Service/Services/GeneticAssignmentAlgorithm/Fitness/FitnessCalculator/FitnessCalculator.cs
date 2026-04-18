@@ -1,4 +1,5 @@
 ﻿using Core.Common.Enums;
+using Core.Models;
 using Microsoft.Extensions.Options;
 using Mission_Service.Config;
 using Mission_Service.Models;
@@ -32,6 +33,7 @@ public class FitnessCalculator : IFitnessCalculator
 
         double totalFitness = 0.0;
         totalFitness += CalculateTelemetryScore(assignments);
+        totalFitness += CalculateDistanceScore(assignments);
         totalFitness += CalculatePriorityScore(assignments);
         totalFitness += CalculateOverlapPenalty(assignments);
         totalFitness += CalculateMismatchPenalty(assignments);
@@ -73,6 +75,26 @@ public class FitnessCalculator : IFitnessCalculator
     {
         double totalPriority = MissionAnalyzer.CalculateTotalPriority(assignments);
         return totalPriority * _fitnessWeights.PriorityCoverage;
+    }
+
+    private double CalculateDistanceScore(List<AssignmentGene> assignments)
+    {
+        if (assignments.Count == 0)
+            return 0.0;
+
+        double totalProximityScore = 0.0;
+        foreach (AssignmentGene assignment in assignments)
+        {
+            Location uavLocation = LocationProximityCalculator.ExtractUAVLocation(assignment.UAV.TelemetryData);
+            double proximityScore = LocationProximityCalculator.CalculateNormelizedProximityScore(
+                uavLocation,
+                assignment.Mission.Location
+            );
+            totalProximityScore += proximityScore;
+        }
+
+        double averageProximityScore = totalProximityScore / assignments.Count;
+        return averageProximityScore * _fitnessWeights.DistanceWeight;
     }
 
     private double CalculateMissionCoverageBonus(List<AssignmentGene> assignments)
