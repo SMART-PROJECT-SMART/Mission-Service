@@ -11,6 +11,8 @@ namespace Mission_Service.Extensions
             {
                 TelemetryFields.FuelAmount => value
                     / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
+                TelemetryFields.AmmoPercentage => value
+                    / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
                 TelemetryFields.ThrottlePercent => value
                     / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
                 TelemetryFields.CurrentSpeedKmph => Math.Min(
