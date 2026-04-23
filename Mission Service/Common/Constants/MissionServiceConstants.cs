@@ -47,6 +47,11 @@
             public const double NO_IMPROVEMENT_THRESHOLD = 0.0001;
         }
 
+        public static class Explainability
+        {
+            public const int MAX_ALTERNATIVES_PER_MISSION = 3;
+        }
+
         public static class Crossover
         {
             public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;

@@ -6,6 +6,7 @@ using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Explainability;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
@@ -96,6 +97,11 @@ public class GeneticAssignmentAlgorithmTests
             Options.Create(_config)
         );
         var parallelExecutor = new ParallelExecutor();
+        var explainabilityBuilder = new AssignmentExplainabilityBuilder(
+            Options.Create(telemetryWeights),
+            Options.Create(fitnessWeights),
+            uavStatusService
+        );
 
         var repairStrategies = new List<IRepairStrategy>
         {
@@ -120,6 +126,7 @@ public class GeneticAssignmentAlgorithmTests
             evolutionStrategy,
             parallelExecutor,
             repairPipeline,
+            explainabilityBuilder,
             Options.Create(_config)
         );
     }

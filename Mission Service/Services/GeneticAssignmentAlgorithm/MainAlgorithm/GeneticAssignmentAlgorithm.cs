@@ -6,6 +6,7 @@ using Mission_Service.Config;
 using Mission_Service.Extensions;
 using Mission_Service.Models;
 using Mission_Service.Models.choromosomes;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Explainability.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
@@ -22,6 +23,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
         private readonly IEvolutionStrategy _evolutionStrategy;
         private readonly IParallelExecutor _parallelExecutor;
         private readonly IRepairPipeline _repairPipeline;
+        private readonly IAssignmentExplainabilityBuilder _explainabilityBuilder;
         private readonly AssignmentAlgorithmConfiguration _algorithmConfig;
 
         public GeneticAssignmentAlgorithm(
@@ -30,6 +32,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
             IEvolutionStrategy evolutionStrategy,
             IParallelExecutor parallelExecutor,
             IRepairPipeline repairPipeline,
+            IAssignmentExplainabilityBuilder explainabilityBuilder,
             IOptions<AssignmentAlgorithmConfiguration> algorithmConfig
         )
         {
@@ -38,6 +41,7 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
             _evolutionStrategy = evolutionStrategy;
             _parallelExecutor = parallelExecutor;
             _repairPipeline = repairPipeline;
+            _explainabilityBuilder = explainabilityBuilder;
             _algorithmConfig = algorithmConfig.Value;
         }
 
@@ -96,7 +100,11 @@ namespace Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm
                 }
             }
 
-            return bestChromosomeFound.ToAssignmentResult(uavs);
+            AssignmentExplainability explainability = _explainabilityBuilder.Build(
+                bestChromosomeFound.AssignmentsList,
+                uavs.ToList()
+            );
+            return bestChromosomeFound.ToAssignmentResult(uavs, explainability);
         }
 
         private IReadOnlyList<AssignmentChromosome> InitializePopulation(

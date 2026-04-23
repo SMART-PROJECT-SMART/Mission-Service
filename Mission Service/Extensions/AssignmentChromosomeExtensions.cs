@@ -8,7 +8,8 @@ namespace Mission_Service.Extensions
     {
         public static AssignmentResult ToAssignmentResult(
             this AssignmentChromosome chromosome,
-            IEnumerable<UAV> allUAVs
+            IEnumerable<UAV> allUAVs,
+            AssignmentExplainability explainability
         )
         {
             IEnumerable<MissionAssignmentPairing> pairings = chromosome.Assignments.Select(
@@ -21,7 +22,13 @@ namespace Mission_Service.Extensions
                 uav => uav.TelemetryData
             );
 
-            return new AssignmentResult(pairings, telemetryData, chromosome.FitnessScore);
+            return new AssignmentResult(
+                pairings,
+                telemetryData,
+                chromosome.FitnessScore,
+                explainability.FitnessBreakdown,
+                explainability.PairingInsights
+            );
         }
     }
 }
