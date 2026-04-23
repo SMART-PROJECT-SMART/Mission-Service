@@ -222,6 +222,18 @@ namespace Mission_Service.Controllers
             return ExecuteTestCase("Mixed Types", missions, uavs);
         }
 
+        [HttpGet("test/mixed-types-all-high")]
+        public IActionResult TestMixedTypesAllHigh()
+        {
+            var (missions, uavs) = CreateMixedTypesData();
+            foreach (Mission mission in missions)
+            {
+                mission.Priority = MissionPriority.High;
+            }
+
+            return ExecuteTestCase("Mixed Types (All High Priority)", missions, uavs);
+        }
+
         [HttpGet("test/sequential-missions")]
         public IActionResult TestSequentialMissions()
         {
@@ -290,6 +302,33 @@ namespace Mission_Service.Controllers
 
             IActionResult result = ExecuteTestCase(
                 "High Priority Reassignment From Low Priority",
+                missions,
+                uavs
+            );
+
+            _uavStatusService.ClearActiveMission(armedUav.TailId);
+
+            return result;
+        }
+
+        [HttpGet("test/reassignment-priority-check")]
+        public IActionResult TestReassignmentPriorityCheck(
+            [FromQuery] MissionPriority donorPriority = MissionPriority.Low,
+            [FromQuery] MissionPriority targetPriority = MissionPriority.High
+        )
+        {
+            var (missions, uavs) = CreateHighPriorityReassignmentData();
+
+            Mission donorMission = missions.First(m => m.Id == "LowPriorityMission");
+            Mission targetMission = missions.First(m => m.Id == "HighPriorityMission");
+            donorMission.Priority = donorPriority;
+            targetMission.Priority = targetPriority;
+
+            UAV armedUav = uavs.First(u => u.UavType == UAVType.Armed);
+            _uavStatusService.SetActiveMission(armedUav.TailId, donorMission);
+
+            IActionResult result = ExecuteTestCase(
+                $"Priority Reassignment Check (Donor={donorPriority}, Target={targetPriority})",
                 missions,
                 uavs
             );
@@ -388,6 +427,7 @@ namespace Mission_Service.Controllers
                     Results = new
                     {
                         BestFitnessScore = result.FitnessScore,
+                        FitnessBreakdown = result.FitnessBreakdown,
                         AssignmentCount = result.Pairings.Count(),
                         Assignments = result.Pairings.Select(p => new
                         {
@@ -397,6 +437,7 @@ namespace Mission_Service.Controllers
                             Duration = p.TimeWindow.GetDuration(),
                             EndTime = p.TimeWindow.End,
                         }),
+                        PairingInsights = result.PairingInsights,
                         UAVTelemetryData = result.UAVTelemetryData
                     },
                 };
