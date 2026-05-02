@@ -21,7 +21,7 @@ namespace Mission_Service.Services.UAVStatusService
                 Title = "Border Surveillance Alpha",
                 RequiredUAVType = UAVType.Surveillance,
                 Priority = Common.Enums.MissionPriority.High,
-                Location = new Core.Models.Location(31.5, 34.8, 300),
+                Location = new Core.Models.Location(33.1, 33.4, 300),
                 TimeWindow = new TimeWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(2))
             });
             _uavActiveMissionsByTailId.TryAdd(3, new Mission
@@ -30,17 +30,8 @@ namespace Mission_Service.Services.UAVStatusService
                 Title = "Armed Patrol Bravo",
                 RequiredUAVType = UAVType.Armed,
                 Priority = Common.Enums.MissionPriority.Medium,
-                Location = new Core.Models.Location(32.1, 35.2, 500),
+                Location = new Core.Models.Location(33.7, 36.6, 500),
                 TimeWindow = new TimeWindow(DateTime.UtcNow.AddMinutes(30), DateTime.UtcNow.AddHours(3))
-            });
-            _uavActiveMissionsByTailId.TryAdd(5, new Mission
-            {
-                Id = "seed-mission-3",
-                Title = "Recon Delta",
-                RequiredUAVType = UAVType.Surveillance,
-                Priority = Common.Enums.MissionPriority.Low,
-                Location = new Core.Models.Location(30.9, 34.5, 250),
-                TimeWindow = new TimeWindow(DateTime.UtcNow.AddHours(1), DateTime.UtcNow.AddHours(4))
             });
         }
 

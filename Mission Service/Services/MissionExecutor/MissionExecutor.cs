@@ -1,4 +1,5 @@
 using Core.Models;
+using Microsoft.Extensions.Logging;
 using Mission_Service.Common.Constants;
 using Mission_Service.DataBase.MongoDB.Entities;
 using Mission_Service.DataBase.MongoDB.Services;
@@ -13,11 +14,13 @@ namespace Mission_Service.Services.MissionExecutor
         private readonly HttpClient _simulatorHttpClient;
         private readonly IUAVStatusService _uavStatusService;
         private readonly IAssignmentDBService _assignmentDbService;
+        private readonly ILogger<MissionExecutor> _logger;
 
         public MissionExecutor(
             IHttpClientFactory httpClientFactory,
             IUAVStatusService uavStatusService,
-            IAssignmentDBService assignmentDbService
+            IAssignmentDBService assignmentDbService,
+            ILogger<MissionExecutor> logger
         )
         {
             _simulatorHttpClient = httpClientFactory.CreateClient(
@@ -25,6 +28,7 @@ namespace Mission_Service.Services.MissionExecutor
             );
             _uavStatusService = uavStatusService;
             _assignmentDbService = assignmentDbService;
+            _logger = logger;
         }
 
         public async Task<bool> ApplyAndExecuteAssignmentAsync(
@@ -75,23 +79,44 @@ namespace Mission_Service.Services.MissionExecutor
                 MissionId = assignment.Mission.Id,
             };
 
-            _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
-
             try
             {
-                await _simulatorHttpClient.PostAsJsonAsync(
+                HttpResponseMessage response = await _simulatorHttpClient.PostAsJsonAsync(
                     MissionServiceConstants.SimulatorEndpoints.SIMULATE,
                     request,
                     cancellationToken
                 );
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _uavStatusService.SetActiveMission(assignment.UavTailId, assignment.Mission);
+                    return;
+                }
+
+                _logger.LogWarning(
+                    "Simulator rejected mission dispatch. TailId: {TailId}, MissionId: {MissionId}, StatusCode: {StatusCode}",
+                    assignment.UavTailId,
+                    assignment.Mission.Id,
+                    response.StatusCode
+                );
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException exception)
             {
-                _uavStatusService.ClearActiveMission(assignment.UavTailId);
+                _logger.LogWarning(
+                    exception,
+                    "Simulator call failed during mission dispatch. TailId: {TailId}, MissionId: {MissionId}",
+                    assignment.UavTailId,
+                    assignment.Mission.Id
+                );
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException exception)
             {
-                _uavStatusService.ClearActiveMission(assignment.UavTailId);
+                _logger.LogWarning(
+                    exception,
+                    "Simulator call timed out during mission dispatch. TailId: {TailId}, MissionId: {MissionId}",
+                    assignment.UavTailId,
+                    assignment.Mission.Id
+                );
             }
         }
     }

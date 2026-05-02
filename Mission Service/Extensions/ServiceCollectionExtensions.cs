@@ -35,6 +35,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interf
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
 using Mission_Service.Services.MissionExecutor;
 using Mission_Service.Services.MissionExecutor.Interfaces;
+using Mission_Service.Services.SeededMissionStartupSimulation;
 using Mission_Service.Services.UAVFetcher;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
@@ -194,6 +195,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IAssignmentSuggestionQueue, AssignmentSuggestionQueue>();
             services.AddSingleton<IAssignmentResultManager, AssignmentResultManager>();
             services.AddHostedService<AssignmentSuggestionWorker>();
+            services.AddHostedService<SeededMissionStartupSimulationService>();
             return services;
         }
 
