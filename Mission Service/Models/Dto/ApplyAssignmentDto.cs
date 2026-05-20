@@ -27,5 +27,7 @@ namespace Mission_Service.Models.Dto
         )]
         public IEnumerable<MissionToUavAssignment> ActualAssignments { get; set; } =
             Array.Empty<MissionToUavAssignment>();
+
+        public Dictionary<string, Dictionary<string, double>> AllUavTelemetryData { get; set; } = new();
     }
 }

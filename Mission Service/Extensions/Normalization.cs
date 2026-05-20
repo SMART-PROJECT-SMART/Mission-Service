@@ -11,6 +11,8 @@ namespace Mission_Service.Extensions
             {
                 TelemetryFields.FuelAmount => value
                     / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
+                TelemetryFields.AmmoPercentage => value
+                    / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
                 TelemetryFields.ThrottlePercent => value
                     / MissionServiceConstants.TelemetryNormalization.MAX_PERCENTAGE,
                 TelemetryFields.CurrentSpeedKmph => Math.Min(
@@ -35,10 +37,13 @@ namespace Mission_Service.Extensions
                         value / MissionServiceConstants.TelemetryNormalization.MAX_DATA_STORAGE_GB,
                         MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
                     ),
-                TelemetryFields.FlightTimeSec => Math.Min(
-                    value / MissionServiceConstants.TelemetryNormalization.MAX_FLIGHT_TIME_SEC,
-                    MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
-                ),
+                TelemetryFields.FlightTimeSec => MissionServiceConstants
+                    .TelemetryNormalization
+                    .MIN_NORMALIZED_VALUE
+                    - Math.Min(
+                        value / MissionServiceConstants.TelemetryNormalization.MAX_FLIGHT_TIME_SEC,
+                        MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
+                    ),
                 TelemetryFields.ThrustAfterInfluence => Math.Min(
                     value / MissionServiceConstants.TelemetryNormalization.MAX_THRUST,
                     MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
@@ -50,10 +55,13 @@ namespace Mission_Service.Extensions
                         value / MissionServiceConstants.TelemetryNormalization.MAX_ENGINE_DEGREES,
                         MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
                     ),
-                TelemetryFields.Rpm => Math.Min(
-                    value / MissionServiceConstants.TelemetryNormalization.MAX_RPM,
-                    MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
-                ),
+                TelemetryFields.Rpm => MissionServiceConstants
+                    .TelemetryNormalization
+                    .MIN_NORMALIZED_VALUE
+                    - Math.Min(
+                        value / MissionServiceConstants.TelemetryNormalization.MAX_RPM,
+                        MissionServiceConstants.TelemetryNormalization.MIN_NORMALIZED_VALUE
+                    ),
                 TelemetryFields.YawDeg => value
                     / MissionServiceConstants.TelemetryNormalization.FULL_ROTATION_DEG,
                 TelemetryFields.PitchDeg => (

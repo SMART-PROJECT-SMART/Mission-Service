@@ -16,14 +16,7 @@ public static class TelemetryScoreCalculator
             telemetryWeights,
             uavTelemetryData
         );
-
-        double locationBasedScore = CalculateLocationBasedScore(
-            telemetryWeights,
-            uavTelemetryData,
-            missionLocation
-        );
-
-        return nonLocationTelemetryScore + locationBasedScore;
+        return nonLocationTelemetryScore;
     }
 
     private static double CalculateNonLocationTelemetryScore(
@@ -44,42 +37,4 @@ public static class TelemetryScoreCalculator
         return telemetryScore;
     }
 
-    private static double CalculateLocationBasedScore(
-        Dictionary<TelemetryFields, double> telemetryWeights,
-        Dictionary<TelemetryFields, double> uavTelemetryData,
-        Location missionLocation
-    )
-    {
-        double totalLocationWeight = CalculateTotalLocationWeight(telemetryWeights);
-
-        if (totalLocationWeight <= 0.0)
-        {
-            return 0.0;
-        }
-
-        Location uavLocation = LocationProximityCalculator.ExtractUAVLocation(uavTelemetryData);
-        double proximityScore = LocationProximityCalculator.CalculateNormelizedProximityScore(
-            uavLocation,
-            missionLocation
-        );
-
-        return proximityScore * totalLocationWeight;
-    }
-
-    private static double CalculateTotalLocationWeight(
-        Dictionary<TelemetryFields, double> telemetryWeights
-    )
-    {
-        double totalLocationWeight = 0.0;
-
-        foreach (KeyValuePair<TelemetryFields, double> telemetryWeight in telemetryWeights)
-        {
-            if (LocationProximityCalculator.IsLocationField(telemetryWeight.Key))
-            {
-                totalLocationWeight += telemetryWeight.Value;
-            }
-        }
-
-        return totalLocationWeight;
-    }
 }

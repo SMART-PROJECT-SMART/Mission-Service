@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Constants;
 using Mission_Service.Common.Enums;
-using Mission_Service.Models.choromosomes;
+using Mission_Service.Models;
 using Mission_Service.Models.RO;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
 
@@ -21,14 +21,12 @@ namespace Mission_Service.Controllers
         [HttpGet("{assignmentId}")]
         public IActionResult GetAssignmentResult(string assignmentId)
         {
-            AssignmentChromosome? result = _assignmentResultManager.GetAndRemoveResult(
-                assignmentId
-            );
+            AssignmentResult? result = _assignmentResultManager.GetAndRemoveResult(assignmentId);
 
             if (result != null)
                 return Ok(result);
 
-            var notFoundResponse = new AssignmentResultNotFoundResponse(
+            AssignmentResultNotFoundResponse notFoundResponse = new AssignmentResultNotFoundResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
                 assignmentId
             );
@@ -39,20 +37,18 @@ namespace Mission_Service.Controllers
         [HttpGet("{assignmentId}/" + MissionServiceConstants.Actions.STATUS)]
         public IActionResult CheckAssignmentStatus(string assignmentId)
         {
-            var execution = _assignmentResultManager.GetExecution(assignmentId);
+            AssignmentExecution? execution = _assignmentResultManager.GetExecution(assignmentId);
 
             if (execution == null)
             {
-                var notFoundResponse = new AssignmentResultNotFoundResponse(
+                AssignmentResultNotFoundResponse notFoundResponse = new AssignmentResultNotFoundResponse(
                     MissionServiceConstants.APIResponses.ASSIGNMENT_RESULT_NOT_FOUND,
                     assignmentId
                 );
                 return NotFound(notFoundResponse);
             }
 
-            bool isCompleted = execution.Status == AssignmentStatus.Completed;
-
-            string? resultUrl = isCompleted
+            string? resultUrl = execution.Status == AssignmentStatus.Completed
                 ? Url.Action(
                     nameof(GetAssignmentResult),
                     MissionServiceConstants.Controllers.ASSIGNMENT_RESULT_CONTROLLER,
@@ -61,7 +57,7 @@ namespace Mission_Service.Controllers
                 )
                 : null;
 
-            var statusResponse = new AssignmentStatusResponse(
+            AssignmentStatusResponse statusResponse = new AssignmentStatusResponse(
                 assignmentId,
                 execution.Status.ToString(),
                 GetStatusMessage(execution.Status),

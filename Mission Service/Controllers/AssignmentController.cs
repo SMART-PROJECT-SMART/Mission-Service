@@ -16,19 +16,16 @@ namespace Mission_Service.Controllers
     {
         private readonly IAssignmentSuggestionQueue _assignmentSuggestionQueue;
         private readonly IAssignmentResultManager _assignmentResultManager;
-        private readonly IAssignmentDBService _assignmentDbService;
         private readonly IMissionExecutor _missionExecutor;
 
         public AssignmentController(
             IAssignmentSuggestionQueue assignmentSuggestionQueue,
             IAssignmentResultManager assignmentResultManager,
-            IAssignmentDBService assignmentDbService,
             IMissionExecutor missionExecutor
         )
         {
             _assignmentSuggestionQueue = assignmentSuggestionQueue;
             _assignmentResultManager = assignmentResultManager;
-            _assignmentDbService = assignmentDbService;
             _missionExecutor = missionExecutor;
         }
 
@@ -46,7 +43,7 @@ namespace Mission_Service.Controllers
                 Request.Scheme
             )!;
 
-            var response = new AssignmentRequestAcceptedResponse(
+            AssignmentRequestAcceptedResponse response = new AssignmentRequestAcceptedResponse(
                 MissionServiceConstants.APIResponses.ASSIGNMENT_REQUEST_ACCEPTED,
                 assignmentId,
                 statusUrl!
@@ -56,24 +53,25 @@ namespace Mission_Service.Controllers
         }
 
         [HttpPost("apply-assignment")]
-        public async Task<IActionResult> ApplyAssignment(ApplyAssignmentDto applyAssignmentDto)
+        public async Task<IActionResult> ApplyAssignment(
+            ApplyAssignmentDto applyAssignmentDto,
+            CancellationToken cancellationToken = default
+        )
         {
-            bool isCreated = await _assignmentDbService.CreateAssignmentAsync(applyAssignmentDto);
+            bool success = await _missionExecutor.ApplyAndExecuteAssignmentAsync(
+                applyAssignmentDto,
+                cancellationToken
+            );
 
-            if (!isCreated)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
-            await _missionExecutor.ExecuteMissionsAsync(applyAssignmentDto.ActualAssignments);
-
-            return CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto);
+            return success
+                ? CreatedAtAction(nameof(ApplyAssignment), applyAssignmentDto)
+                : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         private string StoreRequest(AssignmentSuggestionDto assignmentSuggestionDto)
         {
             string assignmentId = _assignmentResultManager.CreateExecution();
-            var request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
+            AssignmentSuggestionRequest request = new AssignmentSuggestionRequest(assignmentId, assignmentSuggestionDto);
             _assignmentSuggestionQueue.QueueAssignmentSuggestionRequest(request);
             return assignmentId;
         }

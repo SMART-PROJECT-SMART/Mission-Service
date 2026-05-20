@@ -6,6 +6,7 @@ using Mission_Service.Config;
 using Mission_Service.Models;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Evolution;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Explainability;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
@@ -118,6 +119,11 @@ namespace Mission.Service.Benchmarks.Benchmarks
 
             var uavStatusService = new UAVStatus();
             var fitnessCalculator = new FitnessCalculator(telemetryWeights, fitnessWeights, uavStatusService);
+            var explainabilityBuilder = new AssignmentExplainabilityBuilder(
+                telemetryWeights,
+                fitnessWeights,
+                uavStatusService
+            );
             var populationInitializer = new PopulationInitializer(algorithmConfig);
             var parallelExecutor = new ParallelExecutor();
 
@@ -156,6 +162,7 @@ namespace Mission.Service.Benchmarks.Benchmarks
                 evolutionStrategy,
                 parallelExecutor,
                 repairPipeline,
+                explainabilityBuilder,
                 algorithmConfig
             );
         }

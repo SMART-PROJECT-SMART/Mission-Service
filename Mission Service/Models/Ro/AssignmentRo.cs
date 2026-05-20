@@ -7,5 +7,7 @@ namespace Mission_Service.Models.Ro
         public List<MissionToUavAssignment> SuggestedAssignments { get; set; } = new();
 
         public List<MissionToUavAssignment> ActualAssignments { get; set; } = new();
+
+        public Dictionary<string, Dictionary<string, double>> AllUavTelemetryData { get; set; } = new();
     }
 }

@@ -561,3 +561,8 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .idea/
+.claude/
+
+graphify-out/obsidian/
+
+graphify-out/

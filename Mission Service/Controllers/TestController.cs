@@ -3,6 +3,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
+using Mission_Service.Models.Dto;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm.Interfaces;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
@@ -16,6 +17,8 @@ namespace Mission_Service.Controllers
         private readonly ILogger<TestController> _logger;
         private readonly IUAVStatusService _uavStatusService;
 
+        private readonly Dictionary<string, (string Label, Func<(List<Mission>, List<UAV>)> Factory)> _scenarioRegistry;
+
         public TestController(
             IAssignmentAlgorithm assignmentAlgorithm,
             ILogger<TestController> logger,
@@ -25,6 +28,59 @@ namespace Mission_Service.Controllers
             _assignmentAlgorithm = assignmentAlgorithm;
             _logger = logger;
             _uavStatusService = uavStatusService;
+
+            _scenarioRegistry = new Dictionary<string, (string, Func<(List<Mission>, List<UAV>)>)>
+            {
+                ["basic-equal-assignment"] = ("Basic Assignment", CreateBasicEqualAssignmentData),
+                ["resource-constrained"] = ("Resource Constrained", CreateResourceConstrainedData),
+                ["time-overlap-conflict"] = ("Time Overlap Conflict", CreateTimeOverlapConflictData),
+                ["priority-assignment"] = ("Priority Mix", CreatePriorityAssignmentData),
+                ["mixed-types"] = ("Mixed Types", CreateMixedTypesData),
+                ["sequential-missions"] = ("Sequential Missions", CreateSequentialMissionsData),
+                ["stress-test"] = ("Stress Test", CreateStressTestData),
+                ["parallel-missions-optimization"] = ("Parallel Missions", CreateParallelMissionsOptimizationData),
+                ["maximum-coverage"] = ("Maximum Coverage", CreateMaximumCoverageData),
+                ["high-priority-reassignment"] = ("High Priority Override", CreateHighPriorityReassignmentData),
+            };
+        }
+
+        [HttpGet("scenarios")]
+        public IActionResult GetScenarios()
+        {
+            var scenarios = _scenarioRegistry.Select(kvp =>
+            {
+                var (missions, _) = kvp.Value.Factory();
+                return new ScenarioInfoDto
+                {
+                    Key = kvp.Key,
+                    Label = kvp.Value.Label,
+                    MissionCount = missions.Count,
+                };
+            }).ToList();
+
+            return Ok(scenarios);
+        }
+
+        [HttpPost("scenarios/missions")]
+        public IActionResult GetScenarioMissions([FromBody] ScenarioRequestDto request)
+        {
+            var allMissions = new List<Mission>();
+
+            foreach (var scenarioKey in request.Scenarios)
+            {
+                if (!_scenarioRegistry.TryGetValue(scenarioKey, out var scenario))
+                    continue;
+
+                var (missions, _) = scenario.Factory();
+                foreach (var mission in missions)
+                {
+                    mission.Id = Guid.NewGuid().ToString();
+                    mission.Title ??= $"{scenario.Label} - {mission.Id[..8]}";
+                }
+                allMissions.AddRange(missions);
+            }
+
+            return Ok(allMissions);
         }
 
         [HttpGet("test/run-all")]
@@ -166,6 +222,18 @@ namespace Mission_Service.Controllers
             return ExecuteTestCase("Mixed Types", missions, uavs);
         }
 
+        [HttpGet("test/mixed-types-all-high")]
+        public IActionResult TestMixedTypesAllHigh()
+        {
+            var (missions, uavs) = CreateMixedTypesData();
+            foreach (Mission mission in missions)
+            {
+                mission.Priority = MissionPriority.High;
+            }
+
+            return ExecuteTestCase("Mixed Types (All High Priority)", missions, uavs);
+        }
+
         [HttpGet("test/sequential-missions")]
         public IActionResult TestSequentialMissions()
         {
@@ -243,6 +311,33 @@ namespace Mission_Service.Controllers
             return result;
         }
 
+        [HttpGet("test/reassignment-priority-check")]
+        public IActionResult TestReassignmentPriorityCheck(
+            [FromQuery] MissionPriority donorPriority = MissionPriority.Low,
+            [FromQuery] MissionPriority targetPriority = MissionPriority.High
+        )
+        {
+            var (missions, uavs) = CreateHighPriorityReassignmentData();
+
+            Mission donorMission = missions.First(m => m.Id == "LowPriorityMission");
+            Mission targetMission = missions.First(m => m.Id == "HighPriorityMission");
+            donorMission.Priority = donorPriority;
+            targetMission.Priority = targetPriority;
+
+            UAV armedUav = uavs.First(u => u.UavType == UAVType.Armed);
+            _uavStatusService.SetActiveMission(armedUav.TailId, donorMission);
+
+            IActionResult result = ExecuteTestCase(
+                $"Priority Reassignment Check (Donor={donorPriority}, Target={targetPriority})",
+                missions,
+                uavs
+            );
+
+            _uavStatusService.ClearActiveMission(armedUav.TailId);
+
+            return result;
+        }
+
         private IActionResult ExecuteTestCase(
             string testName,
             List<Mission> missions,
@@ -295,14 +390,14 @@ namespace Mission_Service.Controllers
 
                 _logger.LogInformation($"EXECUTION TIME: {duration.TotalMilliseconds}ms");
                 _logger.LogInformation(
-                    $"BEST CHROMOSOME - Fitness: {result.Assignment.FitnessScore:F6}, Assignments: {result.Assignment.Assignments.Count()}"
+                    $"BEST RESULT - Fitness: {result.FitnessScore:F6}, Assignments: {result.Pairings.Count()}"
                 );
 
-                foreach (var gene in result.Assignment.Assignments)
+                foreach (var pairing in result.Pairings)
                 {
                     _logger.LogInformation(
-                        $"  Mission: {gene.Mission.Id} -> UAV: {gene.UAV.TailId} (Type: {gene.UAV.UavType}), "
-                            + $"Start: {gene.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {gene.TimeWindow.GetDuration()}, End: {gene.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
+                        $"  Mission: {pairing.Mission.Id} -> UAV: {pairing.TailId}, "
+                            + $"Start: {pairing.TimeWindow.Start:yyyy-MM-dd HH:mm:ss}, Duration: {pairing.TimeWindow.GetDuration()}, End: {pairing.TimeWindow.End:yyyy-MM-dd HH:mm:ss}"
                     );
                 }
 
@@ -331,17 +426,19 @@ namespace Mission_Service.Controllers
                     },
                     Results = new
                     {
-                        BestFitnessScore = result.Assignment.FitnessScore,
-                        AssignmentCount = result.Assignment.Assignments.Count(),
-                        Assignments = result.Assignment.Assignments.Select(g => new
+                        BestFitnessScore = result.FitnessScore,
+                        FitnessBreakdown = result.FitnessBreakdown,
+                        AssignmentCount = result.Pairings.Count(),
+                        Assignments = result.Pairings.Select(p => new
                         {
-                            MissionId = g.Mission.Id,
-                            UAVTailId = g.UAV.TailId,
-                            UAVType = g.UAV.UavType.ToString(),
-                            StartTime = g.TimeWindow.Start,
-                            Duration = g.TimeWindow.GetDuration(),
-                            EndTime = g.TimeWindow.End,
-                        })
+                            MissionId = p.Mission.Id,
+                            UAVTailId = p.TailId,
+                            StartTime = p.TimeWindow.Start,
+                            Duration = p.TimeWindow.GetDuration(),
+                            EndTime = p.TimeWindow.End,
+                        }),
+                        PairingInsights = result.PairingInsights,
+                        UAVTelemetryData = result.UAVTelemetryData
                     },
                 };
             }

@@ -6,7 +6,8 @@ namespace Mission_Service.Services.AssignmentRequestQueue.Interfaces
     public interface IAssignmentSuggestionQueue
     {
         public Task QueueAssignmentSuggestionRequest(
-            AssignmentSuggestionRequest assignmentSuggestionRequest
+            AssignmentSuggestionRequest assignmentSuggestionRequest,
+            CancellationToken cancellationToken = default
         );
         public ChannelReader<AssignmentSuggestionRequest> AssignmentSuggestionReader { get; }
     }

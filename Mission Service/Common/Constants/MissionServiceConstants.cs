@@ -47,6 +47,11 @@
             public const double NO_IMPROVEMENT_THRESHOLD = 0.0001;
         }
 
+        public static class Explainability
+        {
+            public const int MAX_ALTERNATIVES_PER_MISSION = 3;
+        }
+
         public static class Crossover
         {
             public const int MIN_CHROMOSOMES_FOR_CROSSOVER = 3;
@@ -96,6 +101,7 @@
             public const string ASSIGNMENT_COMPLETED = "Assignment completed successfully";
             public const string ASSIGNMENT_RESULT_READY = "Result is ready";
             public const string ASSIGNMENT_RESULT_PROCESSING = "Result is still processing";
+            public const string ACTIVE_MISSION_NOT_FOUND = "No active mission found for UAV with TailId: {0}";
         }
 
         public static class Controllers
@@ -134,6 +140,36 @@
             public const string LONGITUDE_KEY = "Longitude";
             public const string ALTITUDE_KEY = "Altitude";
             public const string TRIGGER_PREFIX = "trigger-";
+        }
+
+        public static class GeoDistance
+        {
+            public const double EARTH_RADIUS_KM = 6371.0;
+            public const double PROXIMITY_NUMERATOR = 25.0;
+            public const double HALF_DIVISOR = 2.0;
+            public const double FULL_ANGLE_MULTIPLIER = 2.0;
+            public const double DEGREES_TO_RADIANS_FACTOR = Math.PI / 180.0;
+        }
+
+        public static class DevSeededMissionPath
+        {
+            public const double DESTINATION_DISTANCE_SCALE_FACTOR = 1.75;
+
+            public const double TAIL_ONE_PATH_ORIGIN_LATITUDE = 31.2083;
+            public const double TAIL_ONE_PATH_ORIGIN_LONGITUDE = 35.0122;
+            public const double TAIL_ONE_PATH_ORIGIN_ALTITUDE = 20.0;
+
+            public const double TAIL_ONE_BASELINE_DESTINATION_LATITUDE = 33.1;
+            public const double TAIL_ONE_BASELINE_DESTINATION_LONGITUDE = 33.4;
+            public const double TAIL_ONE_BASELINE_DESTINATION_ALTITUDE = 300.0;
+
+            public const double TAIL_THREE_PATH_ORIGIN_LATITUDE = 31.8394;
+            public const double TAIL_THREE_PATH_ORIGIN_LONGITUDE = 34.8217;
+            public const double TAIL_THREE_PATH_ORIGIN_ALTITUDE = 20.0;
+
+            public const double TAIL_THREE_BASELINE_DESTINATION_LATITUDE = 33.7;
+            public const double TAIL_THREE_BASELINE_DESTINATION_LONGITUDE = 36.6;
+            public const double TAIL_THREE_BASELINE_DESTINATION_ALTITUDE = 500.0;
         }
     }
 }

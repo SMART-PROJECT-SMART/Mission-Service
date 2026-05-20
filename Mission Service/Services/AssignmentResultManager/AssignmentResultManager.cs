@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using Mission_Service.Common.Enums;
 using Mission_Service.Models;
-using Mission_Service.Models.choromosomes;
 using Mission_Service.Services.AssignmentResultManager.Interfaces;
 
 namespace Mission_Service.Services.AssignmentResultManager
@@ -18,22 +17,22 @@ namespace Mission_Service.Services.AssignmentResultManager
         public string CreateExecution()
         {
             string assignmentId = Guid.NewGuid().ToString();
-            var execution = new AssignmentExecution();
+            AssignmentExecution execution = new AssignmentExecution();
             _assignmentExecutions.TryAdd(assignmentId, execution);
             return assignmentId;
         }
 
         public void UpdateStatus(string assignmentId, AssignmentStatus status)
         {
-            if (_assignmentExecutions.TryGetValue(assignmentId, out var execution))
+            if (_assignmentExecutions.TryGetValue(assignmentId, out AssignmentExecution? execution))
             {
                 execution.Status = status;
             }
         }
 
-        public void StoreResult(string assignmentId, AssignmentChromosome result)
+        public void StoreResult(string assignmentId, AssignmentResult result)
         {
-            if (_assignmentExecutions.TryGetValue(assignmentId, out var execution))
+            if (_assignmentExecutions.TryGetValue(assignmentId, out AssignmentExecution? execution))
             {
                 execution.Result = result;
                 execution.Status = AssignmentStatus.Completed;
@@ -42,13 +41,13 @@ namespace Mission_Service.Services.AssignmentResultManager
 
         public AssignmentExecution? GetExecution(string assignmentId)
         {
-            _assignmentExecutions.TryGetValue(assignmentId, out var execution);
+            _assignmentExecutions.TryGetValue(assignmentId, out AssignmentExecution? execution);
             return execution;
         }
 
-        public AssignmentChromosome? GetAndRemoveResult(string assignmentId)
+        public AssignmentResult? GetAndRemoveResult(string assignmentId)
         {
-            if (_assignmentExecutions.TryRemove(assignmentId, out var execution))
+            if (_assignmentExecutions.TryRemove(assignmentId, out AssignmentExecution? execution))
             {
                 return execution.Result;
             }
@@ -57,7 +56,7 @@ namespace Mission_Service.Services.AssignmentResultManager
 
         public bool HasResult(string assignmentId)
         {
-            if (_assignmentExecutions.TryGetValue(assignmentId, out var execution))
+            if (_assignmentExecutions.TryGetValue(assignmentId, out AssignmentExecution? execution))
             {
                 return execution.Status == AssignmentStatus.Completed && execution.Result != null;
             }

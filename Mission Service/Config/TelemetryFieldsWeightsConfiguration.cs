@@ -10,7 +10,7 @@ namespace Mission_Service.Config
 
         public Dictionary<TelemetryFields, double> GetWeights(UAVType uavType)
         {
-            return Weights.TryGetValue(uavType, out var weights)
+            return Weights.TryGetValue(uavType, out Dictionary<TelemetryFields, double>? weights)
                 ? weights
                 : new Dictionary<TelemetryFields, double>();
         }

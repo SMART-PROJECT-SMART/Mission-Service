@@ -13,6 +13,8 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Crossover.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Execution.Interfaces;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Explainability;
+using Mission_Service.Services.GeneticAssignmentAlgorithm.Explainability.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Fitness.FitnessCalculator.Interfaces;
 using Mission_Service.Services.GeneticAssignmentAlgorithm.MainAlgorithm;
@@ -33,6 +35,7 @@ using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Elite.Interf
 using Mission_Service.Services.GeneticAssignmentAlgorithm.Selection.Interfaces;
 using Mission_Service.Services.MissionExecutor;
 using Mission_Service.Services.MissionExecutor.Interfaces;
+using Mission_Service.Services.SeededMissionStartupSimulation;
 using Mission_Service.Services.UAVFetcher;
 using Mission_Service.Services.UAVFetcher.Interfaces;
 using Mission_Service.Services.UAVStatusService;
@@ -98,14 +101,6 @@ namespace Mission_Service.Extensions
                     mongoDbConfiguration.ServerSelectionTimeout;
                 return new MongoClient(mongoClientSettings);
             });
-            services.AddSingleton(serviceProvider =>
-            {
-                MongoDBConfiguration mongoDbConfiguration = serviceProvider
-                    .GetRequiredService<IOptions<MongoDBConfiguration>>()
-                    .Value;
-                IMongoClient mongoClient = serviceProvider.GetRequiredService<IMongoClient>();
-                return mongoClient.GetDatabase(mongoDbConfiguration.DatabaseName);
-            });
             return services;
         }
 
@@ -162,6 +157,7 @@ namespace Mission_Service.Extensions
         )
         {
             services.AddScoped<IAssignmentAlgorithm, GeneticAssignmentAlgorithm>();
+            services.AddScoped<IAssignmentExplainabilityBuilder, AssignmentExplainabilityBuilder>();
             services.AddScoped<IFitnessCalculator, FitnessCalculator>();
             services.AddScoped<IPopulationInitializer, PopulationInitializer>();
             services.AddScoped<ISelectionStrategy, TournamentSelectionStrategy>();
@@ -199,6 +195,7 @@ namespace Mission_Service.Extensions
             services.AddSingleton<IAssignmentSuggestionQueue, AssignmentSuggestionQueue>();
             services.AddSingleton<IAssignmentResultManager, AssignmentResultManager>();
             services.AddHostedService<AssignmentSuggestionWorker>();
+            services.AddHostedService<SeededMissionStartupSimulationService>();
             return services;
         }
 

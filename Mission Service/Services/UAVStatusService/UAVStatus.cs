@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
 using Core.Common.Enums;
-using Mission_Service.Common.Enums;
+using Mission_Service.Common.Constants;
+using Mission_Service.Common.Helpers;
 using Mission_Service.Models;
+using Mission_Service.Models.Ro;
 using Mission_Service.Services.UAVStatusService.Interfaces;
 
 namespace Mission_Service.Services.UAVStatusService
@@ -13,13 +15,67 @@ namespace Mission_Service.Services.UAVStatusService
         public UAVStatus()
         {
             _uavActiveMissionsByTailId = new ConcurrentDictionary<int, Mission>();
-        }
 
-        public UAVType DetermineUAVType(Dictionary<TelemetryFields, double> telemetryData)
-        {
-            return telemetryData.ContainsKey(TelemetryFields.DataStorageUsedGB)
-                ? UAVType.Surveillance
-                : UAVType.Armed;
+            // TODO: Remove — temporary seed data for development
+            _uavActiveMissionsByTailId.TryAdd(
+                1,
+                new Mission
+                {
+                    Id = "seed-mission-1",
+                    Title = "Border Surveillance Alpha",
+                    RequiredUAVType = UAVType.Surveillance,
+                    Priority = Common.Enums.MissionPriority.High,
+                    Location = SeededMissionLocationHelper.ScaleDestinationFromPathOrigin(
+                        MissionServiceConstants.DevSeededMissionPath.TAIL_ONE_PATH_ORIGIN_LATITUDE,
+                        MissionServiceConstants.DevSeededMissionPath.TAIL_ONE_PATH_ORIGIN_LONGITUDE,
+                        MissionServiceConstants.DevSeededMissionPath.TAIL_ONE_PATH_ORIGIN_ALTITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_ONE_BASELINE_DESTINATION_LATITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_ONE_BASELINE_DESTINATION_LONGITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_ONE_BASELINE_DESTINATION_ALTITUDE
+                    ),
+                    TimeWindow = new TimeWindow(DateTime.UtcNow, DateTime.UtcNow.AddHours(2)),
+                }
+            );
+            _uavActiveMissionsByTailId.TryAdd(
+                3,
+                new Mission
+                {
+                    Id = "seed-mission-2",
+                    Title = "Armed Patrol Bravo",
+                    RequiredUAVType = UAVType.Armed,
+                    Priority = Common.Enums.MissionPriority.Medium,
+                    Location = SeededMissionLocationHelper.ScaleDestinationFromPathOrigin(
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_PATH_ORIGIN_LATITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_PATH_ORIGIN_LONGITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_PATH_ORIGIN_ALTITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_BASELINE_DESTINATION_LATITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_BASELINE_DESTINATION_LONGITUDE,
+                        MissionServiceConstants
+                            .DevSeededMissionPath
+                            .TAIL_THREE_BASELINE_DESTINATION_ALTITUDE
+                    ),
+                    TimeWindow = new TimeWindow(
+                        DateTime.UtcNow.AddMinutes(30),
+                        DateTime.UtcNow.AddHours(3)
+                    ),
+                }
+            );
         }
 
         public bool IsInActiveMission(Dictionary<TelemetryFields, double> telemetryData)
@@ -49,6 +105,15 @@ namespace Mission_Service.Services.UAVStatusService
         public void ClearActiveMission(int tailId)
         {
             _uavActiveMissionsByTailId.TryRemove(tailId, out _);
+        }
+
+        public IEnumerable<ActiveMissionRo> GetAllActiveMissions()
+        {
+            return _uavActiveMissionsByTailId.Select(entry => new ActiveMissionRo
+            {
+                TailId = entry.Key,
+                Mission = entry.Value,
+            });
         }
     }
 }
